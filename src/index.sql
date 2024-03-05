@@ -1,0 +1,1 @@
+create index DocumentPath on Document(Path, Doc_Order);

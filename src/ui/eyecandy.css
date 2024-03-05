@@ -1,0 +1,35 @@
+:root {
+    --bg-color: #edeff0;
+    --widget-color: #f7f7f7;
+    --widget-pressed-color: #d5d1c9;
+    --widget-radius: 4px;
+    --widget-padding: 4px 8px;
+    --widget-border-color: #dddddd;
+    --separator-color: #dddddd;
+    --widget-border-style: solid;
+    --widget-border-pressed-style: solid;
+    --widget-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+    --widget-border-width: 1px;
+    --btn-min-height: 28px;
+}
+
+input[type="text"],
+input[type="search"],
+input[type="email"],
+input[type="password"],
+textarea,
+.text,
+.text {
+    border-style: solid;
+}
+
+.fixed-to-top,
+.text-over-img {
+    background-color: #edeff09c;
+    backdrop-filter: blur(10px);
+}
+
+.text-over-img {
+    padding: 1px 4px;
+    border-radius: 14px;
+}

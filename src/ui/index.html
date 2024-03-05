@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hazo</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="eyecandy.css">
+    <link rel="stylesheet" href="fontawesome.css">
+    <script src="main.js"></script>
+</head>
+<body class="hbox responsive-850">
+    <nav class="vbox separated-right">
+        <div class="top-bar-height hbox vertical-align padded separated-bottom">
+            <div class="btn-group hbox vertical-align">
+                <select name="" id="">
+                    <option value="">Plantes</option>
+                    <option value="">Baobabs</option>
+                    <option value="">Fungi</option>
+                </select><button title="edit dataset name"><i class="fa-solid fa-edit"></i>
+                </button><button title="new dataset" class="primary"><i class="fa-solid fa-plus"></i>
+                </button><button title="delete dataset" class="warning"><i class="fa-solid fa-trash"></i></button>
+            </div>
+            <div class="separator"></div>
+            <div class="spacer"></div>
+            <button title="save" class="success"><i class="fa-solid fa-save"></i></button>
+            <button title="import"><i class="fa-solid fa-file-import"></i></button>
+            <button title="export"><i class="fa-solid fa-file-export"></i></button>
+            <div class="separator"></div>
+            <div class="btn-group hbox vertical-align">
+                <button title="synchronize"><i class="fa-solid fa-rotate"></i>
+                </button><a href="#" class="btn">Hub</a>
+            </div>
+            <div class="separator"></div>
+            <button><i class="fa-solid fa-close"></i></button>
+        </div>
+        <div class="height-below-top-bar vbox">
+            <header class="vbox padded separated-bottom">
+                <div class="hbox vertical-align relative">
+                    <input type="search" name="filter-menu" id="filter-menu" class="flex-fill" placeholder="filter taxons" />
+                    <i class="search-icon fa-solid fa-search"></i>
+                </div>
+                <div class="hbox vertical-align">
+                    <div class="hbox vertical-align btn-group">
+                        <div class="toggle">
+                            <input type="checkbox" checked name="langS" id="langS" /><label for="langS">NS</label>
+                        </div>
+                        <div class="toggle">
+                            <input type="checkbox" checked name="langV" id="langV" /><label for="langV">NV</label>
+                        </div>
+                        <div class="toggle">
+                            <input type="checkbox" checked name="langCn" id="langCn" /><label for="langCn">中文名</label>
+                        </div>
+                    </div>
+                    <div class="spacer"></div>
+                    <div class="btn-group">
+                        <button><i class="fa-solid fa-plus"></i>
+                        </button><button><i class="fa-solid fa-minus"></i></button>
+                    </div>
+                </div>
+            </header>
+            <menu class="text flex-fill tree-view tree-cols-3">
+                <li>
+                    <div class="indent hbox vertical-align">
+                        <i class="fa-solid fa-chevron-down"></i><div>1</div>
+                    </div><a href="">Acanthaceae</a><a href="">Acanthaceae</a><a href="">爵床科</a>
+                    <ul>
+                        <li>
+                            <div class="indent hbox vertical-align">
+                                <i class="fa-solid fa-chevron-right"></i><div>2</div>
+                            </div>
+                            <a href="">Asystasia gangetica</a><a href="">Anamamy mena</a><a href=""></a>
+                        </li>
+                        <li>
+                            <div class="indent hbox vertical-align">
+                                <i class="fa-solid fa-chevron-right"></i><div>3</div>
+                            </div>
+                            <a href="">Avicennia</a><a href=""></a><a href="">海榄雌属</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <div class="indent hbox vertical-align">
+                        <i class="fa-solid fa-chevron-right"></i><div>4</div>
+                    </div>
+                    <a href="">Achariaceae</a><a href="">Achariaceae</a><a href="">柄果草科</a></li>
+            </menu>
+        </div>
+    </nav>
+    <div class="vbox flex-fill">
+        <div class="top-bar-height hbox vertical-align separated-bottom padded">
+            <div class="btn-group hbox vertical-align">
+                <select name="" id="">
+                    <option value="">Taxons</option>
+                    <option value="">Characters</option>
+                    <option value="">Trees</option>
+                </select><nav class="hbox vertical-align breadcrumbs">
+                    <a href="#">Acanthaceae</a>
+                    <a href="#">Asystasia Gangetica</a>
+                </nav>
+            </div>
+            <div class="spacer"></div>
+            <button title="print"><i class="fa-solid fa-print"></i></button>
+            <div class="separator"></div>
+            <button><i class="fa-solid fa-bars"></i></button>
+        </div>
+        <main class="relative height-below-top-bar hbox responsive-1100 flex-fill separated-children">
+            <section class="vertical-scroll vbox flex-fill">
+                <header class="hbox vertical-align padded separated-bottom fixed-to-top">
+                    <h1>Properties</h1>
+                    <div class="spacer"></div>
+                    <div class="btn-group">
+                        <button><i class="fa-solid fa-magnifying-glass"></i>
+                        </button><button><i class="fa-solid fa-close"></i></button>
+                    </div>
+                </header>
+                <details open class="separated-bottom">
+                    <summary class="padded">Pictures</summary>
+                    <div class="vbox">
+                        <a class="hbox horizontal-align text" id="pictureLink">
+                            <img class="illustration" src="plant.png" alt="Some plant"></img>
+                        </a>
+                        <dialog id="pictureDialog">
+                            <div class="vbox">
+                                <div class="hbox vertical-align padded separated-bottom">
+                                    <h1>Asystasia Gangetica</h1>
+                                    <div class="spacer"></div>
+                                    <button autofocus id="pictureDialogCloseBtn"><i class="fa-solid fa-close"></i></button>
+                                </div>
+                                <img class="fullscreen-img" src="plant.png" alt="Some plant"></img>
+                            </div>
+                        </dialog>
+                        <div class="hbox vertical-align">
+                            <div class="btn-group">
+                                <button><i class="fa-solid fa-arrow-left"></i>
+                                </button><button><i class="fa-solid fa-arrow-right"></i></button>
+                            </div>
+                            <div class="padded">1 / 1</div>
+                            <button><i class="fa-solid fa-upload"></i></button>
+                            <input type="text" class="flex-fill" placeholder="add a picture" />
+                            <button><i class="fa-solid fa-file-lines"></i></button>
+                            <button class="primary"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+                </details>
+                <details open class="separated-bottom">
+                    <summary class="padded">Properties</summary>
+                    <form action="" class="form-2-col vertical-align padded">
+                        <label for="nameS">NS</label><input type="text" name="nameS" id="nameEn" />
+                        <label for="author">Author</label><input type="text" name="author" id="author" />
+                        <label for="nameCn">中文名</label><input type="text" name="nameCn" id="nameCn" />
+                        <label for="nameV">NV</label><input type="text" name="nameV" id="nameV" />
+                        <label for="description">Description</label><textarea name="description" id="description" cols="30" rows="10"></textarea>
+                    </form>
+                </details>
+                <details class="separated-bottom">
+                    <summary class="padded">Flore de Madagascar et Comores</summary>
+                    <form action="" class="form-2-col vertical-align padded">
+                        <label for="fasc">Bool</label><input type="text" name="fasc" id="fasc" />
+                        <label for="page">Page</label><input type="text" name="page" id="page" />
+                        <label for="bookText">Text</label><textarea name="bookText" id="bookText" cols="30" rows="10"></textarea>
+                    </form>
+                </details>
+                <details class="separated-bottom">
+                    <summary class="padded">Manuel de Botanique Forestière</summary>
+                    <form action="" class="form-2-col vertical-align padded">
+                        <label for="fasc2">Bool</label><input type="text" name="fasc2" id="fasc2" />
+                        <label for="page2">Page</label><input type="text" name="page2" id="page2" />
+                        <label for="bookText2">Text</label><textarea name="bookText2" id="bookText2" cols="30" rows="10"></textarea>
+                    </form>
+                </details>
+                <details class="separated-bottom">
+                    <summary class="padded">Additional Text</summary>
+                    <form action="" class="form-2-col vertical-align padded">
+                        <label for="additionalText">Text</label><textarea name="additionalText" id="additionalText" cols="30" rows="10"></textarea>
+                    </form>
+                </details>
+            </section>
+            <section class="vertical-scroll vbox flex-fill">
+                <header class="hbox vertical-align padded separated-bottom fixed-to-top">
+                    <h1>Descriptors</h1>
+                    <div class="spacer"></div>
+                    <div class="btn-group">
+                        <button><i class="fa-solid fa-magnifying-glass"></i>
+                        </button><button><i class="fa-solid fa-close"></i></button>
+                    </div>
+                </header>
+                <div class="vbox flex-fill">
+                    <div class="vbox fixed-to-top separated-bottom padded">
+                        <div class="hbox vertical-align relative">
+                            <input type="search" name="filter-descriptors" id="filter-descriptors" class="flex-fill" placeholder="filter descriptors" />
+                            <i class="search-icon fa-solid fa-search"></i>
+                        </div>
+                        <nav class="hbox vertical-align breadcrumbs">
+                            <a href="#">Feuille</a>
+                            <a href="#">Type</a>
+                        </nav>
+                    </div>
+                    <div class="dynamic-grid gapped wrap padded horizontal-align vertical-align">
+                        <a href="#" class="separated square text padded stack-container">
+                            <div class="background-contained transparent" style="background-image: url(fleur.jpg);"></div>
+                            <div class="transparent vbox horizontal-align justify-space-around">
+                                <div class="text-over-img">Flower</div>
+                                <div class="text-over-img">Fleur</div>
+                                <div class="text-over-img">花</div>
+                            </div>
+                        </a>
+                        <a href="#" class="separated square text padded stack-container">
+                            <div class="background-contained transparent" style="background-image: url(graine.jpg);"></div>
+                            <div class="transparent vbox horizontal-align justify-space-around">
+                                <div class="text-over-img">Composée</div>
+                                <div class="text-over-img">Composée</div>
+                                <div class="text-over-img">Composée</div>
+                            </div>
+                        </a>
+                        <a href="#" class="separated square text padded stack-container">
+                            <div class="background-contained transparent" style="background-image: url(feuille.jpg);"></div>
+                            <div class="transparent vbox horizontal-align justify-space-around">
+                                <div class="text-over-img">Multicomposée</div>
+                                <div class="text-over-img">Multicomposée</div>
+                                <div class="text-over-img">Multicomposée</div>
+                            </div>
+                        </a>
+                        <a href="#" class="separated square text padded stack-container">
+                            <div class="background-contained transparent" style="background-image: url(fruit.jpg);"></div>
+                            <div class="transparent vbox horizontal-align justify-space-around">
+                                <div class="text-over-img">Fruit</div>
+                                <div class="text-over-img">Fruit</div>
+                                <div class="text-over-img">Fruit</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </section>
+            <section class="vertical-scroll vbox flex-fill">
+                <header class="hbox vertical-align padded separated-bottom fixed-to-top">
+                    <h1>Summary</h1>
+                    <div class="spacer"></div>
+                    <div class="btn-group">
+                        <button><i class="fa-solid fa-magnifying-glass"></i>
+                        </button><button><i class="fa-solid fa-close"></i></button>
+                    </div>
+                </header>
+                <ul class="padded text flex-fill">
+                    <li>Feuilles:
+                        <ul>
+                            <li>Composées</li>
+                        </ul>
+                    </li>
+                    <li>Famille:
+                        <ul>
+                            <li>Acanthaceae</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+        </main>
+    </div>
+</body>
+</html>
