@@ -24,7 +24,7 @@ func main() {
 	case "lsdoc":
 		err = cmd.LsDoc(ctx, os.Args[2], os.Args[3])
 	case "serve":
-		err = cmd.Serve()
+		err = cmd.Serve(os.Args[2])
 	default:
 		log.Fatal("unknown command:", os.Args[1])
 	}
