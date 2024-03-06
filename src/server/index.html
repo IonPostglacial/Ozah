@@ -34,58 +34,7 @@
             <div class="separator"></div>
             <button><i class="fa-solid fa-close"></i></button>
         </div>
-        <div class="height-below-top-bar vbox">
-            <header class="vbox padded separated-bottom">
-                <div class="hbox vertical-align relative">
-                    <input type="search" name="filter-menu" id="filter-menu" class="flex-fill" placeholder="filter taxons" />
-                    <i class="search-icon fa-solid fa-search"></i>
-                </div>
-                <div class="hbox vertical-align">
-                    <div class="hbox vertical-align btn-group">
-                        <div class="toggle">
-                            <input type="checkbox" checked name="langS" id="langS" /><label for="langS">NS</label>
-                        </div>
-                        <div class="toggle">
-                            <input type="checkbox" checked name="langV" id="langV" /><label for="langV">NV</label>
-                        </div>
-                        <div class="toggle">
-                            <input type="checkbox" checked name="langCn" id="langCn" /><label for="langCn">中文名</label>
-                        </div>
-                    </div>
-                    <div class="spacer"></div>
-                    <div class="btn-group">
-                        <button><i class="fa-solid fa-plus"></i>
-                        </button><button><i class="fa-solid fa-minus"></i></button>
-                    </div>
-                </div>
-            </header>
-            <menu class="text flex-fill tree-view tree-cols-3">
-                <li>
-                    <div class="indent hbox vertical-align">
-                        <i class="fa-solid fa-chevron-down"></i><div>1</div>
-                    </div><a href="">Acanthaceae</a><a href="">Acanthaceae</a><a href="">爵床科</a>
-                    <ul>
-                        <li>
-                            <div class="indent hbox vertical-align">
-                                <i class="fa-solid fa-chevron-right"></i><div>2</div>
-                            </div>
-                            <a href="">Asystasia gangetica</a><a href="">Anamamy mena</a><a href=""></a>
-                        </li>
-                        <li>
-                            <div class="indent hbox vertical-align">
-                                <i class="fa-solid fa-chevron-right"></i><div>3</div>
-                            </div>
-                            <a href="">Avicennia</a><a href=""></a><a href="">海榄雌属</a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <div class="indent hbox vertical-align">
-                        <i class="fa-solid fa-chevron-right"></i><div>4</div>
-                    </div>
-                    <a href="">Achariaceae</a><a href="">Achariaceae</a><a href="">柄果草科</a></li>
-            </menu>
-        </div>
+        {{template "treemenu"}}
     </nav>
     <div class="vbox flex-fill">
         <div class="top-bar-height hbox vertical-align separated-bottom padded">

@@ -1,10 +1,12 @@
 package server
 
 import (
-	"bytes"
 	"fmt"
 	"html"
+	"html/template"
+	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"embed"
@@ -14,7 +16,10 @@ import (
 var assets embed.FS
 
 //go:embed index.html
-var indexPage []byte
+var indexPage string
+
+//go:embed components/treemenu.html
+var treemenu string
 
 func Serve(addr string) error {
 	http.HandleFunc("/bar", func(w http.ResponseWriter, r *http.Request) {
@@ -27,5 +32,18 @@ func Serve(addr string) error {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeContent(w, r, "index.html", time.Now(), bytes.NewReader(indexPage))
+	tmpl, err := template.New("index").Parse(indexPage)
+	if err != nil {
+		log.Fatal(err)
+	}
+	tmpl, err = tmpl.Parse(treemenu)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var buf strings.Builder
+	err = tmpl.Execute(&buf, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	http.ServeContent(w, r, "index.html", time.Now(), strings.NewReader(buf.String()))
 }
