@@ -1,0 +1,18 @@
+.mode csv
+.import {{ .DirectoryPath }}/lang.csv lang
+.import {{ .DirectoryPath }}/unit.csv unit
+.import {{ .DirectoryPath }}/document.csv document
+.import {{ .DirectoryPath }}/document_translation.csv document_translation
+.import {{ .DirectoryPath }}/document_attachment.csv document_attachment
+.import {{ .DirectoryPath }}/measurement_character.csv measurement_character
+.import {{ .DirectoryPath }}/categorical_character.csv categorical_character
+.import {{ .DirectoryPath }}/descriptor_visibility_inapplicable.csv descriptor_visibility_inapplicable
+.import {{ .DirectoryPath }}/descriptor_visibility_requirement.csv descriptor_visibility_requirement
+.import {{ .DirectoryPath }}/book.csv book
+.import {{ .DirectoryPath }}/state.csv state
+.import {{ .DirectoryPath }}/taxon.csv taxon
+.import {{ .DirectoryPath }}/taxon_book_info.csv taxon_book_info
+.import {{ .DirectoryPath }}/taxon_measurement.csv taxon_measurement
+.import {{ .DirectoryPath }}/taxon_description.csv taxon_description
+.import {{ .DirectoryPath }}/taxon_specimen_location.csv taxon_specimen_location
+.exit

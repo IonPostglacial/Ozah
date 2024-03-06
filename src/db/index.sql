@@ -1,0 +1,1 @@
+create index DocumentFullPath on Document(Path || '.' || Ref);
