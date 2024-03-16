@@ -134,6 +134,117 @@ func (q *Queries) GetDocumentHierarchy(ctx context.Context, arg GetDocumentHiera
 	return items, nil
 }
 
+const getDocumentHierarchyTr1 = `-- name: GetDocumentHierarchyTr1 :many
+select doc.ref, doc.path, doc.doc_order, doc.name, doc.details, tr1.name name_tr1 from document doc
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = ?
+where (doc.Path >= ? and doc.Path < (? || '.~'))
+order by (Path || '.' || Ref) asc
+`
+
+type GetDocumentHierarchyTr1Params struct {
+	Lang1 string
+	Path  string
+}
+
+type GetDocumentHierarchyTr1Row struct {
+	Ref      string
+	Path     string
+	DocOrder int32
+	Name     string
+	Details  sql.NullString
+	NameTr1  sql.NullString
+}
+
+func (q *Queries) GetDocumentHierarchyTr1(ctx context.Context, arg GetDocumentHierarchyTr1Params) ([]GetDocumentHierarchyTr1Row, error) {
+	rows, err := q.db.QueryContext(ctx, getDocumentHierarchyTr1, arg.Lang1, arg.Path, arg.Path)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetDocumentHierarchyTr1Row
+	for rows.Next() {
+		var i GetDocumentHierarchyTr1Row
+		if err := rows.Scan(
+			&i.Ref,
+			&i.Path,
+			&i.DocOrder,
+			&i.Name,
+			&i.Details,
+			&i.NameTr1,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getDocumentHierarchyTr2 = `-- name: GetDocumentHierarchyTr2 :many
+select doc.ref, doc.path, doc.doc_order, doc.name, doc.details, tr1.name name_tr1, tr2.name name_tr2 from document doc
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = ?
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = ?
+where (doc.Path >= ? and doc.Path < (? || '.~'))
+order by (Path || '.' || Ref) asc
+`
+
+type GetDocumentHierarchyTr2Params struct {
+	Lang1 string
+	Lang2 string
+	Path  string
+}
+
+type GetDocumentHierarchyTr2Row struct {
+	Ref      string
+	Path     string
+	DocOrder int32
+	Name     string
+	Details  sql.NullString
+	NameTr1  sql.NullString
+	NameTr2  sql.NullString
+}
+
+func (q *Queries) GetDocumentHierarchyTr2(ctx context.Context, arg GetDocumentHierarchyTr2Params) ([]GetDocumentHierarchyTr2Row, error) {
+	rows, err := q.db.QueryContext(ctx, getDocumentHierarchyTr2,
+		arg.Lang1,
+		arg.Lang2,
+		arg.Path,
+		arg.Path,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetDocumentHierarchyTr2Row
+	for rows.Next() {
+		var i GetDocumentHierarchyTr2Row
+		if err := rows.Scan(
+			&i.Ref,
+			&i.Path,
+			&i.DocOrder,
+			&i.Name,
+			&i.Details,
+			&i.NameTr1,
+			&i.NameTr2,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const insertDocument = `-- name: InsertDocument :execresult
 insert into Document (Ref, Path, Doc_Order, Name, Details)
     values (?, ?, ?, ?, ?)

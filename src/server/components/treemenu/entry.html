@@ -1,0 +1,15 @@
+{{define "treemenu_entry"}}
+<li>
+    <div class="indent hbox vertical-align">
+        <i class="fa-solid fa-chevron-right">&nbsp;</i><div class="min-width-5ch">{{ .Id }}</div>
+    </div>
+    <a href="{{ .Url }}">{{ .Name }}</a><a href="{{ .Url }}">{{ .NameV }}</a><a href="{{ .Url }}">{{ .NameCN }}</a>
+    {{if .Children}}
+    <ul>
+    {{range sortDocs .Children}}
+        {{template "treemenu_entry" .}}
+    {{end}}
+    </ul>
+    {{end}}
+</li>
+{{end}}

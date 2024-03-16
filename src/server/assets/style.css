@@ -7,6 +7,7 @@
     --bg-color: #d5d1c9;
     --text-color: black;
     --bg-color-primary: #2571d4;
+    --border-color-primary: #1e5fb3;
     --text-color-primary: white;
     --bg-color-success: #2f7a2c;
     --text-color-success: white;
@@ -136,6 +137,10 @@ select,
     cursor: pointer;
     min-width: 2ch;
     min-height: var(--btn-min-height);
+}
+
+.toggle > label {
+    border-color: var(--border-color-primary);
 }
 
 button.primary,
@@ -316,10 +321,14 @@ input[type="search"] ~ .search-icon {
     --tree-column-number: 3;
 }
 
+.min-width-5ch {
+    min-width: 5ch;
+}
+
 .tree-view {
     display: grid;
-    padding-left: 16px;
-    grid-template-columns: min-content repeat(var(--tree-column-number), 1fr);
+    padding-left: 6ch;
+    grid-template-columns: min-content repeat(var(--tree-column-number), auto);
     align-content: start;
 }
 

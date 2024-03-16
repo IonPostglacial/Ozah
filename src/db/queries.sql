@@ -30,3 +30,16 @@ order by Path asc, Doc_Order asc;
 select * from document doc
 where (doc.Path >= sqlc.arg(path) and doc.Path < (sqlc.arg(path) || '.~'))
 order by (Path || '.' || Ref) asc;
+
+-- name: GetDocumentHierarchyTr1 :many
+select doc.*, tr1.name name_tr1 from document doc
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = sqlc.arg(lang1)
+where (doc.Path >= sqlc.arg(path) and doc.Path < (sqlc.arg(path) || '.~'))
+order by (Path || '.' || Ref) asc;
+
+-- name: GetDocumentHierarchyTr2 :many
+select doc.*, tr1.name name_tr1, tr2.name name_tr2 from document doc
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = sqlc.arg(lang1)
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = sqlc.arg(lang2)
+where (doc.Path >= sqlc.arg(path) and doc.Path < (sqlc.arg(path) || '.~'))
+order by (Path || '.' || Ref) asc;

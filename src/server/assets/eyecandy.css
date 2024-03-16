@@ -24,7 +24,8 @@ textarea,
 }
 
 .fixed-to-top,
-.text-over-img {
+.text-over-img,
+.fixed-to-top div {
     background-color: #edeff09c;
     backdrop-filter: blur(10px);
 }

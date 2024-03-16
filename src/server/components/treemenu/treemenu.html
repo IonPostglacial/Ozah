@@ -1,6 +1,6 @@
 {{define "treemenu"}}
-<div class="height-below-top-bar vbox">
-    <header class="vbox padded separated-bottom">
+<div class="height-below-top-bar vbox vertical-scroll">
+    <header class="vbox padded separated-bottom fixed-to-top">
         <div class="hbox vertical-align relative">
             <input type="search" name="filter-menu" id="filter-menu" class="flex-fill" placeholder="filter taxons" />
             <i class="search-icon fa-solid fa-search"></i>
@@ -25,30 +25,9 @@
         </div>
     </header>
     <menu class="text flex-fill tree-view tree-cols-3">
-        <li>
-            <div class="indent hbox vertical-align">
-                <i class="fa-solid fa-chevron-down"></i><div>1</div>
-            </div><a href="">Acanthaceae</a><a href="">Acanthaceae</a><a href="">爵床科</a>
-            <ul>
-                <li>
-                    <div class="indent hbox vertical-align">
-                        <i class="fa-solid fa-chevron-right"></i><div>2</div>
-                    </div>
-                    <a href="">Asystasia gangetica</a><a href="">Anamamy mena</a><a href=""></a>
-                </li>
-                <li>
-                    <div class="indent hbox vertical-align">
-                        <i class="fa-solid fa-chevron-right"></i><div>3</div>
-                    </div>
-                    <a href="">Avicennia</a><a href=""></a><a href="">海榄雌属</a>
-                </li>
-            </ul>
-        </li>
-        <li>
-            <div class="indent hbox vertical-align">
-                <i class="fa-solid fa-chevron-right"></i><div>4</div>
-            </div>
-            <a href="">Achariaceae</a><a href="">Achariaceae</a><a href="">柄果草科</a></li>
+    {{range sortDocs .Children}}
+        {{template "treemenu_entry" .}}
+    {{end}}
     </menu>
 </div>
 {{end}}
