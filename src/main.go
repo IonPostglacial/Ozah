@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -15,18 +15,17 @@ func main() {
 		log.Fatal("Pass command 'init' or 'run'.")
 	}
 	var err error
-	ctx := context.Background()
-	switch os.Args[1] {
+	switch command := os.Args[1]; command {
 	case "init":
-		err = cmd.Init(os.Args[2])
+		err = cmd.Init(os.Args[2:])
 	case "import":
-		err = cmd.ImportCsv(os.Args[2], os.Args[3])
+		err = cmd.ImportCsv(os.Args[2:])
 	case "lsdoc":
-		err = cmd.LsDoc(ctx, os.Args[2], os.Args[3])
+		err = cmd.LsDoc(os.Args[2:])
 	case "serve":
-		err = cmd.Serve(os.Args[2])
+		err = cmd.Serve(os.Args[2:])
 	default:
-		log.Fatal("unknown command:", os.Args[1])
+		err = fmt.Errorf("unknown command: '%s'", command)
 	}
 	if err != nil {
 		log.Fatal(err)

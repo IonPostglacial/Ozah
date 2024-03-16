@@ -2,7 +2,8 @@ package cmd
 
 import "nicolas.galipot.net/hazo/db"
 
-func Init(dbPath string) error {
+func Init(args []string) error {
+	dbPath := args[0]
 	err := db.ExecSqlite(dbPath, db.Schema)
 	if err != nil {
 		return err

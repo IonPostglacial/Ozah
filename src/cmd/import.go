@@ -15,7 +15,9 @@ type tmplData struct {
 //go:embed import_template.txt
 var tmpl string
 
-func ImportCsv(csvPath string, to string) error {
+func ImportCsv(args []string) error {
+	csvPath := args[0]
+	to := args[1]
 	tmpl, err := template.New("import_template").Parse(tmpl)
 	if err != nil {
 		return err

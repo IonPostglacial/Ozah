@@ -8,7 +8,10 @@ import (
 	"nicolas.galipot.net/hazo/db/storage"
 )
 
-func LsDoc(ctx context.Context, dbPath string, docPath string) error {
+func LsDoc(args []string) error {
+	ctx := context.Background()
+	dbPath := args[0]
+	docPath := args[1]
 	queries, err := db.Open(dbPath)
 	if err != nil {
 		return err
