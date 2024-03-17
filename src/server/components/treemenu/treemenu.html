@@ -1,4 +1,4 @@
-{{define "treemenu"}}
+{{ define "treemenu" }}
 <div class="height-below-top-bar vbox vertical-scroll">
     <header class="vbox padded separated-bottom fixed-to-top">
         <div class="hbox vertical-align relative">
@@ -25,9 +25,9 @@
         </div>
     </header>
     <menu class="text flex-fill tree-view tree-cols-3">
-    {{range sortDocs .Children}}
-        {{template "treemenu_entry" .}}
-    {{end}}
+    {{ range sortDocs .Children }}
+        {{ template "treemenu_entry" . }}
+    {{ end }}
     </menu>
 </div>
-{{end}}
+{{ end }}

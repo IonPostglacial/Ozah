@@ -43,3 +43,10 @@ left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Re
 left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = sqlc.arg(lang2)
 where (doc.Path >= sqlc.arg(path) and doc.Path < (sqlc.arg(path) || '.~'))
 order by (Path || '.' || Ref) asc;
+
+-- name: GetTaxonInfo :one
+select t.*, doc.*, tr1.name name_v, tr2.name name_cn from taxon t
+inner join document doc on doc.Ref = t.Document_Ref
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "V"
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
+where t.Document_Ref = sqlc.arg(ref);

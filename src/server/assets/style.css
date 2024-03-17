@@ -112,8 +112,16 @@ th {
     background-color: white;
 }
 
+.clickable {
+    cursor: pointer;
+}
+
 .relative {
     position: relative;
+}
+
+.display-none {
+    display: none;
 }
 
 .toggle > input[type="checkbox"] {
@@ -351,7 +359,7 @@ input[type="search"] ~ .search-icon {
     padding: 4px;
 }
 
-.tree-view li > *:first-child {
+.tree-view li > *:nth-child(2) {
     border-left: none;
 }
 
@@ -386,6 +394,23 @@ input[type="search"] ~ .search-icon {
 
 .tree-view li li li li > .indent {
     width: 20ch;
+}
+
+input[type="checkbox"].visibility-trigger ~ .contents-if-checked {
+    display: none;
+}
+
+input[type="checkbox"]:checked.visibility-trigger ~ .contents-if-checked {
+    display: contents;
+}
+
+input[type="checkbox"].visibility-trigger ~ * > .rotate-90-if-checked-p {
+    rotate: 0deg;
+    transition: rotate 0.2s;
+}
+
+input[type="checkbox"]:checked.visibility-trigger ~ * > .rotate-90-if-checked-p {
+    rotate: 90deg;
 }
 
 .square {

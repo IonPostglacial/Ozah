@@ -1,0 +1,14 @@
+{{ define "taxon_form" }}
+<details open class="separated-bottom">
+    <summary class="padded">Properties</summary>
+    <form action="" class="form-2-col vertical-align padded">
+        <label for="nameS">NS</label><input type="text" name="nameS" id="nameEn" value="{{ .Name }}" />
+        <label for="author">Author</label><input type="text" name="author" id="author" value="{{ .Author }}" />
+        <label for="nameCn">中文名</label><input type="text" name="nameCn" id="nameCn" value="{{ .NameCN }}" />
+        <label for="nameV">NV</label><input type="text" name="nameV" id="nameV" value="{{ .NameV }}" />
+        <label for="description">Description</label><textarea name="description" id="description" cols="30" rows="10">
+            {{ .Description }}
+        </textarea>
+    </form>
+</details>
+{{ end }}

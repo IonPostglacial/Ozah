@@ -245,6 +245,55 @@ func (q *Queries) GetDocumentHierarchyTr2(ctx context.Context, arg GetDocumentHi
 	return items, nil
 }
 
+const getTaxonInfo = `-- name: GetTaxonInfo :one
+select t.document_ref, t.author, t.website, t.meaning, t.herbarium_no, t.herbarium_picture, t.fasc, t.page, doc.ref, doc.path, doc.doc_order, doc.name, doc.details, tr1.name name_v, tr2.name name_cn from taxon t
+inner join document doc on doc.Ref = t.Document_Ref
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "V"
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
+where t.Document_Ref = ?
+`
+
+type GetTaxonInfoRow struct {
+	DocumentRef      string
+	Author           string
+	Website          sql.NullString
+	Meaning          sql.NullString
+	HerbariumNo      sql.NullString
+	HerbariumPicture sql.NullString
+	Fasc             sql.NullString
+	Page             sql.NullString
+	Ref              string
+	Path             string
+	DocOrder         int32
+	Name             string
+	Details          sql.NullString
+	NameV            sql.NullString
+	NameCn           sql.NullString
+}
+
+func (q *Queries) GetTaxonInfo(ctx context.Context, ref string) (GetTaxonInfoRow, error) {
+	row := q.db.QueryRowContext(ctx, getTaxonInfo, ref)
+	var i GetTaxonInfoRow
+	err := row.Scan(
+		&i.DocumentRef,
+		&i.Author,
+		&i.Website,
+		&i.Meaning,
+		&i.HerbariumNo,
+		&i.HerbariumPicture,
+		&i.Fasc,
+		&i.Page,
+		&i.Ref,
+		&i.Path,
+		&i.DocOrder,
+		&i.Name,
+		&i.Details,
+		&i.NameV,
+		&i.NameCn,
+	)
+	return i, err
+}
+
 const insertDocument = `-- name: InsertDocument :execresult
 insert into Document (Ref, Path, Doc_Order, Name, Details)
     values (?, ?, ?, ?, ?)

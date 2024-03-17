@@ -1,15 +1,18 @@
-{{define "treemenu_entry"}}
+{{ define "treemenu_entry" }}
 <li>
-    <div class="indent hbox vertical-align">
-        <i class="fa-solid fa-chevron-right">&nbsp;</i><div class="min-width-5ch">{{ .Id }}</div>
-    </div>
-    <a href="{{ .Url }}">{{ .Name }}</a><a href="{{ .Url }}">{{ .NameV }}</a><a href="{{ .Url }}">{{ .NameCN }}</a>
-    {{if .Children}}
-    <ul>
-    {{range sortDocs .Children}}
-        {{template "treemenu_entry" .}}
-    {{end}}
-    </ul>
-    {{end}}
+    <input type="checkbox" name="open-item-{{ .Id }}" id="open-item-{{ .Id }}" class="display-none visibility-trigger">
+    <label for="open-item-{{ .Id }}" class="indent hbox vertical-align clickable">
+        <i class="fa-solid fa-chevron-right rotate-90-if-checked-p">&nbsp;</i>
+        <div class="min-width-5ch">{{ .Id }}</div>
+    </label>
+    {{ $variable := taxonUrl . }}
+    <a href="{{ $variable }}">{{ .Name }}</a><a href="{{ $variable }}">{{ .NameV }}</a><a href="{{ $variable }}">{{ .NameCN }}</a>
+    {{ if .Children }}
+        <ul class="contents-if-checked">
+        {{ range sortDocs .Children }}
+            {{ template "treemenu_entry" . }}
+        {{ end }}
+        </ul>
+    {{ end }}
 </li>
-{{end}}
+{{ end }}

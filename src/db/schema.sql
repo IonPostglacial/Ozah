@@ -96,10 +96,10 @@ create table Taxon (
     Author Text not null default '',
     Website Text,
 	Meaning Text,
-    Herbarium_No Integer,
+    Herbarium_No Text,
     Herbarium_Picture Text,
-    Fasc Integer,
-    Page Integer,
+    Fasc Text,
+    Page Text,
 
     foreign key (Document_Ref) references Document(Ref) on delete cascade
 );

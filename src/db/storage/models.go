@@ -71,10 +71,10 @@ type Taxon struct {
 	Author           string
 	Website          sql.NullString
 	Meaning          sql.NullString
-	HerbariumNo      sql.NullInt32
+	HerbariumNo      sql.NullString
 	HerbariumPicture sql.NullString
-	Fasc             sql.NullInt32
-	Page             sql.NullInt32
+	Fasc             sql.NullString
+	Page             sql.NullString
 }
 
 type TaxonBookInfo struct {

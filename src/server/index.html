@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hazo</title>
-    <link rel="stylesheet" href="assets/style.css">
-    <link rel="stylesheet" href="assets/eyecandy.css">
-    <link rel="stylesheet" href="assets/fontawesome.css">
-    <script src="assets/main.js"></script>
+    <link rel="stylesheet" href="/assets/style.css">
+    <link rel="stylesheet" href="/assets/eyecandy.css">
+    <link rel="stylesheet" href="/assets/fontawesome.css">
+    <script src="/assets/main.js"></script>
 </head>
 <body class="hbox responsive-850">
     <nav class="vbox separated-right">
@@ -34,7 +34,7 @@
             <div class="separator"></div>
             <button><i class="fa-solid fa-close"></i></button>
         </div>
-        {{template "treemenu" .MenuRoot}}
+        {{ template "treemenu" .MenuRoot }}
     </nav>
     <div class="vbox flex-fill">
         <div class="top-bar-height hbox vertical-align separated-bottom padded">
@@ -92,16 +92,7 @@
                         </div>
                     </div>
                 </details>
-                <details open class="separated-bottom">
-                    <summary class="padded">Properties</summary>
-                    <form action="" class="form-2-col vertical-align padded">
-                        <label for="nameS">NS</label><input type="text" name="nameS" id="nameEn" />
-                        <label for="author">Author</label><input type="text" name="author" id="author" />
-                        <label for="nameCn">中文名</label><input type="text" name="nameCn" id="nameCn" />
-                        <label for="nameV">NV</label><input type="text" name="nameV" id="nameV" />
-                        <label for="description">Description</label><textarea name="description" id="description" cols="30" rows="10"></textarea>
-                    </form>
-                </details>
+                {{ template "taxon_form" .SelectedTaxon }}
                 <details class="separated-bottom">
                     <summary class="padded">Flore de Madagascar et Comores</summary>
                     <form action="" class="form-2-col vertical-align padded">
