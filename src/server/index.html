@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/assets/style.css">
     <link rel="stylesheet" href="/assets/eyecandy.css">
     <link rel="stylesheet" href="/assets/fontawesome.css">
+    <script src="/assets/htmx.min.js"></script>
     <script src="/assets/main.js"></script>
 </head>
 <body class="hbox responsive-850">
@@ -36,7 +37,7 @@
         </div>
         {{ template "treemenu" .MenuRoot }}
     </nav>
-    <div class="vbox flex-fill">
+    <div id="doc-content" class="vbox flex-fill">
         <div class="top-bar-height hbox vertical-align separated-bottom padded">
             <div class="btn-group hbox vertical-align">
                 <select name="" id="">
@@ -67,7 +68,7 @@
                     <summary class="padded">Pictures</summary>
                     <div class="vbox">
                         <a class="hbox horizontal-align text" id="pictureLink">
-                            <img class="illustration" src="assets/plant.png" alt="Some plant"></img>
+                            <img class="illustration" src="/assets/plant.png" alt="Some plant"></img>
                         </a>
                         <dialog id="pictureDialog">
                             <div class="vbox">
@@ -76,10 +77,10 @@
                                     <div class="spacer"></div>
                                     <button autofocus id="pictureDialogCloseBtn"><i class="fa-solid fa-close"></i></button>
                                 </div>
-                                <img class="fullscreen-img" src="assets/plant.png" alt="Some plant"></img>
+                                <img class="fullscreen-img" src="/assets/plant.png" alt="Some plant"></img>
                             </div>
                         </dialog>
-                        <div class="hbox vertical-align">
+                        <div class="hbox vertical-align padded">
                             <div class="btn-group">
                                 <button><i class="fa-solid fa-arrow-left"></i>
                                 </button><button><i class="fa-solid fa-arrow-right"></i></button>
@@ -138,7 +139,7 @@
                     </div>
                     <div class="dynamic-grid gapped wrap padded horizontal-align vertical-align">
                         <a href="#" class="separated square text padded stack-container">
-                            <div class="background-contained transparent" style="background-image: url(assets/fleur.jpg);"></div>
+                            <div class="background-contained transparent" style="background-image: url(/assets/fleur.jpg);"></div>
                             <div class="transparent vbox horizontal-align justify-space-around">
                                 <div class="text-over-img">Flower</div>
                                 <div class="text-over-img">Fleur</div>
@@ -146,7 +147,7 @@
                             </div>
                         </a>
                         <a href="#" class="separated square text padded stack-container">
-                            <div class="background-contained transparent" style="background-image: url(assets/graine.jpg);"></div>
+                            <div class="background-contained transparent" style="background-image: url(/assets/graine.jpg);"></div>
                             <div class="transparent vbox horizontal-align justify-space-around">
                                 <div class="text-over-img">Composée</div>
                                 <div class="text-over-img">Composée</div>
@@ -154,7 +155,7 @@
                             </div>
                         </a>
                         <a href="#" class="separated square text padded stack-container">
-                            <div class="background-contained transparent" style="background-image: url(assets/feuille.jpg);"></div>
+                            <div class="background-contained transparent" style="background-image: url(/assets/feuille.jpg);"></div>
                             <div class="transparent vbox horizontal-align justify-space-around">
                                 <div class="text-over-img">Multicomposée</div>
                                 <div class="text-over-img">Multicomposée</div>
@@ -162,7 +163,7 @@
                             </div>
                         </a>
                         <a href="#" class="separated square text padded stack-container">
-                            <div class="background-contained transparent" style="background-image: url(assets/fruit.jpg);"></div>
+                            <div class="background-contained transparent" style="background-image: url(/assets/fruit.jpg);"></div>
                             <div class="transparent vbox horizontal-align justify-space-around">
                                 <div class="text-over-img">Fruit</div>
                                 <div class="text-over-img">Fruit</div>

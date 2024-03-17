@@ -11,10 +11,11 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		log.Fatal("Pass command 'init' or 'run'.")
-	}
 	var err error
+	if len(os.Args) < 2 {
+		err = cmd.Serve([]string{":8080"})
+		log.Fatal(err)
+	}
 	switch command := os.Args[1]; command {
 	case "init":
 		err = cmd.Init(os.Args[2:])

@@ -7,11 +7,13 @@
     --bg-color: #d5d1c9;
     --text-color: black;
     --bg-color-primary: #2571d4;
-    --border-color-primary: #1e5fb3;
+    --border-color-primary: #8ea5c8;
     --text-color-primary: white;
     --bg-color-success: #2f7a2c;
+    --border-color-success: #87a186;
     --text-color-success: white;
     --bg-color-warning: #bd2237;
+    --border-color-warning: #aa8d90;
     --text-color-warning: white;
     --separator-color: #999997;
     --widget-radius: 0px;
@@ -19,11 +21,11 @@
     --widget-border-width: 2px;
     --widget-shadow: none;
     --widget-color: #d5d1c9;
-    --widget-border-color: #f1f1f0;
+    --widget-border-color: #cacaca;
     --widget-border-style: outset;
     --widget-pressed-color: #d5d1c9;
     --widget-border-pressed-style: inset;
-    --top-bar-height: 32px;
+    --top-bar-height: 31px;
     --btn-min-height: initial;
 }
 
@@ -155,6 +157,7 @@ button.primary,
 .btn.primary,
 select.primary {
     background-color: var(--bg-color-primary);
+    border-color: var(--border-color-primary);
     color: var(--text-color-primary);
 }
 
@@ -162,6 +165,7 @@ button.success,
 .btn.success,
 select.success {
     background-color: var(--bg-color-success);
+    border-color: var(--border-color-success);
     color: var(--text-color-success);
 }
 
@@ -169,6 +173,7 @@ button.warning,
 .btn.warning,
 select.warning {
     background-color: var(--bg-color-warning);
+    border-color: var(--border-color-warning);
     color: var(--text-color-warning);
 }
 
