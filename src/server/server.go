@@ -13,6 +13,7 @@ import (
 	"embed"
 
 	"nicolas.galipot.net/hazo/db"
+	"nicolas.galipot.net/hazo/server/authentication"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 	"nicolas.galipot.net/hazo/server/views/taxons"
 )
@@ -27,6 +28,7 @@ func New() *http.ServeMux {
 	s := http.NewServeMux()
 	s.HandleFunc("/ds/{dsName}/taxons/{id}", indexHandler)
 	s.HandleFunc("/", indexHandler)
+	s.HandleFunc("/private", authentication.Handler)
 	s.Handle("/assets/", http.FileServer(http.FS(assets)))
 	return s
 }

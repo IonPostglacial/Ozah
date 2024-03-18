@@ -96,7 +96,7 @@ func (q *Queries) GetDocumentDirectChildren(ctx context.Context, path string) ([
 }
 
 const getDocumentHierarchy = `-- name: GetDocumentHierarchy :many
-select ref, path, doc_order, name, details from document doc
+select ref, path, doc_order, name, details from Document doc
 where (doc.Path >= ? and doc.Path < (? || '.~'))
 order by (Path || '.' || Ref) asc
 `
@@ -135,7 +135,7 @@ func (q *Queries) GetDocumentHierarchy(ctx context.Context, arg GetDocumentHiera
 }
 
 const getDocumentHierarchyTr1 = `-- name: GetDocumentHierarchyTr1 :many
-select doc.ref, doc.path, doc.doc_order, doc.name, doc.details, tr1.name name_tr1 from document doc
+select doc.ref, doc.path, doc.doc_order, doc.name, doc.details, tr1.name name_tr1 from Document doc
 left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = ?
 where (doc.Path >= ? and doc.Path < (? || '.~'))
 order by (Path || '.' || Ref) asc
@@ -186,7 +186,7 @@ func (q *Queries) GetDocumentHierarchyTr1(ctx context.Context, arg GetDocumentHi
 }
 
 const getDocumentHierarchyTr2 = `-- name: GetDocumentHierarchyTr2 :many
-select doc.ref, doc.path, doc.doc_order, doc.name, doc.details, tr1.name name_tr1, tr2.name name_tr2 from document doc
+select doc.ref, doc.path, doc.doc_order, doc.name, doc.details, tr1.name name_tr1, tr2.name name_tr2 from Document doc
 left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = ?
 left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = ?
 where (doc.Path >= ? and doc.Path < (? || '.~'))
@@ -246,8 +246,8 @@ func (q *Queries) GetDocumentHierarchyTr2(ctx context.Context, arg GetDocumentHi
 }
 
 const getTaxonInfo = `-- name: GetTaxonInfo :one
-select t.document_ref, t.author, t.website, t.meaning, t.herbarium_no, t.herbarium_picture, t.fasc, t.page, doc.ref, doc.path, doc.doc_order, doc.name, doc.details, tr1.name name_v, tr2.name name_cn from taxon t
-inner join document doc on doc.Ref = t.Document_Ref
+select t.document_ref, t.author, t.website, t.meaning, t.herbarium_no, t.herbarium_picture, t.fasc, t.page, doc.ref, doc.path, doc.doc_order, doc.name, doc.details, tr1.name name_v, tr2.name name_cn from Taxon t
+inner join Document doc on doc.Ref = t.Document_Ref
 left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "V"
 left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
 where t.Document_Ref = ?

@@ -7,3 +7,10 @@ sql:
       go:
         package: "storage"
         out: "storage"
+  - engine: "mysql"
+    queries: "common_queries.sql"
+    schema: "common_schema.sql"
+    gen:
+      go:
+        package: "commonstorage"
+        out: "commonstorage"
