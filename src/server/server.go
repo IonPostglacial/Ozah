@@ -13,9 +13,8 @@ import (
 	"embed"
 
 	"nicolas.galipot.net/hazo/db"
-	"nicolas.galipot.net/hazo/db/storage"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
-	"nicolas.galipot.net/hazo/server/views"
+	"nicolas.galipot.net/hazo/server/views/taxons"
 )
 
 //go:embed assets
@@ -35,58 +34,7 @@ func New() *http.ServeMux {
 type State struct {
 	DatasetName   string
 	MenuRoot      *treemenu.Item
-	SelectedTaxon *views.TaxonFormData
-}
-
-func taxonHierarchyFromDb(ctx context.Context, queries *storage.Queries) (*treemenu.Item, error) {
-	docs, err := queries.GetDocumentHierarchyTr2(ctx, storage.GetDocumentHierarchyTr2Params{
-		Path: "t0", Lang1: "V", Lang2: "CN",
-	})
-	if err != nil {
-		return nil, err
-	}
-	h := &treemenu.Item{Id: "t0", Name: "<TOP>", FullPath: "t0"}
-	previous := h
-	parent := h
-	breadcrumb := []*treemenu.Item{}
-	for i := 0; i < len(docs); i++ {
-		doc := docs[i]
-		switch {
-		case doc.Path == previous.FullPath:
-			parent = previous
-			breadcrumb = append(breadcrumb, parent)
-		case doc.Path != parent.FullPath:
-			for doc.Path != parent.FullPath && len(breadcrumb) > 0 {
-				breadcrumb = breadcrumb[:len(breadcrumb)-1]
-				parent = breadcrumb[len(breadcrumb)-1]
-			}
-		}
-		fullPath := fmt.Sprintf("%s.%s", doc.Path, doc.Ref)
-		taxon := &treemenu.Item{
-			Id:       doc.Ref,
-			FullPath: fullPath,
-			Order:    int(doc.DocOrder),
-			Name:     doc.Name, NameV: doc.NameTr1.String, NameCN: doc.NameTr2.String,
-		}
-		parent.Children = append(parent.Children, taxon)
-		previous = taxon
-	}
-	return h, nil
-}
-
-func taxonFormDataFromDb(ctx context.Context, queries *storage.Queries, id string) (*views.TaxonFormData, error) {
-	data, err := queries.GetTaxonInfo(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return &views.TaxonFormData{
-		Name:        data.Name,
-		NameV:       data.NameV.String,
-		NameCN:      data.NameCn.String,
-		Description: data.Details.String,
-		Author:      data.Author,
-		Website:     data.Website.String,
-	}, nil
+	SelectedTaxon *taxons.FormData
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -119,7 +67,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tmpl, err = tmpl.Parse(views.TaxonFormTemplate)
+	tmpl, err = tmpl.Parse(taxons.FormTemplate)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -128,24 +76,24 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	taxons, err := taxonHierarchyFromDb(ctx, queries)
+	items, err := treemenu.LoadItemFromDb(ctx, queries)
 	if err != nil {
 		log.Fatal(err)
 	}
-	var taxon *views.TaxonFormData
+	var taxon *taxons.FormData
 	if taxonId != "" {
-		taxon, err = taxonFormDataFromDb(ctx, queries, taxonId)
+		taxon, err = taxons.LoadFormDataFromDb(ctx, queries, taxonId)
 		if err != nil {
 			log.Fatal(err)
 		}
 	} else {
-		taxon = &views.TaxonFormData{}
+		taxon = &taxons.FormData{}
 	}
 	var buf strings.Builder
 	err = tmpl.Execute(&buf, State{
 		DatasetName:   dbName,
 		SelectedTaxon: taxon,
-		MenuRoot:      taxons,
+		MenuRoot:      items,
 	})
 	if err != nil {
 		log.Fatal(err)
