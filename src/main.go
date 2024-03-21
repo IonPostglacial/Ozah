@@ -17,8 +17,12 @@ func main() {
 		log.Fatal(err)
 	}
 	switch command := os.Args[1]; command {
+	case "setup":
+		err = cmd.Setup(os.Args[2:])
 	case "init":
 		err = cmd.Init(os.Args[2:])
+	case "adduser":
+		err = cmd.AddUser(os.Args[2:])
 	case "import":
 		err = cmd.ImportCsv(os.Args[2:])
 	case "lsdoc":

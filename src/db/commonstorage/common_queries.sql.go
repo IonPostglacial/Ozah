@@ -11,14 +11,13 @@ import (
 )
 
 const getCredentials = `-- name: GetCredentials :one
-select Encryption, Salt, Password, Created_On, Last_Modified from Credentials
+select Encryption, Password, Created_On, Last_Modified from Credentials
 where Login = ?
 `
 
 type GetCredentialsRow struct {
-	Encryption   sql.NullString
-	Salt         sql.NullString
-	Password     sql.NullString
+	Encryption   string
+	Password     string
 	CreatedOn    sql.NullString
 	LastModified sql.NullString
 }
@@ -28,7 +27,6 @@ func (q *Queries) GetCredentials(ctx context.Context, login string) (GetCredenti
 	var i GetCredentialsRow
 	err := row.Scan(
 		&i.Encryption,
-		&i.Salt,
 		&i.Password,
 		&i.CreatedOn,
 		&i.LastModified,
@@ -37,22 +35,16 @@ func (q *Queries) GetCredentials(ctx context.Context, login string) (GetCredenti
 }
 
 const insertCredentials = `-- name: InsertCredentials :execresult
-insert into Credentials (Login, Encryption, Salt, Password)
-values (?, ?, ?, ?)
+insert into Credentials (Login, Encryption, Password)
+values (?, ?, ?)
 `
 
 type InsertCredentialsParams struct {
 	Login      string
-	Encryption sql.NullString
-	Salt       sql.NullString
-	Password   sql.NullString
+	Encryption string
+	Password   string
 }
 
 func (q *Queries) InsertCredentials(ctx context.Context, arg InsertCredentialsParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertCredentials,
-		arg.Login,
-		arg.Encryption,
-		arg.Salt,
-		arg.Password,
-	)
+	return q.db.ExecContext(ctx, insertCredentials, arg.Login, arg.Encryption, arg.Password)
 }

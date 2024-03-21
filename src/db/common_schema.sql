@@ -1,8 +1,7 @@
 create table Credentials (
     Login Text primary key,
-    Encryption Text,
-    Salt Text,
-    Password Text,
+    Encryption Text not null,
+    Password Text not null,
     Created_On Text,
     Last_Modified Text
 );

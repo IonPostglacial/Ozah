@@ -10,9 +10,8 @@ import (
 
 type Credential struct {
 	Login        string
-	Encryption   sql.NullString
-	Salt         sql.NullString
-	Password     sql.NullString
+	Encryption   string
+	Password     string
 	CreatedOn    sql.NullString
 	LastModified sql.NullString
 }
