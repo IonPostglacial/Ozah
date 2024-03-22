@@ -34,9 +34,10 @@ func New() *http.ServeMux {
 }
 
 type State struct {
-	DatasetName   string
-	MenuRoot      *treemenu.Item
-	SelectedTaxon *taxons.FormData
+	DatasetName       string
+	AvailableDatasets []db.Dataset
+	MenuRoot          *treemenu.Item
+	SelectedTaxon     *taxons.FormData
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -91,11 +92,16 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		taxon = &taxons.FormData{}
 	}
+	datasets, err := db.ListDatasets()
+	if err != nil {
+		log.Fatal(err)
+	}
 	var buf strings.Builder
 	err = tmpl.Execute(&buf, State{
-		DatasetName:   dbName,
-		SelectedTaxon: taxon,
-		MenuRoot:      items,
+		DatasetName:       dbName,
+		AvailableDatasets: datasets,
+		SelectedTaxon:     taxon,
+		MenuRoot:          items,
 	})
 	if err != nil {
 		log.Fatal(err)
