@@ -17,6 +17,8 @@ import (
 	"nicolas.galipot.net/hazo/db/commonstorage"
 )
 
+const SessionCookieName = "session_token"
+
 //go:embed login.html
 var loginTemplate string
 
@@ -31,7 +33,7 @@ func authorizedHandler(ctx context.Context, db *sql.DB, queries *commonstorage.Q
 		log.Fatal(err)
 	}
 	http.SetCookie(w, &http.Cookie{
-		Name:    "session_token",
+		Name:    SessionCookieName,
 		Value:   session.Token,
 		Expires: session.Expires,
 	})
@@ -45,7 +47,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	token, err := r.Cookie("session_token")
+	token, err := r.Cookie(SessionCookieName)
 	if err == nil {
 		username, err := loginFromSessionToken(ctx, queries, token.Value)
 		if err != nil {
