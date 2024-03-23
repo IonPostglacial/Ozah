@@ -7,11 +7,11 @@ import (
 	"nicolas.galipot.net/hazo/db/commonstorage"
 )
 
-func OpenCommon() (*commonstorage.Queries, error) {
+func OpenCommon() (*sql.DB, *commonstorage.Queries, error) {
 	db, err := sql.Open("sqlite3", "file:common.db")
 	if err != nil {
-		return nil, fmt.Errorf("could not connect to the database: %w", err)
+		return nil, nil, fmt.Errorf("could not connect to the database: %w", err)
 	}
 	queries := commonstorage.New(db)
-	return queries, nil
+	return db, queries, nil
 }

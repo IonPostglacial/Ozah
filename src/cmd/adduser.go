@@ -15,7 +15,7 @@ func AddUser(args []string) error {
 	login := args[0]
 	password := args[1]
 	ctx := context.Background()
-	queries, err := db.OpenCommon()
+	_, queries, err := db.OpenCommon()
 	if err != nil {
 		return err
 	}

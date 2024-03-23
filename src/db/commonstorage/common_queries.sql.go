@@ -10,6 +10,14 @@ import (
 	"database/sql"
 )
 
+const deleteUserSessions = `-- name: DeleteUserSessions :execresult
+delete from Session where Login = ?
+`
+
+func (q *Queries) DeleteUserSessions(ctx context.Context, login string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, deleteUserSessions, login)
+}
+
 const getCredentials = `-- name: GetCredentials :one
 select Encryption, Password, Created_On, Last_Modified from Credentials
 where Login = ?
@@ -34,6 +42,23 @@ func (q *Queries) GetCredentials(ctx context.Context, login string) (GetCredenti
 	return i, err
 }
 
+const getSession = `-- name: GetSession :one
+select Login, Expiry_Date from Session
+where Token = ?
+`
+
+type GetSessionRow struct {
+	Login      string
+	ExpiryDate string
+}
+
+func (q *Queries) GetSession(ctx context.Context, token string) (GetSessionRow, error) {
+	row := q.db.QueryRowContext(ctx, getSession, token)
+	var i GetSessionRow
+	err := row.Scan(&i.Login, &i.ExpiryDate)
+	return i, err
+}
+
 const insertCredentials = `-- name: InsertCredentials :execresult
 insert into Credentials (Login, Encryption, Password)
 values (?, ?, ?)
@@ -47,4 +72,19 @@ type InsertCredentialsParams struct {
 
 func (q *Queries) InsertCredentials(ctx context.Context, arg InsertCredentialsParams) (sql.Result, error) {
 	return q.db.ExecContext(ctx, insertCredentials, arg.Login, arg.Encryption, arg.Password)
+}
+
+const insertSession = `-- name: InsertSession :execresult
+insert into Session (Token, Login, Expiry_Date)
+values (?, ?, ?)
+`
+
+type InsertSessionParams struct {
+	Token      string
+	Login      string
+	ExpiryDate string
+}
+
+func (q *Queries) InsertSession(ctx context.Context, arg InsertSessionParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertSession, arg.Token, arg.Login, arg.ExpiryDate)
 }

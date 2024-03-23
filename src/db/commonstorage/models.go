@@ -15,3 +15,9 @@ type Credential struct {
 	CreatedOn    sql.NullString
 	LastModified sql.NullString
 }
+
+type Session struct {
+	Token      string
+	Login      string
+	ExpiryDate string
+}

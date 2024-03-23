@@ -2,7 +2,10 @@ package authentication
 
 import (
 	"context"
+	"database/sql"
+	_ "embed"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"strings"
@@ -11,20 +14,57 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"nicolas.galipot.net/hazo/db"
+	"nicolas.galipot.net/hazo/db/commonstorage"
 )
 
-func Handler(w http.ResponseWriter, r *http.Request) {
-	username, password, _ := r.BasicAuth()
+//go:embed login.html
+var loginTemplate string
 
-	ctx := context.Background()
-	queries, err := db.OpenCommon()
+type Model struct {
+	ErrorMessage string
+}
+
+func authorizedHandler(ctx context.Context, db *sql.DB, queries *commonstorage.Queries,
+	username string, w http.ResponseWriter, r *http.Request) {
+	session, err := startSession(ctx, db, queries, username)
 	if err != nil {
 		log.Fatal(err)
 	}
+	http.SetCookie(w, &http.Cookie{
+		Name:    "session_token",
+		Value:   session.Token,
+		Expires: session.Expires,
+	})
+	http.ServeContent(w, r, "index.html", time.Now(),
+		strings.NewReader(fmt.Sprintf("<!DOCTYPE html><html><body>Hello %s</body></html>", username)))
+}
+
+func Handler(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+	hdb, queries, err := db.OpenCommon()
+	if err != nil {
+		log.Fatal(err)
+	}
+	token, err := r.Cookie("session_token")
+	if err == nil {
+		username, err := loginFromSessionToken(ctx, queries, token.Value)
+		if err != nil {
+			// TODO: handle case with error not login error
+		} else {
+			authorizedHandler(ctx, hdb, queries, username, w, r)
+			return
+		}
+	}
 	loginFound := false
+	err = r.ParseForm()
+	if err != nil {
+		log.Fatal(err)
+	}
+	username := r.Form.Get("login")
+	password := r.Form.Get("password")
 	cred, err := queries.GetCredentials(ctx, username)
 	if err != nil {
-		fmt.Println("login not found")
+		// TODO: login not found
 	} else {
 		loginFound = true
 	}
@@ -37,16 +77,26 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if authorized {
-		http.ServeContent(w, r, "index.html", time.Now(), strings.NewReader("<!DOCTYPE html><html><body>Success</body></html>"))
+		authorizedHandler(ctx, hdb, queries, username, w, r)
 	} else {
-		w.Header().Add("WWW-Authenticate", "Basic")
+		tmpl := template.New("login")
+		template.Must(tmpl.Parse(loginTemplate))
 		w.Header().Add("Content-Type", "text/html")
 		w.WriteHeader(http.StatusUnauthorized)
 		if loginFound {
-			w.Write([]byte(fmt.Sprintf("<!DOCTYPE html><html><body>Sorry '%s': wrong password: '%s'</body></html>",
-				username, password)))
+			err := tmpl.Execute(w, &Model{
+				ErrorMessage: fmt.Sprintf("Sorry '%s': wrong password", username),
+			})
+			if err != nil {
+				log.Fatal(err)
+			}
 		} else {
-			w.Write([]byte(fmt.Sprintf("<!DOCTYPE html><html><body>Login '%s': not found</body></html>", username)))
+			err := tmpl.Execute(w, &Model{
+				ErrorMessage: fmt.Sprintf("Login '%s': not found", username),
+			})
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 }
