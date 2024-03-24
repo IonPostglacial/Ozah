@@ -27,6 +27,8 @@
     --widget-border-pressed-style: inset;
     --top-bar-height: 31px;
     --btn-min-height: initial;
+    --error-msg-background-color: #fddee2;
+    --error-msg-text-color: #951224;
 }
 
 * {
@@ -131,6 +133,7 @@ th {
 }
 
 button,
+input[type=submit],
 .btn,
 select,
 .breadcrumbs,
@@ -154,6 +157,7 @@ select,
 }
 
 button.primary,
+input[type=submit].primary,
 .btn.primary,
 select.primary {
     background-color: var(--bg-color-primary);
@@ -162,6 +166,7 @@ select.primary {
 }
 
 button.success,
+input[type=submit].success,
 .btn.success,
 select.success {
     background-color: var(--bg-color-success);
@@ -170,6 +175,7 @@ select.success {
 }
 
 button.warning,
+input[type=submit].warning,
 .btn.warning,
 select.warning {
     background-color: var(--bg-color-warning);
@@ -178,6 +184,7 @@ select.warning {
 }
 
 button:active,
+input[type=submit]:active,
 .btn:active,
 select:active {
     background-color: var(--widget-pressed-color);
@@ -189,6 +196,7 @@ select:active {
 }
 
 .btn-group > button,
+.btn-group > input[type=submit],
 .btn-group > select,
 .btn-group > .breadcrumbs,
 .btn-group > .btn,
@@ -198,6 +206,7 @@ select:active {
 }
 
 .btn-group > button:first-child,
+.btn-group > input[type=submit]:first-child,
 .btn-group > select:first-child,
 .btn-group > .breadcrumbs:first-child,
 .btn-group > .btn:first-child,
@@ -207,6 +216,7 @@ select:active {
 }
 
 .btn-group > button:last-child,
+.btn-group > input[type=submit]:last-child,
 .btn-group > select:last-child,
 .btn-group > .breadcrumbs:last-child,
 .btn-group > .btn:last-child,
@@ -303,6 +313,17 @@ input[type="search"] ~ .search-icon {
 .vbox.vertical-align,
 .form-2-col.horizontal-align {
     justify-content: center;
+}
+
+.error-colors {
+    background-color: var(--error-msg-background-color);
+    color: var(--error-msg-text-color);
+    border-color: var(--error-msg-text-color);
+}
+
+.bordered {
+    border-style: solid;
+    border-width: 1px;
 }
 
 .justify-space-around {
@@ -520,6 +541,11 @@ input[type="checkbox"]:checked.visibility-trigger ~ * > .rotate-90-if-checked-p 
 .fullscreen-img {
     max-height: fit-content;
     max-height: 80vh;
+}
+
+.single-content {
+    max-width: 100ch;
+    margin: auto;
 }
 
 @media screen and (max-width: 1100px) {

@@ -7,17 +7,23 @@
     <link rel="stylesheet" href="/assets/style.css">
     <link rel="stylesheet" href="/assets/eyecandy.css">
 </head>
-<body>
+<body class="single-content">
+    <div class="hbox top-bar-height separated-bottom vertical-align padded">
+        <h1>Log in</h1>
+    </div>
     <form method="POST" id="login-form" class="form-2-col padded">
         <label for="login">Login</label>
-        <input type="text" name="login" id="login">
+        <input type="text" name="login" id="login" placeholder="login">
         <label for="password">Password</label>
-        <input type="text" name="password" id="password">
+        <input type="password" name="password" id="password" placeholder="password">
     </form>
-    <input type="submit" form="login-form" value="Login"/>
 
-    {{ if .ErrorMessage }}
-        <p>{{ .ErrorMessage }}</p>
-    {{ end }}
+    <article class="padded">
+        {{ if .ErrorMessage }}
+        <p class="error-colors padded bordered">{{ .ErrorMessage }}</p>
+        {{ end }}
+    
+        <input type="submit" form="login-form" value="Login"/>
+    </article>
 </body>
 </html>

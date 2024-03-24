@@ -34,3 +34,11 @@ textarea,
     padding: 1px 4px;
     border-radius: 14px;
 }
+
+.bordered {
+    border-radius: var(--widget-radius);
+}
+
+.single-content {
+    box-shadow: var(--widget-shadow);
+}

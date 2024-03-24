@@ -59,7 +59,7 @@ func startSession(ctx context.Context, db *sql.DB, queries *commonstorage.Querie
 	if err != nil {
 		return nil, err
 	}
-	expiresAt := time.Now().Add(120 * time.Second)
+	expiresAt := time.Now().Add(2 * time.Hour)
 	tx, err := db.Begin()
 	if err != nil {
 		return nil, err
