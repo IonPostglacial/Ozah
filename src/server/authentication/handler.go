@@ -2,7 +2,6 @@ package authentication
 
 import (
 	"context"
-	"database/sql"
 	_ "embed"
 	"fmt"
 	"html/template"
@@ -12,7 +11,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"nicolas.galipot.net/hazo/db"
-	"nicolas.galipot.net/hazo/db/commonstorage"
 	"nicolas.galipot.net/hazo/server/common"
 )
 
@@ -23,25 +21,6 @@ var loginTemplate string
 
 type Model struct {
 	ErrorMessage string
-}
-
-func authorizedHandler(ctx context.Context, handler common.Handler, db *sql.DB, queries *commonstorage.Queries,
-	username string, w http.ResponseWriter, r *http.Request) {
-	session, err := startSession(ctx, db, queries, username)
-	if err != nil {
-		log.Fatal(err)
-	}
-	http.SetCookie(w, &http.Cookie{
-		Name:     SessionCookieName,
-		Value:    session.Token,
-		Expires:  session.Expires,
-		SameSite: http.SameSiteLaxMode,
-	})
-	handler(w, r, &common.Context{
-		User: common.User{
-			Login: username,
-		},
-	})
 }
 
 func HandlerWrapper(handler common.Handler) func(http.ResponseWriter, *http.Request) {
@@ -57,7 +36,11 @@ func HandlerWrapper(handler common.Handler) func(http.ResponseWriter, *http.Requ
 			if err != nil {
 				// TODO: handle case with error not login error
 			} else {
-				authorizedHandler(ctx, handler, cdb, queries, username, w, r)
+				handler(w, r, &common.Context{
+					User: common.User{
+						Login: username,
+					},
+				})
 				return
 			}
 		}
@@ -83,7 +66,22 @@ func HandlerWrapper(handler common.Handler) func(http.ResponseWriter, *http.Requ
 			}
 		}
 		if authorized {
-			authorizedHandler(ctx, handler, cdb, queries, username, w, r)
+			session, err := startSession(ctx, cdb, queries, username)
+			if err != nil {
+				log.Fatal(err)
+			}
+			http.SetCookie(w, &http.Cookie{
+				Name:     SessionCookieName,
+				Value:    session.Token,
+				Expires:  session.Expires,
+				Path:     "/",
+				SameSite: http.SameSiteLaxMode,
+			})
+			handler(w, r, &common.Context{
+				User: common.User{
+					Login: username,
+				},
+			})
 		} else {
 			tmpl := template.New("login")
 			template.Must(tmpl.Parse(loginTemplate))

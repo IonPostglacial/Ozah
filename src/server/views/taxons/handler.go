@@ -16,13 +16,13 @@ import (
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 )
 
-//go:embed index.html
+//go:embed taxons.html
 var taxonPage string
 
 type State struct {
 	DatasetName       string
 	AvailableDatasets []db.Dataset
-	MenuRoot          *treemenu.Item
+	MenuState         *treemenu.State
 	SelectedTaxon     *FormData
 }
 
@@ -87,7 +87,10 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) {
 		DatasetName:       dbName,
 		AvailableDatasets: datasets,
 		SelectedTaxon:     taxon,
-		MenuRoot:          items,
+		MenuState: &treemenu.State{
+			Selected: taxon.Id,
+			Root:     items,
+		},
 	})
 	if err != nil {
 		log.Fatal(err)

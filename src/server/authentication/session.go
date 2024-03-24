@@ -39,7 +39,6 @@ func loginFromSessionToken(ctx context.Context, queries *commonstorage.Queries, 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 var tokenSize = 512
 
-// n is the length of random string we want to generate
 func generateToken() (string, error) {
 	var buf strings.Builder
 

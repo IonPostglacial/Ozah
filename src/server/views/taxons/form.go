@@ -12,6 +12,7 @@ import (
 var FormTemplate string
 
 type FormData struct {
+	Id          string
 	Name        string
 	NameV       string
 	NameCN      string
@@ -26,6 +27,7 @@ func LoadFormDataFromDb(ctx context.Context, queries *storage.Queries, id string
 		return nil, err
 	}
 	return &FormData{
+		Id:          id,
 		Name:        data.Name,
 		NameV:       data.NameV.String,
 		NameCN:      data.NameCn.String,

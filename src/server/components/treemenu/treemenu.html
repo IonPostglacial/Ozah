@@ -25,7 +25,7 @@
         </div>
     </header>
     <menu class="text flex-fill tree-view tree-cols-3">
-    {{ range sortDocs .Children }}
+    {{ range sortDocs .Root.Children }}
         {{ template "treemenu_entry" . }}
     {{ end }}
     </menu>

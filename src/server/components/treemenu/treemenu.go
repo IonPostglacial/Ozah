@@ -14,6 +14,11 @@ var EntryTemplate string
 //go:embed treemenu.html
 var Template string
 
+type State struct {
+	Selected string
+	Root     *Item
+}
+
 type Item struct {
 	Id       string
 	Url      string
