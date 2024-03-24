@@ -1,20 +1,14 @@
 (() => {
     function onLoad() {
-        const pictureLink = document.getElementById("pictureLink");
-        const pictureDialog = document.getElementById("pictureDialog");
-        const pictureDialogCloseBtn = document.getElementById("pictureDialogCloseBtn");
-        
-        function openPictureDialog() {
-            pictureDialog.showModal();
-        }
-    
-        function closeDialog(e) {
-            e.preventDefault();
-            pictureDialog.close();
-        }
-
-        pictureLink.addEventListener("click", openPictureDialog);
-        pictureDialogCloseBtn.addEventListener("click", closeDialog);
+        document.body.addEventListener('click', function (e) {
+            const menu = e.target.closest("menu");
+            if (menu !== null) {
+                const selectedItem = e.target.closest("li");
+                const items = menu.querySelectorAll("li.selected");
+                items.forEach(item => item.classList.remove("selected"));
+                selectedItem.classList.add("selected");
+            }
+        });
     }
     window.addEventListener("load", onLoad);
 })();

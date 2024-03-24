@@ -33,7 +33,27 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) {
 		dbName = "plants"
 	}
 	taxonId := r.PathValue("id")
+	var (
+		taxon *FormData
+		err   error
+	)
+	ctx := context.Background()
+	queries, err := db.Open(fmt.Sprintf("%s.sq3", dbName))
+	if err != nil {
+		log.Fatal(err)
+	}
+	if taxonId != "" {
+		taxon, err = LoadFormDataFromDb(ctx, queries, taxonId)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		taxon = &FormData{}
+	}
 	tmpl.Funcs(template.FuncMap{
+		"selectedDoc": func() string {
+			return taxon.Id
+		},
 		"sortDocs": func(items []*treemenu.Item) []*treemenu.Item {
 			slices.SortFunc(items, func(i, o *treemenu.Item) int {
 				return i.Order - o.Order
@@ -44,7 +64,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) {
 			return fmt.Sprintf("/ds/%s/taxons/%s", dbName, taxon.Id)
 		},
 	})
-	tmpl, err := tmpl.Parse(taxonPage)
+	tmpl, err = tmpl.Parse(taxonPage)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,23 +80,9 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	ctx := context.Background()
-	queries, err := db.Open(fmt.Sprintf("%s.sq3", dbName))
-	if err != nil {
-		log.Fatal(err)
-	}
 	items, err := treemenu.LoadItemFromDb(ctx, queries)
 	if err != nil {
 		log.Fatal(err)
-	}
-	var taxon *FormData
-	if taxonId != "" {
-		taxon, err = LoadFormDataFromDb(ctx, queries, taxonId)
-		if err != nil {
-			log.Fatal(err)
-		}
-	} else {
-		taxon = &FormData{}
 	}
 	datasets, err := db.ListDatasets()
 	if err != nil {
