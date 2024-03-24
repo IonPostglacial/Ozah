@@ -32,9 +32,10 @@ func authorizedHandler(ctx context.Context, handler common.Handler, db *sql.DB, 
 		log.Fatal(err)
 	}
 	http.SetCookie(w, &http.Cookie{
-		Name:    SessionCookieName,
-		Value:   session.Token,
-		Expires: session.Expires,
+		Name:     SessionCookieName,
+		Value:    session.Token,
+		Expires:  session.Expires,
+		SameSite: http.SameSiteLaxMode,
 	})
 	handler(w, r, &common.Context{
 		User: common.User{

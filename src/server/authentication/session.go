@@ -30,7 +30,6 @@ func loginFromSessionToken(ctx context.Context, queries *commonstorage.Queries, 
 	if err != nil {
 		return "", err
 	}
-	fmt.Printf("expiry date: %s\nnow: %s\n", expiryDate, time.Now())
 	if expiryDate.Before(time.Now()) {
 		return "", ErrSessionExpired
 	}
