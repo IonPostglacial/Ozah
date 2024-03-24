@@ -8,8 +8,6 @@ import (
 	"log"
 	"net/http"
 	"slices"
-	"strings"
-	"time"
 
 	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/server/common"
@@ -88,8 +86,8 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	var buf strings.Builder
-	err = tmpl.Execute(&buf, State{
+	w.Header().Add("Content-Type", "text/html")
+	err = tmpl.Execute(w, State{
 		DatasetName:       dbName,
 		AvailableDatasets: datasets,
 		SelectedTaxon:     taxon,
@@ -101,5 +99,4 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	http.ServeContent(w, r, "index.html", time.Now(), strings.NewReader(buf.String()))
 }

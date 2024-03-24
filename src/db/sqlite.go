@@ -40,5 +40,9 @@ func ExecSqlite(dbPath string, code string) error {
 	if err != nil {
 		log.Fatal(err)
 	}
+	err = cmd.Wait()
+	if err != nil {
+		log.Fatal(err)
+	}
 	return nil
 }

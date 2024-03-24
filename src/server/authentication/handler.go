@@ -34,6 +34,7 @@ func HandlerWrapper(handler common.Handler) func(http.ResponseWriter, *http.Requ
 		if err == nil {
 			username, err := loginFromSessionToken(ctx, queries, token.Value)
 			if err != nil {
+				fmt.Printf("error logging: %s\n", err)
 				// TODO: handle case with error not login error
 			} else {
 				handler(w, r, &common.Context{
@@ -43,6 +44,8 @@ func HandlerWrapper(handler common.Handler) func(http.ResponseWriter, *http.Requ
 				})
 				return
 			}
+		} else {
+			fmt.Printf("error reading cookie: %s\n", err)
 		}
 		loginFound := false
 		err = r.ParseForm()
@@ -53,6 +56,7 @@ func HandlerWrapper(handler common.Handler) func(http.ResponseWriter, *http.Requ
 		password := r.Form.Get("password")
 		cred, err := queries.GetCredentials(ctx, username)
 		if err != nil {
+			fmt.Printf("login not found: %s\n", err)
 			// TODO: login not found
 		} else {
 			loginFound = true
