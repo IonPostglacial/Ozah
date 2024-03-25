@@ -19,15 +19,16 @@
                 {{ range .AvailableDatasets }}
                     <option value="{{ .Path }}">{{ .Name }}</option>
                 {{ end }}
-                </select><button title="edit dataset name"><i class="fa-solid fa-edit"></i>
-                </button><button title="new dataset" class="primary"><i class="fa-solid fa-plus"></i>
-                </button><button title="delete dataset" class="warning"><i class="fa-solid fa-trash"></i></button>
+                </select>
             </div>
             <div class="separator"></div>
+            <div class="btn-group hbox vertical-align">
+                <button title="save" class="success"><i class="fa-solid fa-save"></i></button>
+                <button title="export"><i class="fa-solid fa-file-export"></i></button>
+                <button title="print"><i class="fa-solid fa-print"></i></button>
+            </div>
             <div class="spacer"></div>
-            <button title="save" class="success"><i class="fa-solid fa-save"></i></button>
-            <button title="import"><i class="fa-solid fa-file-import"></i></button>
-            <button title="export"><i class="fa-solid fa-file-export"></i></button>
+            <button><i class="fa-solid fa-bars"></i></button>
             <div class="separator"></div>
             <button><i class="fa-solid fa-close"></i></button>
         </div>
@@ -45,10 +46,6 @@
                     <a href="#">Asystasia Gangetica</a>
                 </nav>
             </div>
-            <div class="spacer"></div>
-            <button title="print"><i class="fa-solid fa-print"></i></button>
-            <div class="separator"></div>
-            <button><i class="fa-solid fa-bars"></i></button>
         </div>
         <main class="relative height-below-top-bar hbox responsive-1100 flex-fill separated-children">
             <section class="vertical-scroll vbox flex-fill">
