@@ -41,13 +41,17 @@ type State struct {
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) {
-	fmt.Println("handle")
+	fmt.Println("handle upload")
 	r.ParseMultipartForm(5000000) //5 MB in memory, the rest in disk
 	datas := r.MultipartForm
 	for _, headers := range datas.File {
+		if len(headers) != 1 {
+			log.Fatalf("wrong header length, expected 1 got %d\n", len(headers))
+		}
 		auxiliar, _ := headers[0].Open() //TODO: first check len(headers) is correct
 		fileName := headers[0].Filename
 		dir, err := os.MkdirTemp("tmp", fileName)
+		fmt.Printf("make tmp dir '%s'\n", dir)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -55,29 +59,35 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) {
 		file, _ := io.ReadAll(auxiliar)
 		r, err := zip.NewReader(bytes.NewReader(file), int64(len(file)))
 		if err != nil {
-			fmt.Printf("error reading zip: %s\n", err)
+			log.Fatalf("error reading zip: %s\n", err)
 		}
+		fmt.Printf("read zip")
 		for _, f := range r.File {
 			content, err := f.Open()
 			if err != nil {
 				log.Fatalf("error reading file '%s': %s\n", f.Name, err)
 			}
+			fmt.Printf("open file '%s'\n", f.Name)
 			filePath := path.Join(dir, f.Name)
 			file, err := os.Create(filePath)
 			if err != nil {
 				log.Fatalf("error creating file '%s': %s\n", filePath, err)
 			}
+			defer file.Close()
 			io.Copy(file, content)
-			dbPath := fmt.Sprintf("%s.sq3", strings.TrimSuffix(fileName, ".zip"))
-			err = db.Init(dbPath)
-			if err != nil {
-				log.Fatalf("error creating db '%s': %s\n", dbPath, err)
-			}
-			err = db.ImportCsv(dir, dbPath)
-			if err != nil {
-				log.Fatalf("error importing csv: %s\n", err)
-			}
+			fmt.Println("copied file")
 		}
+		dbPath := fmt.Sprintf("%s.sq3", strings.TrimSuffix(fileName, ".zip"))
+		err = db.Init(dbPath)
+		if err != nil {
+			log.Fatalf("error creating db '%s': %s\n", dbPath, err)
+		}
+		fmt.Println("created db")
+		err = db.ImportCsv(dir, dbPath)
+		if err != nil {
+			log.Fatalf("error importing zip: %s\n", err)
+		}
+		fmt.Println("imported zip")
 	}
 	w.Header().Add("Content-Type", "text/html")
 	w.Write([]byte("<!DOCTYPE html><html><body>Upload successful!</body></html>"))
