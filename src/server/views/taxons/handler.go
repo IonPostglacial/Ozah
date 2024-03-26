@@ -5,7 +5,6 @@ import (
 	_ "embed"
 	"fmt"
 	"html/template"
-	"log"
 	"net/http"
 	"slices"
 
@@ -24,7 +23,7 @@ type State struct {
 	SelectedTaxon     *FormData
 }
 
-func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) {
+func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	tmpl := template.New("taxons")
 	dbName := r.PathValue("dsName")
 	if dbName == "" {
@@ -38,12 +37,12 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) {
 	ctx := context.Background()
 	queries, err := db.Open(fmt.Sprintf("%s.sq3", dbName))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	if taxonId != "" {
 		taxon, err = LoadFormDataFromDb(ctx, queries, taxonId)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	} else {
 		taxon = &FormData{}
@@ -64,27 +63,27 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) {
 	})
 	tmpl, err = tmpl.Parse(taxonPage)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	tmpl, err = tmpl.Parse(treemenu.Template)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	tmpl, err = tmpl.Parse(treemenu.EntryTemplate)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	tmpl, err = tmpl.Parse(FormTemplate)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	items, err := treemenu.LoadItemFromDb(ctx, queries)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	datasets, err := db.ListDatasets()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	w.Header().Add("Content-Type", "text/html")
 	err = tmpl.Execute(w, State{
@@ -97,6 +96,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) {
 		},
 	})
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }

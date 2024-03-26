@@ -23,12 +23,12 @@ type Model struct {
 	ErrorMessage string
 }
 
-func HandlerWrapper(handler common.Handler) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
+func HandlerWrapper(handler common.Handler) common.Handler {
+	return func(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		ctx := context.Background()
 		cdb, queries, err := db.OpenCommon()
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 		token, err := r.Cookie(SessionCookieName)
 		if err == nil {
@@ -37,12 +37,11 @@ func HandlerWrapper(handler common.Handler) func(http.ResponseWriter, *http.Requ
 				fmt.Printf("error logging: %s\n", err)
 				// TODO: handle case with error not login error
 			} else {
-				handler(w, r, &common.Context{
+				return handler(w, r, &common.Context{
 					User: common.User{
 						Login: username,
 					},
 				})
-				return
 			}
 		} else {
 			fmt.Printf("error reading cookie: %s\n", err)
@@ -81,7 +80,7 @@ func HandlerWrapper(handler common.Handler) func(http.ResponseWriter, *http.Requ
 				Path:     "/",
 				SameSite: http.SameSiteLaxMode,
 			})
-			handler(w, r, &common.Context{
+			return handler(w, r, &common.Context{
 				User: common.User{
 					Login: username,
 				},
@@ -96,7 +95,7 @@ func HandlerWrapper(handler common.Handler) func(http.ResponseWriter, *http.Requ
 					ErrorMessage: fmt.Sprintf("Sorry '%s': wrong password", username),
 				})
 				if err != nil {
-					log.Fatal(err)
+					return err
 				}
 			} else {
 				msg := ""
@@ -107,9 +106,10 @@ func HandlerWrapper(handler common.Handler) func(http.ResponseWriter, *http.Requ
 					ErrorMessage: msg,
 				})
 				if err != nil {
-					log.Fatal(err)
+					return err
 				}
 			}
 		}
+		return nil
 	}
 }
