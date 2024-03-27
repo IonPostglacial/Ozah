@@ -4,7 +4,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"fmt"
-	"html/template"
 	"io"
 	"net/http"
 	"os"
@@ -16,6 +15,7 @@ import (
 	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/server/authentication"
 	"nicolas.galipot.net/hazo/server/common"
+	"nicolas.galipot.net/hazo/server/components"
 	"nicolas.galipot.net/hazo/server/views/taxons"
 )
 
@@ -98,7 +98,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) e
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
-	tmpl := template.New("index")
+	tmpl := components.NewTemplate()
 	tmpl, err := tmpl.Parse(indexPage)
 	if err != nil {
 		return err

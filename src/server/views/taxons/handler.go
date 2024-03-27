@@ -10,6 +10,7 @@ import (
 
 	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/server/common"
+	"nicolas.galipot.net/hazo/server/components"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 )
 
@@ -24,7 +25,7 @@ type State struct {
 }
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
-	tmpl := template.New("taxons")
+	tmpl := components.NewTemplate()
 	dbName := r.PathValue("dsName")
 	if dbName == "" {
 		dbName = "plants"
@@ -57,19 +58,11 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 			})
 			return items
 		},
-		"taxonUrl": func(taxon *treemenu.Item) string {
+		"documentUrl": func(taxon *treemenu.Item) string {
 			return fmt.Sprintf("/ds/%s/taxons/%s", dbName, taxon.Id)
 		},
 	})
 	tmpl, err = tmpl.Parse(taxonPage)
-	if err != nil {
-		return err
-	}
-	tmpl, err = tmpl.Parse(treemenu.Template)
-	if err != nil {
-		return err
-	}
-	tmpl, err = tmpl.Parse(treemenu.EntryTemplate)
 	if err != nil {
 		return err
 	}

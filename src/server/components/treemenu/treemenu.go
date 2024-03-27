@@ -8,12 +8,6 @@ import (
 	"nicolas.galipot.net/hazo/db/storage"
 )
 
-//go:embed entry.html
-var EntryTemplate string
-
-//go:embed treemenu.html
-var Template string
-
 type State struct {
 	Selected string
 	Root     *Item

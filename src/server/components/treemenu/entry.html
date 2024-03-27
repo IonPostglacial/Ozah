@@ -5,7 +5,7 @@
         <i class="fa-solid fa-chevron-right rotate-90-if-checked-p">&nbsp;</i>
         <div class="min-width-5ch">{{ .Id }}</div>
     </label>
-    {{ $variable := taxonUrl . }}
+    {{ $variable := documentUrl . }}
     <a href="{{ $variable }}" hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML">{{ .Name }}</a>
     <a href="{{ $variable }}" hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML">{{ .NameV }}</a>
     <a href="{{ $variable }}" hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML">{{ .NameCN }}</a>
