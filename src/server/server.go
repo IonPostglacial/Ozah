@@ -44,7 +44,8 @@ func New() *http.ServeMux {
 }
 
 type State struct {
-	Datasets []db.Dataset
+	PageTitle string
+	Datasets  []db.Dataset
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
@@ -109,7 +110,8 @@ func indexHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) er
 	}
 	w.Header().Add("Content-Type", "text/html")
 	err = tmpl.Execute(w, State{
-		Datasets: datasets,
+		PageTitle: "Hazo Home",
+		Datasets:  datasets,
 	})
 	if err != nil {
 		return err

@@ -18,6 +18,7 @@ import (
 var taxonPage string
 
 type State struct {
+	PageTitle         string
 	DatasetName       string
 	AvailableDatasets []db.Dataset
 	MenuState         *treemenu.State
@@ -80,6 +81,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	}
 	w.Header().Add("Content-Type", "text/html")
 	err = tmpl.Execute(w, State{
+		PageTitle:         "Hazo",
 		DatasetName:       dbName,
 		AvailableDatasets: datasets,
 		SelectedTaxon:     taxon,
