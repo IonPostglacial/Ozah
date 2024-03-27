@@ -5,5 +5,5 @@ type User struct {
 }
 
 type Context struct {
-	User User
+	User *User
 }

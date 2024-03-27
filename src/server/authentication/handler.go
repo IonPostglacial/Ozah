@@ -37,11 +37,10 @@ func HandlerWrapper(handler common.Handler) common.Handler {
 				fmt.Printf("error logging: %s\n", err)
 				// TODO: handle case with error not login error
 			} else {
-				return handler(w, r, &common.Context{
-					User: common.User{
-						Login: username,
-					},
-				})
+				cc.User = &common.User{
+					Login: username,
+				}
+				return handler(w, r, cc)
 			}
 		} else {
 			fmt.Printf("error reading cookie: %s\n", err)
@@ -80,11 +79,10 @@ func HandlerWrapper(handler common.Handler) common.Handler {
 				Path:     "/",
 				SameSite: http.SameSiteLaxMode,
 			})
-			return handler(w, r, &common.Context{
-				User: common.User{
-					Login: username,
-				},
-			})
+			cc.User = &common.User{
+				Login: username,
+			}
+			return handler(w, r, cc)
 		} else {
 			tmpl := template.New("login")
 			template.Must(tmpl.Parse(loginTemplate))

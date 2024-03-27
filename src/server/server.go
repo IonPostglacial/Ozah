@@ -27,10 +27,18 @@ var indexPage string
 
 func New() *http.ServeMux {
 	s := http.NewServeMux()
-	s.HandleFunc("/ds/{dsName}/taxons", common.UnwrapHandler(authentication.HandlerWrapper(taxons.Handler)))
-	s.HandleFunc("/ds/{dsName}/taxons/{id}", common.UnwrapHandler(authentication.HandlerWrapper(taxons.Handler)))
-	s.HandleFunc("/upload", common.UnwrapHandler(authentication.HandlerWrapper(uploadHandler)))
-	s.HandleFunc("/", common.UnwrapHandler(authentication.HandlerWrapper(indexHandler)))
+	s.HandleFunc("/ds/{dsName}/taxons", common.Handler(taxons.Handler).
+		Wrap(authentication.HandlerWrapper).
+		Unwrap())
+	s.HandleFunc("/ds/{dsName}/taxons/{id}", common.Handler(taxons.Handler).
+		Wrap(authentication.HandlerWrapper).
+		Unwrap())
+	s.HandleFunc("/upload", common.Handler(uploadHandler).
+		Wrap(authentication.HandlerWrapper).
+		Unwrap())
+	s.HandleFunc("/", common.Handler(indexHandler).
+		Wrap(authentication.HandlerWrapper).
+		Unwrap())
 	s.Handle("/assets/", http.FileServer(http.FS(assets)))
 	return s
 }
