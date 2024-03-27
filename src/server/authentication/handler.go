@@ -42,8 +42,6 @@ func HandlerWrapper(handler common.Handler) common.Handler {
 				}
 				return handler(w, r, cc)
 			}
-		} else {
-			fmt.Printf("error reading cookie: %s\n", err)
 		}
 		loginFound := false
 		err = r.ParseForm()
@@ -53,10 +51,7 @@ func HandlerWrapper(handler common.Handler) common.Handler {
 		username := r.Form.Get("login")
 		password := r.Form.Get("password")
 		cred, err := queries.GetCredentials(ctx, username)
-		if err != nil {
-			fmt.Printf("login not found: %s\n", err)
-			// TODO: login not found
-		} else {
+		if err == nil {
 			loginFound = true
 		}
 		authorized := false
