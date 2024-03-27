@@ -5,12 +5,35 @@ import (
 	"html/template"
 	"log"
 	"slices"
+	"strings"
+	txtemplate "text/template"
 
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 )
 
 //go:embed */*.html
 var htmlTemplates embed.FS
+
+//go:embed */*.js
+var jsFS embed.FS
+
+var jsTemplate *txtemplate.Template
+var JavascriptCode string
+
+func init() {
+	var err error
+	var buf strings.Builder
+	jsTemplate, err = txtemplate.ParseFS(jsFS, "*/*.js")
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, t := range jsTemplate.Templates() {
+		buf.WriteString("(()=>{")
+		t.Execute(&buf, nil)
+		buf.WriteString("})();")
+	}
+	JavascriptCode = buf.String()
+}
 
 func NewTemplate() *template.Template {
 	tmpl := template.New("")
@@ -30,7 +53,7 @@ func NewTemplate() *template.Template {
 	})
 	tmpl, err := tmpl.ParseFS(htmlTemplates, "*/*.html")
 	if err != nil {
-		log.Fatal("fuck", err)
+		log.Fatal(err)
 	}
 	return tmpl
 }

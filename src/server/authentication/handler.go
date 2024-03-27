@@ -12,6 +12,7 @@ import (
 
 	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/server/common"
+	"nicolas.galipot.net/hazo/server/components"
 )
 
 const SessionCookieName = "session_token"
@@ -79,7 +80,7 @@ func HandlerWrapper(handler common.Handler) common.Handler {
 			}
 			return handler(w, r, cc)
 		} else {
-			tmpl := template.New("login")
+			tmpl := components.NewTemplate()
 			template.Must(tmpl.Parse(loginTemplate))
 			w.Header().Add("Content-Type", "text/html")
 			w.WriteHeader(http.StatusUnauthorized)

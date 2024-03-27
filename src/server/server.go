@@ -39,6 +39,7 @@ func New() *http.ServeMux {
 	s.HandleFunc("/", common.Handler(indexHandler).
 		Wrap(authentication.HandlerWrapper).
 		Unwrap())
+	s.HandleFunc("/components.js", common.Handler(components.JavascriptHandler).Unwrap())
 	s.Handle("/assets/", http.FileServer(http.FS(assets)))
 	return s
 }
