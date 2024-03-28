@@ -24,14 +24,14 @@ type Item struct {
 	Children []*Item
 }
 
-func LoadItemFromDb(ctx context.Context, queries *storage.Queries) (*Item, error) {
+func LoadItemFromDb(ctx context.Context, queries *storage.Queries, root string, langs [3]string) (*Item, error) {
 	docs, err := queries.GetDocumentHierarchyTr2(ctx, storage.GetDocumentHierarchyTr2Params{
-		Path: "t0", Lang1: "V", Lang2: "CN",
+		Path: root, Lang1: langs[1], Lang2: langs[2],
 	})
 	if err != nil {
 		return nil, err
 	}
-	h := &Item{Id: "t0", Name: "<TOP>", FullPath: "t0"}
+	h := &Item{Id: root, Name: "<TOP>", FullPath: root}
 	previous := h
 	parent := h
 	breadcrumb := []*Item{}

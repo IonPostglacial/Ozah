@@ -1,0 +1,22 @@
+{{ define "main_toolbar" }}
+<div class="top-bar-height hbox vertical-align padded separated-bottom">
+    <div class="btn-group hbox vertical-align">
+        <a class="btn" href="/" title="home"><i class="fa-solid fa-home"></i></a>
+        <select name="" id="">
+        {{ range .AvailableDatasets }}
+            <option value="{{ .Path }}">{{ .Name }}</option>
+        {{ end }}
+        </select>
+    </div>
+    <div class="separator"></div>
+    <div class="btn-group hbox vertical-align">
+        <button title="save" class="success"><i class="fa-solid fa-save"></i></button>
+        <button title="export"><i class="fa-solid fa-file-export"></i></button>
+        <button title="print"><i class="fa-solid fa-print"></i></button>
+    </div>
+    <div class="spacer"></div>
+    <button><i class="fa-solid fa-bars"></i></button>
+    <div class="separator"></div>
+    <button><i class="fa-solid fa-close"></i></button>
+</div>
+{{ end }}

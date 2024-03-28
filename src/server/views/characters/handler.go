@@ -1,4 +1,4 @@
-package taxons
+package characters
 
 import (
 	"context"
@@ -14,15 +14,14 @@ import (
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 )
 
-//go:embed taxons.html
-var taxonPage string
+//go:embed characters.html
+var charactersPage string
 
 type State struct {
 	PageTitle         string
 	DatasetName       string
 	AvailableDatasets []db.Dataset
 	MenuState         *treemenu.State
-	SelectedTaxon     *FormData
 }
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
@@ -32,26 +31,14 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		dbName = "plants"
 	}
 	docId := r.PathValue("id")
-	var (
-		taxon *FormData
-		err   error
-	)
 	ctx := context.Background()
 	queries, err := db.Open(fmt.Sprintf("%s.sq3", dbName))
 	if err != nil {
 		return err
 	}
-	if docId != "" {
-		taxon, err = LoadFormDataFromDb(ctx, queries, docId)
-		if err != nil {
-			return err
-		}
-	} else {
-		taxon = &FormData{}
-	}
 	tmpl.Funcs(template.FuncMap{
 		"selectedDoc": func() string {
-			return taxon.Id
+			return docId
 		},
 		"sortDocs": func(items []*treemenu.Item) []*treemenu.Item {
 			slices.SortFunc(items, func(i, o *treemenu.Item) int {
@@ -60,18 +47,14 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 			return items
 		},
 		"documentUrl": func(taxon *treemenu.Item) string {
-			return fmt.Sprintf("/ds/%s/taxons/%s", dbName, taxon.Id)
+			return fmt.Sprintf("/ds/%s/characters/%s", dbName, taxon.Id)
 		},
 	})
-	tmpl, err = tmpl.Parse(taxonPage)
+	tmpl, err = tmpl.Parse(charactersPage)
 	if err != nil {
 		return err
 	}
-	tmpl, err = tmpl.Parse(FormTemplate)
-	if err != nil {
-		return err
-	}
-	items, err := treemenu.LoadItemFromDb(ctx, queries, "t0", [3]string{"S", "V", "CN"})
+	items, err := treemenu.LoadItemFromDb(ctx, queries, "c0", [3]string{"FR", "EN", "CN"})
 	if err != nil {
 		return err
 	}
@@ -84,9 +67,8 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		PageTitle:         "Hazo",
 		DatasetName:       dbName,
 		AvailableDatasets: datasets,
-		SelectedTaxon:     taxon,
 		MenuState: &treemenu.State{
-			Selected: taxon.Id,
+			Selected: docId,
 			Root:     items,
 		},
 	})
