@@ -6,13 +6,15 @@
         <div class="hbox top-bar-height separated-bottom vertical-align padded">
             <h1>List of Datasets</h1>
         </div>
-        <ul>
+        <table>
         {{ range .Datasets }}
-            <li>
-                {{ .Name }} <a href="/ds/{{ .Name }}/taxons">open</a>
-            </li>
+            <tr>
+                <td>{{ .Name }}</td>
+                <td><a href="/ds/{{ .Name }}/taxons">open</a></td>
+                <td>{{ .LastModified }}</td>
+            </tr>
         {{ end }}
-        </ul>
+        </table>
         <form action="/upload" id="upload-form" method="post" enctype="multipart/form-data" class="form-2-col vertical-align padded">
             <label for="upload">Chose file</label>
             <input type="file" name="upload" id="upload" accept="application/zip">
