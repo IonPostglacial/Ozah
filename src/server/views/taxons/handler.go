@@ -28,9 +28,6 @@ type State struct {
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	dbName := r.PathValue("dsName")
-	if dbName == "" {
-		dbName = "plants"
-	}
 	docId := r.PathValue("id")
 	var (
 		taxon *FormData
