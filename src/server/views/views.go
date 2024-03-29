@@ -32,7 +32,7 @@ func GetDocumentBranch(ctx context.Context, queries *storage.Queries, path strin
 	}
 	for i, name := range names {
 		model[i].Label = name
-		model[i].Url = fmt.Sprintf("/ds/%s/%s/%s", dbName, docType, branch[i])
+		model[i].Url = fmt.Sprintf("/ds/%s/%s/%s", dbName, docType, branch[i+1])
 	}
 	return &breadcrumbs.State{Branch: model}, nil
 }
