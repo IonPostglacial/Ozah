@@ -11,7 +11,9 @@ import (
 	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components"
+	"nicolas.galipot.net/hazo/server/components/popover"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
+	"nicolas.galipot.net/hazo/server/views"
 )
 
 //go:embed taxons.html
@@ -23,6 +25,7 @@ type State struct {
 	AvailableDatasets []db.Dataset
 	MenuState         *treemenu.State
 	SelectedTaxon     *FormData
+	ViewMenuState     *popover.State
 }
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
@@ -89,6 +92,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 			Selected: taxon.Id,
 			Root:     items,
 		},
+		ViewMenuState: views.NewMenuState("Taxons", dbName),
 	})
 	if err != nil {
 		return err

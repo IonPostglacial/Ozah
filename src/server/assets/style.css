@@ -40,7 +40,8 @@
     font-weight: normal;
 }
 
-div, section {
+div,
+section {
     background-color: var(--bg-color);
 }
 
@@ -128,7 +129,7 @@ th {
     display: none;
 }
 
-.toggle > input[type="checkbox"] {
+.toggle>input[type="checkbox"] {
     display: none;
 }
 
@@ -137,7 +138,7 @@ input[type=submit],
 .btn,
 select,
 .breadcrumbs,
-.toggle > label {
+.toggle>label {
     display: inline-block;
     background-color: var(--widget-color);
     border-radius: var(--widget-radius);
@@ -152,7 +153,7 @@ select,
     min-height: var(--btn-min-height);
 }
 
-.toggle > label {
+.toggle>label {
     border-color: var(--border-color-primary);
 }
 
@@ -195,37 +196,37 @@ select:active {
     white-space: nowrap;
 }
 
-.btn-group > button,
-.btn-group > input[type=submit],
-.btn-group > select,
-.btn-group > .breadcrumbs,
-.btn-group > .btn,
-.btn-group > .toggle > label {
+.btn-group>button,
+.btn-group>input[type=submit],
+.btn-group>select,
+.btn-group>.breadcrumbs,
+.btn-group>.btn,
+.btn-group>.toggle>label {
     border-radius: 0;
     border-left-width: 0;
 }
 
-.btn-group > button:first-child,
-.btn-group > input[type=submit]:first-child,
-.btn-group > select:first-child,
-.btn-group > .breadcrumbs:first-child,
-.btn-group > .btn:first-child,
-.btn-group > .toggle:first-child > label {
+.btn-group>button:first-child,
+.btn-group>input[type=submit]:first-child,
+.btn-group>select:first-child,
+.btn-group>.breadcrumbs:first-child,
+.btn-group>.btn:first-child,
+.btn-group>.toggle:first-child>label {
     border-start-start-radius: var(--widget-radius);
     border-end-start-radius: var(--widget-radius);
 }
 
-.btn-group > button:last-child,
-.btn-group > input[type=submit]:last-child,
-.btn-group > select:last-child,
-.btn-group > .breadcrumbs:last-child,
-.btn-group > .btn:last-child,
-.btn-group > .toggle:last-child > label {
+.btn-group>button:last-child,
+.btn-group>input[type=submit]:last-child,
+.btn-group>select:last-child,
+.btn-group>.breadcrumbs:last-child,
+.btn-group>.btn:last-child,
+.btn-group>.toggle:last-child>label {
     border-start-end-radius: var(--widget-radius);
     border-end-end-radius: var(--widget-radius);
 }
 
-.btn-group > .toggle > input:checked ~ label {
+.btn-group>.toggle>input:checked~label {
     background-color: var(--bg-color-primary);
     color: var(--text-color-primary);
     border-style: var(--widget-border-pressed-style);
@@ -237,7 +238,7 @@ a.btn {
 
 a.btn:hover {
     text-decoration: none;
-} 
+}
 
 input[type="text"],
 input[type="search"],
@@ -260,7 +261,7 @@ textarea:focus {
     border: 2px solid var(--bg-color-primary);
 }
 
-input[type="search"] ~ .search-icon {
+input[type="search"]~.search-icon {
     position: absolute;
     right: 1ch;
 }
@@ -336,7 +337,7 @@ input[type="search"] ~ .search-icon {
     overflow: hidden;
 }
 
-.stack-container > * {
+.stack-container>* {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -372,22 +373,22 @@ input[type="search"] ~ .search-icon {
     display: contents;
 }
 
-.tree-view li > * {
+.tree-view li>* {
     border-left: 1px solid var(--separator-color);
     border-radius: 0;
 }
 
-.tree-view li:hover > a,
-.selected > a {
+.tree-view li:hover>a,
+.selected>a {
     background-color: var(--bg-color-primary);
     color: var(--text-color-primary);
 }
 
-.tree-view li > a {
+.tree-view li>a {
     padding: 4px;
 }
 
-.tree-view li > *:nth-child(2) {
+.tree-view li>*:nth-child(2) {
     border-left: none;
 }
 
@@ -400,44 +401,44 @@ input[type="search"] ~ .search-icon {
     padding-left: 4px;
 }
 
-.tree-view li > .indent {
+.tree-view li>.indent {
     width: 0ch;
 }
 
-.tree-view li li > .indent {
+.tree-view li li>.indent {
     width: 5ch;
 }
 
-.tree-view li li li > .indent {
+.tree-view li li li>.indent {
     width: 10ch;
 }
 
-.tree-view li li li li > .indent {
+.tree-view li li li li>.indent {
     width: 15ch;
 }
 
-.tree-view li li li li > .indent {
+.tree-view li li li li>.indent {
     width: 18ch;
 }
 
-.tree-view li li li li > .indent {
+.tree-view li li li li>.indent {
     width: 20ch;
 }
 
-input[type="checkbox"].visibility-trigger ~ .contents-if-checked {
+input[type="checkbox"].visibility-trigger~.contents-if-checked {
     display: none;
 }
 
-input[type="checkbox"]:checked.visibility-trigger ~ .contents-if-checked {
+input[type="checkbox"]:checked.visibility-trigger~.contents-if-checked {
     display: contents;
 }
 
-input[type="checkbox"].visibility-trigger ~ * > .rotate-90-if-checked-p {
+input[type="checkbox"].visibility-trigger~*>.rotate-90-if-checked-p {
     rotate: 0deg;
     transition: rotate 0.2s;
 }
 
-input[type="checkbox"]:checked.visibility-trigger ~ * > .rotate-90-if-checked-p {
+input[type="checkbox"]:checked.visibility-trigger~*>.rotate-90-if-checked-p {
     rotate: 90deg;
 }
 
@@ -504,7 +505,7 @@ input[type="checkbox"]:checked.visibility-trigger ~ * > .rotate-90-if-checked-p 
 
 .separated,
 .separated-right,
-.separated-children > * {
+.separated-children>* {
     border-right: 1px solid var(--separator-color);
 }
 
@@ -518,11 +519,16 @@ input[type="checkbox"]:checked.visibility-trigger ~ * > .rotate-90-if-checked-p 
     border-bottom: 1px solid var(--separator-color);
 }
 
-.separated-children > *:last-child {
+.separated-children>*:last-child {
     border-right: none;
 }
 
-.breadcrumbs > *::after {
+.highlight-on-hover:hover {
+    background-color: var(--bg-color-primary);
+    color: var(--text-color-primary);
+}
+
+.breadcrumbs>*::after {
     font-family: "Font Awesome 6 Free";
     display: inline-block;
     content: "\f054";
@@ -530,8 +536,48 @@ input[type="checkbox"]:checked.visibility-trigger ~ * > .rotate-90-if-checked-p 
     color: var(--text-color);
 }
 
-.breadcrumbs > *:last-child:after {
+.breadcrumbs>*:last-child:after {
     display: none;
+}
+
+.popover {
+    display: inline-block;
+    position: relative;
+}
+
+.popover li {
+    list-style: none;
+}
+
+.popover .popover-panel {
+    position: absolute;
+    z-index: 100;
+    opacity: 0;
+    border-radius: var(--widget-radius);
+    box-shadow: 0px 2px 9px #0000005c;
+    transition-property: opacity, padding, visibility;
+    transition: 0.15s ease-out;
+    visibility: hidden;
+    padding-top: 8px;
+    --offset: -8px;
+}
+
+.popover>input[type="checkbox"] {
+    visibility: hidden;
+    position: absolute;
+}
+
+.popover>input[type="checkbox"]:checked~.popover-panel {
+    visibility: visible;
+    opacity: 1;
+    top: calc(-2 * var(--offset));
+}
+
+.popover-panel:before {
+    content: "";
+    position: relative;
+    top: var(--offset);
+    left: calc(50% + var(--offset));
 }
 
 .text-over-img {
@@ -557,7 +603,7 @@ input[type="checkbox"]:checked.visibility-trigger ~ * > .rotate-90-if-checked-p 
         height: 100%;
     }
 
-    .hbox.responsive-1100 > .vertical-scroll {
+    .hbox.responsive-1100>.vertical-scroll {
         overflow-y: initial;
         height: initial;
     }

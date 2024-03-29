@@ -25,7 +25,8 @@ textarea,
 
 .fixed-to-top,
 .text-over-img,
-.fixed-to-top div {
+.fixed-to-top div,
+.popover .popover-panel {
     background-color: #edeff09c;
     backdrop-filter: blur(10px);
 }
