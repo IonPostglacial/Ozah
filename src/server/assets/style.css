@@ -558,8 +558,9 @@ input[type="checkbox"]:checked.visibility-trigger~*>.rotate-90-if-checked-p {
     transition-property: opacity, padding, visibility;
     transition: 0.15s ease-out;
     visibility: hidden;
-    padding-top: 8px;
-    --offset: -8px;
+    padding: var(--widget-padding);
+    --offset: -13px;
+    left: 0;
 }
 
 .popover>input[type="checkbox"] {
