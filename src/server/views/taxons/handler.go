@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"nicolas.galipot.net/hazo/db"
+	"nicolas.galipot.net/hazo/db/storage"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/breadcrumbs"
 	"nicolas.galipot.net/hazo/server/components/popover"
@@ -19,13 +20,15 @@ import (
 var taxonPage string
 
 type State struct {
-	PageTitle         string
-	DatasetName       string
-	AvailableDatasets []db.Dataset
-	MenuState         *treemenu.State
-	SelectedTaxon     *FormData
-	ViewMenuState     *popover.State
-	BreadCrumbsState  *breadcrumbs.State
+	PageTitle                   string
+	DatasetName                 string
+	AvailableDatasets           *popover.State
+	MenuState                   *treemenu.State
+	SelectedTaxon               *FormData
+	ViewMenuState               *popover.State
+	BreadCrumbsState            *breadcrumbs.State
+	DescriptorsBreadCrumbsState *breadcrumbs.State
+	Descriptors                 []storage.GetDescriptorsRow
 }
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
@@ -37,6 +40,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	)
 	ctx := context.Background()
 	queries, err := db.Open(fmt.Sprintf("%s.sq3", dbName))
+	currentDescriptor := &views.DocState{Ref: "c0", Path: "c0"}
 	if err != nil {
 		return err
 	}
@@ -54,11 +58,24 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	datasets, err := db.ListDatasets()
+	datasets, err := views.NewDatasetMenuState(dbName)
 	if err != nil {
 		return err
 	}
 	branch, err := views.GetDocumentBranch(ctx, queries, &taxon.DocState, dbName, "taxons")
+	if err != nil {
+		return err
+	}
+	descBreadcrumbs, err := views.GetDocumentBranch(ctx, queries, currentDescriptor, dbName, "characters")
+	if err != nil {
+		return err
+	}
+	// TODO: retrieve selection by taxon
+
+	descriptors, err := queries.GetDescriptors(ctx, storage.GetDescriptorsParams{
+		Path:     currentDescriptor.Ref,
+		TaxonRef: taxon.Ref,
+	})
 	if err != nil {
 		return err
 	}
@@ -68,11 +85,13 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		AvailableDatasets: datasets,
 		SelectedTaxon:     taxon,
 		MenuState: &treemenu.State{
-			Selected: taxon.Id,
+			Selected: taxon.Ref,
 			Root:     items,
 		},
-		ViewMenuState:    views.NewMenuState("Taxons", dbName),
-		BreadCrumbsState: branch,
+		ViewMenuState:               views.NewMenuState("Taxons", dbName),
+		BreadCrumbsState:            branch,
+		DescriptorsBreadCrumbsState: descBreadcrumbs,
+		Descriptors:                 descriptors,
 	})
 	if err != nil {
 		return err

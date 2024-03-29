@@ -32,8 +32,11 @@ func HandlerWrapper(docType string) func(handler common.Handler) common.Handler 
 				},
 			})
 			cc.Template = tmpl
-			w.Header().Add("Content-Type", "text/html")
-			return handler(w, r, cc)
+			err := handler(w, r, cc)
+			if err == nil {
+				w.Header().Add("Content-Type", "text/html")
+			}
+			return err
 		}
 	}
 }

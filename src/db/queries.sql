@@ -55,3 +55,13 @@ inner join Document doc on doc.Ref = t.Document_Ref
 left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "V"
 left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
 where t.Document_Ref = sqlc.arg(ref);
+
+-- name: GetDescriptors :many
+select doc.Ref, doc.Path, doc.Name, doc.Details, max(att.Source) Source, count(descriptor.Description_Ref) Descriptors_Count, tr1.name name_tr1, tr2.name name_tr2 from Document doc 
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "EN"
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
+left join Document_Attachment att on doc.Ref = att.Document_Ref
+left join Taxon_Description descriptor on doc.Ref = descriptor.Description_Ref
+where (doc.Path = ? and (descriptor.Taxon_Ref is null or descriptor.Taxon_Ref = ?))
+group by doc.Ref
+order by doc.Path asc, Doc_Order asc;

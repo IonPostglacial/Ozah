@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -11,6 +12,7 @@ func (handler Handler) Unwrap() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := handler(w, r, &Context{})
 		if err != nil {
+			fmt.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	}

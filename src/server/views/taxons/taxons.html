@@ -88,45 +88,9 @@
                             <input type="search" name="filter-descriptors" id="filter-descriptors" class="flex-fill" placeholder="filter descriptors" />
                             <i class="search-icon fa-solid fa-search"></i>
                         </div>
-                        <nav class="hbox vertical-align breadcrumbs">
-                            <a href="#">Feuille</a>
-                            <a href="#">Type</a>
-                        </nav>
+                        {{ template "breadcrumbs" .DescriptorsBreadCrumbsState }}
                     </div>
-                    <div class="dynamic-grid gapped wrap padded horizontal-align vertical-align">
-                        <a href="#" class="separated square text padded stack-container">
-                            <div class="background-contained transparent" style="background-image: url(/assets/fleur.jpg);"></div>
-                            <div class="transparent vbox horizontal-align justify-space-around">
-                                <div class="text-over-img">Flower</div>
-                                <div class="text-over-img">Fleur</div>
-                                <div class="text-over-img">花</div>
-                            </div>
-                        </a>
-                        <a href="#" class="separated square text padded stack-container">
-                            <div class="background-contained transparent" style="background-image: url(/assets/graine.jpg);"></div>
-                            <div class="transparent vbox horizontal-align justify-space-around">
-                                <div class="text-over-img">Composée</div>
-                                <div class="text-over-img">Composée</div>
-                                <div class="text-over-img">Composée</div>
-                            </div>
-                        </a>
-                        <a href="#" class="separated square text padded stack-container">
-                            <div class="background-contained transparent" style="background-image: url(/assets/feuille.jpg);"></div>
-                            <div class="transparent vbox horizontal-align justify-space-around">
-                                <div class="text-over-img">Multicomposée</div>
-                                <div class="text-over-img">Multicomposée</div>
-                                <div class="text-over-img">Multicomposée</div>
-                            </div>
-                        </a>
-                        <a href="#" class="separated square text padded stack-container">
-                            <div class="background-contained transparent" style="background-image: url(/assets/fruit.jpg);"></div>
-                            <div class="transparent vbox horizontal-align justify-space-around">
-                                <div class="text-over-img">Fruit</div>
-                                <div class="text-over-img">Fruit</div>
-                                <div class="text-over-img">Fruit</div>
-                            </div>
-                        </a>
-                    </div>
+                    {{ template "icon_menu" .Descriptors }}
                 </div>
             </section>
             <section class="vertical-scroll vbox flex-fill">

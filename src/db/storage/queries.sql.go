@@ -11,6 +11,65 @@ import (
 	"strings"
 )
 
+const getDescriptors = `-- name: GetDescriptors :many
+select doc.Ref, doc.Path, doc.Name, doc.Details, max(att.Source) Source, count(descriptor.Description_Ref) Descriptors_Count, tr1.name name_tr1, tr2.name name_tr2 from Document doc 
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "EN"
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
+left join Document_Attachment att on doc.Ref = att.Document_Ref
+left join Taxon_Description descriptor on doc.Ref = descriptor.Description_Ref
+where (doc.Path = ? and (descriptor.Taxon_Ref is null or descriptor.Taxon_Ref = ?))
+group by doc.Ref
+order by doc.Path asc, Doc_Order asc
+`
+
+type GetDescriptorsParams struct {
+	Path     string
+	TaxonRef string
+}
+
+type GetDescriptorsRow struct {
+	Ref              string
+	Path             string
+	Name             string
+	Details          sql.NullString
+	Source           interface{}
+	DescriptorsCount int64
+	NameTr1          sql.NullString
+	NameTr2          sql.NullString
+}
+
+func (q *Queries) GetDescriptors(ctx context.Context, arg GetDescriptorsParams) ([]GetDescriptorsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getDescriptors, arg.Path, arg.TaxonRef)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetDescriptorsRow
+	for rows.Next() {
+		var i GetDescriptorsRow
+		if err := rows.Scan(
+			&i.Ref,
+			&i.Path,
+			&i.Name,
+			&i.Details,
+			&i.Source,
+			&i.DescriptorsCount,
+			&i.NameTr1,
+			&i.NameTr2,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getDocument = `-- name: GetDocument :one
 select ref, path, doc_order, name, details from Document doc where (doc.Ref = ?)
 `

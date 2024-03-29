@@ -49,7 +49,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		return err
 	}
 	character := views.DocState{
-		Id:          ch.Ref,
+		Ref:         ch.Ref,
 		Path:        ch.Path,
 		Name:        ch.Name,
 		Description: ch.Details.String,

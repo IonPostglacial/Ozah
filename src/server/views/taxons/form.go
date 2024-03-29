@@ -27,7 +27,7 @@ func LoadFormDataFromDb(ctx context.Context, queries *storage.Queries, id string
 	}
 	return &FormData{
 		DocState: views.DocState{
-			Id:          id,
+			Ref:         id,
 			Path:        data.Path,
 			Name:        data.Name,
 			Description: data.Details.String,
