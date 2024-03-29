@@ -16,6 +16,7 @@ import (
 	"nicolas.galipot.net/hazo/server/authentication"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components"
+	"nicolas.galipot.net/hazo/server/documents"
 	"nicolas.galipot.net/hazo/server/views/characters"
 	"nicolas.galipot.net/hazo/server/views/taxons"
 )
@@ -30,15 +31,19 @@ func New() *http.ServeMux {
 	s := http.NewServeMux()
 	s.HandleFunc("/ds/{dsName}/taxons", common.Handler(taxons.Handler).
 		Wrap(authentication.HandlerWrapper).
+		Wrap(documents.HandlerWrapper).
 		Unwrap())
 	s.HandleFunc("/ds/{dsName}/taxons/{id}", common.Handler(taxons.Handler).
 		Wrap(authentication.HandlerWrapper).
+		Wrap(documents.HandlerWrapper).
 		Unwrap())
 	s.HandleFunc("/ds/{dsName}/characters", common.Handler(characters.Handler).
 		Wrap(authentication.HandlerWrapper).
+		Wrap(documents.HandlerWrapper).
 		Unwrap())
 	s.HandleFunc("/ds/{dsName}/characters/{id}", common.Handler(characters.Handler).
 		Wrap(authentication.HandlerWrapper).
+		Wrap(documents.HandlerWrapper).
 		Unwrap())
 	s.HandleFunc("/upload", common.Handler(uploadHandler).
 		Wrap(authentication.HandlerWrapper).
