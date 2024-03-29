@@ -18,7 +18,7 @@ insert into Document (Ref, Path, Doc_Order, Name, Details)
 select * from Document doc where (doc.Ref = ?);
 
 -- name: GetDocumentsNames :many
-select Name from Document doc 
+select Ref, Name from Document doc 
 where doc.Ref in (sqlc.slice(path))
 order by doc.Path;
 

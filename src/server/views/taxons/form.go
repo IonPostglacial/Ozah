@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"nicolas.galipot.net/hazo/db/storage"
+	"nicolas.galipot.net/hazo/server/views"
 
 	_ "embed"
 )
@@ -12,14 +13,11 @@ import (
 var FormTemplate string
 
 type FormData struct {
-	Id          string
-	Path        string
-	Name        string
-	NameV       string
-	NameCN      string
-	Author      string
-	Website     string
-	Description string
+	views.DocState
+	NameV   string
+	NameCN  string
+	Author  string
+	Website string
 }
 
 func LoadFormDataFromDb(ctx context.Context, queries *storage.Queries, id string) (*FormData, error) {
@@ -28,13 +26,15 @@ func LoadFormDataFromDb(ctx context.Context, queries *storage.Queries, id string
 		return nil, err
 	}
 	return &FormData{
-		Id:          id,
-		Path:        data.Path,
-		Name:        data.Name,
-		NameV:       data.NameV.String,
-		NameCN:      data.NameCn.String,
-		Description: data.Details.String,
-		Author:      data.Author,
-		Website:     data.Website.String,
+		DocState: views.DocState{
+			Id:          id,
+			Path:        data.Path,
+			Name:        data.Name,
+			Description: data.Details.String,
+		},
+		NameV:   data.NameV.String,
+		NameCN:  data.NameCn.String,
+		Author:  data.Author,
+		Website: data.Website.String,
 	}, nil
 }

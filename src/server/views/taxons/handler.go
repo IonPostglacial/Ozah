@@ -58,14 +58,10 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	branch, err := views.GetDocumentBranch(ctx, queries, taxon.Path, dbName, "taxons")
+	branch, err := views.GetDocumentBranch(ctx, queries, &taxon.DocState, dbName, "taxons")
 	if err != nil {
 		return err
 	}
-	branch.Branch = append(branch.Branch, breadcrumbs.BreadCrumb{
-		Label: taxon.Name,
-		Url:   fmt.Sprintf("/ds/%s/taxons/%s", dbName, taxon.Id),
-	})
 	err = cc.Template.Execute(w, State{
 		PageTitle:         "Hazo",
 		DatasetName:       dbName,

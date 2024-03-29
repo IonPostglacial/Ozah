@@ -48,14 +48,16 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	breadCrumbs, err := views.GetDocumentBranch(ctx, queries, ch.Path, dbName, "characters")
+	character := views.DocState{
+		Id:          ch.Ref,
+		Path:        ch.Path,
+		Name:        ch.Name,
+		Description: ch.Details.String,
+	}
+	breadCrumbs, err := views.GetDocumentBranch(ctx, queries, &character, dbName, "characters")
 	if err != nil {
 		return err
 	}
-	breadCrumbs.Branch = append(breadCrumbs.Branch, breadcrumbs.BreadCrumb{
-		Label: ch.Name,
-		Url:   fmt.Sprintf("/ds/%s/characters/%s", dbName, docId),
-	})
 	err = cc.Template.Execute(w, State{
 		PageTitle:         "Hazo",
 		DatasetName:       dbName,
