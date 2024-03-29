@@ -9,6 +9,7 @@ import (
 
 	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/server/common"
+	"nicolas.galipot.net/hazo/server/components/breadcrumbs"
 	"nicolas.galipot.net/hazo/server/components/popover"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 	"nicolas.galipot.net/hazo/server/views"
@@ -23,6 +24,7 @@ type State struct {
 	AvailableDatasets []db.Dataset
 	MenuState         *treemenu.State
 	ViewMenuState     *popover.State
+	BreadCrumbsState  *breadcrumbs.State
 }
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
@@ -42,6 +44,18 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
+	ch, err := queries.GetDocument(ctx, docId)
+	if err != nil {
+		return err
+	}
+	breadCrumbs, err := views.GetDocumentBranch(ctx, queries, ch.Path, dbName, "characters")
+	if err != nil {
+		return err
+	}
+	breadCrumbs.Branch = append(breadCrumbs.Branch, breadcrumbs.BreadCrumb{
+		Label: ch.Name,
+		Url:   fmt.Sprintf("/ds/%s/characters/%s", dbName, docId),
+	})
 	err = cc.Template.Execute(w, State{
 		PageTitle:         "Hazo",
 		DatasetName:       dbName,
@@ -50,7 +64,8 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 			Selected: docId,
 			Root:     items,
 		},
-		ViewMenuState: views.NewMenuState("Characters", dbName),
+		ViewMenuState:    views.NewMenuState("Characters", dbName),
+		BreadCrumbsState: breadCrumbs,
 	})
 	if err != nil {
 		return err

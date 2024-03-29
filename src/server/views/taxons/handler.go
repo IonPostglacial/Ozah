@@ -9,6 +9,7 @@ import (
 
 	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/server/common"
+	"nicolas.galipot.net/hazo/server/components/breadcrumbs"
 	"nicolas.galipot.net/hazo/server/components/popover"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 	"nicolas.galipot.net/hazo/server/views"
@@ -24,6 +25,7 @@ type State struct {
 	MenuState         *treemenu.State
 	SelectedTaxon     *FormData
 	ViewMenuState     *popover.State
+	BreadCrumbsState  *breadcrumbs.State
 }
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
@@ -56,6 +58,14 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
+	branch, err := views.GetDocumentBranch(ctx, queries, taxon.Path, dbName, "taxons")
+	if err != nil {
+		return err
+	}
+	branch.Branch = append(branch.Branch, breadcrumbs.BreadCrumb{
+		Label: taxon.Name,
+		Url:   fmt.Sprintf("/ds/%s/taxons/%s", dbName, taxon.Id),
+	})
 	err = cc.Template.Execute(w, State{
 		PageTitle:         "Hazo",
 		DatasetName:       dbName,
@@ -65,7 +75,8 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 			Selected: taxon.Id,
 			Root:     items,
 		},
-		ViewMenuState: views.NewMenuState("Taxons", dbName),
+		ViewMenuState:    views.NewMenuState("Taxons", dbName),
+		BreadCrumbsState: branch,
 	})
 	if err != nil {
 		return err

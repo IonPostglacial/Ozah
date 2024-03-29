@@ -13,6 +13,7 @@ var FormTemplate string
 
 type FormData struct {
 	Id          string
+	Path        string
 	Name        string
 	NameV       string
 	NameCN      string
@@ -28,6 +29,7 @@ func LoadFormDataFromDb(ctx context.Context, queries *storage.Queries, id string
 	}
 	return &FormData{
 		Id:          id,
+		Path:        data.Path,
 		Name:        data.Name,
 		NameV:       data.NameV.String,
 		NameCN:      data.NameCn.String,

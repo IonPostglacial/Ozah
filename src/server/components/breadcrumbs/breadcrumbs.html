@@ -1,0 +1,7 @@
+{{ define "breadcrumbs" }}
+<nav class="hbox vertical-align breadcrumbs">
+{{ range .Branch }}
+    <a href="{{ .Url }}">{{ .Label }}</a>
+{{ end }}
+</nav>
+{{ end }}

@@ -17,6 +17,11 @@ insert into Document (Ref, Path, Doc_Order, Name, Details)
 -- name: GetDocument :one
 select * from Document doc where (doc.Ref = ?);
 
+-- name: GetDocumentsNames :many
+select Name from Document doc 
+where doc.Ref in (sqlc.slice(path))
+order by doc.Path;
+
 -- name: GetDocumentAttachments :many
 select * from Document_Attachment att 
 where (att.Document_Ref = ?);

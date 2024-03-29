@@ -1,9 +1,6 @@
 {{ define "navbar" }}
 <div class="btn-group hbox vertical-align">
     {{ template "popover" .ViewMenuState }}
-    <nav class="hbox vertical-align breadcrumbs">
-        <a href="#">Acanthaceae</a>
-        <a href="#">Asystasia Gangetica</a>
-    </nav>
+    {{ template "breadcrumbs" .BreadCrumbsState }}
 </div>
 {{ end }}
