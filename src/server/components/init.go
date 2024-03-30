@@ -50,6 +50,9 @@ func NewTemplate() *template.Template {
 		"documentUrl": func(taxon *treemenu.Item) string {
 			return "#1"
 		},
+		"colorize": func(color string) template.HTMLAttr {
+			return "style='background-color: red;'"
+		},
 	})
 	tmpl, err := tmpl.ParseFS(htmlTemplates, "*/*.html")
 	if err != nil {

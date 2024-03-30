@@ -12,6 +12,7 @@ import (
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/breadcrumbs"
 	"nicolas.galipot.net/hazo/server/components/popover"
+	"nicolas.galipot.net/hazo/server/components/summary"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 	"nicolas.galipot.net/hazo/server/views"
 )
@@ -29,6 +30,7 @@ type State struct {
 	BreadCrumbsState            *breadcrumbs.State
 	DescriptorsBreadCrumbsState *breadcrumbs.State
 	Descriptors                 []storage.GetDescriptorsRow
+	SummaryModel                *summary.Model
 }
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
@@ -71,11 +73,14 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		return err
 	}
 	// TODO: retrieve selection by taxon
-
 	descriptors, err := queries.GetDescriptors(ctx, storage.GetDescriptorsParams{
 		Path:     currentDescriptor.Ref,
 		TaxonRef: taxon.Ref,
 	})
+	if err != nil {
+		return err
+	}
+	summary, err := summary.LoadForTaxon(ctx, queries, taxon.Ref)
 	if err != nil {
 		return err
 	}
@@ -92,6 +97,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		BreadCrumbsState:            branch,
 		DescriptorsBreadCrumbsState: descBreadcrumbs,
 		Descriptors:                 descriptors,
+		SummaryModel:                summary,
 	})
 	if err != nil {
 		return err

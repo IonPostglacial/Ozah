@@ -1,0 +1,32 @@
+{{ define "summary" }}
+<ul class="padded flex-fill vbox gapped no-list-style">
+{{ range .Descriptors }}
+    <li class="separated-bottom padded text rounded" {{ colorize .Color }}>
+        <ul class="hbox gapped no-list-style wrap">
+            <li>{{ .Label.Name }}</li>
+            {{ if .Label.Tr1 }}
+                <li>{{ .Label.Tr1 }}</li>
+            {{ end }}
+            {{ if .Label.Tr2 }}
+                <li>{{ .Label.Tr2 }}</li>
+            {{ end }}
+        </ul>
+        <ul class="no-list-style indented">
+        {{ range .States }}
+            <li class="padded" {{ colorize .Color }}>
+                <ul class="hbox gapped no-list-style wrap">
+                    <li>{{ .Label.Name }}</li>
+                    {{ if .Label.Tr1 }}
+                        <li>{{ .Label.Tr1 }}</li>
+                    {{ end }}
+                    {{ if .Label.Tr2 }}
+                        <li>{{ .Label.Tr2 }}</li>
+                    {{ end }}
+                </ul>
+            </li>
+        {{ end }}
+        </ul>
+    </li>
+{{ end }}
+</ul>
+{{ end }}

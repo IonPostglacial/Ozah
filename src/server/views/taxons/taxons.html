@@ -41,7 +41,7 @@
                                 <button><i class="fa-solid fa-arrow-left"></i>
                                 </button><button><i class="fa-solid fa-arrow-right"></i></button>
                             </div>
-                            <div class="padded">1 / 1</div>
+                            <div class="padded nowrap">1 / 1</div>
                             <button><i class="fa-solid fa-upload"></i></button>
                             <input type="text" class="flex-fill" placeholder="add a picture" />
                             <button><i class="fa-solid fa-file-lines"></i></button>
@@ -102,18 +102,7 @@
                         </button><button><i class="fa-solid fa-close"></i></button>
                     </div>
                 </header>
-                <ul class="padded text flex-fill">
-                    <li>Feuilles:
-                        <ul>
-                            <li>Composées</li>
-                        </ul>
-                    </li>
-                    <li>Famille:
-                        <ul>
-                            <li>Acanthaceae</li>
-                        </ul>
-                    </li>
-                </ul>
+                {{ template "summary" .SummaryModel }}
             </section>
         </main>
     </div>

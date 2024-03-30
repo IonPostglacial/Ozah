@@ -192,6 +192,7 @@ select:active {
     border-style: var(--widget-border-pressed-style);
 }
 
+.nowrap,
 .btn-group {
     white-space: nowrap;
 }
@@ -396,9 +397,12 @@ input[type="search"]~.search-icon {
     justify-content: right;
 }
 
+.indented {
+    padding-left: 3ch;
+}
+
 .indent div {
     background-color: transparent;
-    padding-left: 4px;
 }
 
 .tree-view li>.indent {
@@ -545,7 +549,7 @@ input[type="checkbox"]:checked.visibility-trigger~*>.rotate-90-if-checked-p {
     position: relative;
 }
 
-.popover li {
+.no-list-style > li {
     list-style: none;
 }
 

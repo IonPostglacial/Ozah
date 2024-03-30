@@ -11,6 +11,72 @@ import (
 	"strings"
 )
 
+const getCatCharactersNameTr2 = `-- name: GetCatCharactersNameTr2 :many
+select doc.Ref, doc.Path, doc.Name, tr1.name name_tr1, tr2.name name_tr2, ch.Color from Document doc 
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = ?
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = ?
+left join Categorical_Character ch on doc.Ref = ch.Document_Ref
+where doc.Ref in (/*SLICE:refs*/?)
+order by doc.Path, Doc_Order asc
+`
+
+type GetCatCharactersNameTr2Params struct {
+	Lang1 string
+	Lang2 string
+	Refs  []string
+}
+
+type GetCatCharactersNameTr2Row struct {
+	Ref     string
+	Path    string
+	Name    string
+	NameTr1 sql.NullString
+	NameTr2 sql.NullString
+	Color   sql.NullString
+}
+
+func (q *Queries) GetCatCharactersNameTr2(ctx context.Context, arg GetCatCharactersNameTr2Params) ([]GetCatCharactersNameTr2Row, error) {
+	query := getCatCharactersNameTr2
+	var queryParams []interface{}
+	queryParams = append(queryParams, arg.Lang1)
+	queryParams = append(queryParams, arg.Lang2)
+	if len(arg.Refs) > 0 {
+		for _, v := range arg.Refs {
+			queryParams = append(queryParams, v)
+		}
+		query = strings.Replace(query, "/*SLICE:refs*/?", strings.Repeat(",?", len(arg.Refs))[1:], 1)
+	} else {
+		query = strings.Replace(query, "/*SLICE:refs*/?", "NULL", 1)
+	}
+	rows, err := q.db.QueryContext(ctx, query, queryParams...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetCatCharactersNameTr2Row
+	for rows.Next() {
+		var i GetCatCharactersNameTr2Row
+		if err := rows.Scan(
+			&i.Ref,
+			&i.Path,
+			&i.Name,
+			&i.NameTr1,
+			&i.NameTr2,
+			&i.Color,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getDescriptors = `-- name: GetDescriptors :many
 select doc.Ref, doc.Path, doc.Name, doc.Details, max(att.Source) Source, count(descriptor.Description_Ref) Descriptors_Count, tr1.name name_tr1, tr2.name name_tr2 from Document doc 
 left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "EN"
@@ -336,6 +402,55 @@ func (q *Queries) GetDocumentsNames(ctx context.Context, path []string) ([]GetDo
 	for rows.Next() {
 		var i GetDocumentsNamesRow
 		if err := rows.Scan(&i.Ref, &i.Name); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSummaryDescriptors = `-- name: GetSummaryDescriptors :many
+select doc.Ref, doc.Path, doc.Name, tr1.name name_tr1, tr2.name name_tr2, s.Color from Taxon_Description descriptor
+inner join Document doc on doc.Ref = descriptor.Description_Ref
+inner join State s on s.Document_Ref = descriptor.Description_Ref
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "EN"
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
+where descriptor.Taxon_Ref = ?
+order by doc.Path asc, doc.Doc_Order asc
+`
+
+type GetSummaryDescriptorsRow struct {
+	Ref     string
+	Path    string
+	Name    string
+	NameTr1 sql.NullString
+	NameTr2 sql.NullString
+	Color   sql.NullString
+}
+
+func (q *Queries) GetSummaryDescriptors(ctx context.Context, taxonRef string) ([]GetSummaryDescriptorsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getSummaryDescriptors, taxonRef)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetSummaryDescriptorsRow
+	for rows.Next() {
+		var i GetSummaryDescriptorsRow
+		if err := rows.Scan(
+			&i.Ref,
+			&i.Path,
+			&i.Name,
+			&i.NameTr1,
+			&i.NameTr2,
+			&i.Color,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"slices"
+	"strconv"
 
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components"
@@ -29,6 +30,19 @@ func HandlerWrapper(docType string) func(handler common.Handler) common.Handler 
 				},
 				"documentUrl": func(taxon *treemenu.Item) string {
 					return fmt.Sprintf("/ds/%s/%s/%s", dbName, docType, taxon.Id)
+				},
+				"colorize": func(color string) template.HTMLAttr {
+					if color == "" {
+						return ""
+					}
+					if len(color) != 7 || color[0] != '#' {
+						return ""
+					}
+					_, err := strconv.ParseUint(color[1:], 16, 64)
+					if err != nil {
+						return ""
+					}
+					return template.HTMLAttr(fmt.Sprintf("style='background-color: color-mix(in hsl, %s 25%%, transparent);'", color))
 				},
 			})
 			cc.Template = tmpl

@@ -6,9 +6,9 @@
         <div class="min-width-5ch">{{ .Id }}</div>
     </label>
     {{ $variable := documentUrl . }}
-    <a href="{{ $variable }}" hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML">{{ .Name }}</a>
-    <a href="{{ $variable }}" hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML">{{ .NameV }}</a>
-    <a href="{{ $variable }}" hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML">{{ .NameCN }}</a>
+    <a href="{{ $variable }}" class="nowrap" hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML">{{ .Name }}</a>
+    <a href="{{ $variable }}" class="nowrap" hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML">{{ .NameV }}</a>
+    <a href="{{ $variable }}" class="nowrap" hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML">{{ .NameCN }}</a>
     {{ if .Children }}
         <ul class="contents-if-checked">
         {{ range sortDocs .Children }}

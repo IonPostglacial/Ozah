@@ -21,7 +21,7 @@ var charactersPage string
 type State struct {
 	PageTitle         string
 	DatasetName       string
-	AvailableDatasets []db.Dataset
+	AvailableDatasets *popover.State
 	MenuState         *treemenu.State
 	ViewMenuState     *popover.State
 	BreadCrumbsState  *breadcrumbs.State
@@ -40,7 +40,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	datasets, err := db.ListDatasets()
+	datasets, err := views.NewDatasetMenuState(dbName)
 	if err != nil {
 		return err
 	}

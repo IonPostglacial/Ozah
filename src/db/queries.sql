@@ -22,6 +22,14 @@ select Ref, Name from Document doc
 where doc.Ref in (sqlc.slice(path))
 order by doc.Path;
 
+-- name: GetCatCharactersNameTr2 :many
+select doc.Ref, doc.Path, doc.Name, tr1.name name_tr1, tr2.name name_tr2, ch.Color from Document doc 
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = sqlc.arg(lang1)
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = sqlc.arg(lang2)
+left join Categorical_Character ch on doc.Ref = ch.Document_Ref
+where doc.Ref in (sqlc.slice(refs))
+order by doc.Path, Doc_Order asc;
+
 -- name: GetDocumentAttachments :many
 select * from Document_Attachment att 
 where (att.Document_Ref = ?);
@@ -65,3 +73,12 @@ left join Taxon_Description descriptor on doc.Ref = descriptor.Description_Ref
 where (doc.Path = ? and (descriptor.Taxon_Ref is null or descriptor.Taxon_Ref = ?))
 group by doc.Ref
 order by doc.Path asc, Doc_Order asc;
+
+-- name: GetSummaryDescriptors :many
+select doc.Ref, doc.Path, doc.Name, tr1.name name_tr1, tr2.name name_tr2, s.Color from Taxon_Description descriptor
+inner join Document doc on doc.Ref = descriptor.Description_Ref
+inner join State s on s.Document_Ref = descriptor.Description_Ref
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "EN"
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
+where descriptor.Taxon_Ref = ?
+order by doc.Path asc, doc.Doc_Order asc;
