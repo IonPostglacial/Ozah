@@ -614,3 +614,52 @@ func (q *Queries) ListLangs(ctx context.Context) ([]Lang, error) {
 	}
 	return items, nil
 }
+
+const taxonsWithStates = `-- name: TaxonsWithStates :many
+select doc.Name from Document doc 
+where Ref in (
+    select Taxon_Ref from Taxon_Description 
+    where Description_Ref in (/*SLICE:states*/?) 
+    group by Taxon_Ref 
+    having Count(Taxon_Ref) = ?
+)
+`
+
+type TaxonsWithStatesParams struct {
+	States      []string
+	Statescount string
+}
+
+func (q *Queries) TaxonsWithStates(ctx context.Context, arg TaxonsWithStatesParams) ([]string, error) {
+	query := taxonsWithStates
+	var queryParams []interface{}
+	if len(arg.States) > 0 {
+		for _, v := range arg.States {
+			queryParams = append(queryParams, v)
+		}
+		query = strings.Replace(query, "/*SLICE:states*/?", strings.Repeat(",?", len(arg.States))[1:], 1)
+	} else {
+		query = strings.Replace(query, "/*SLICE:states*/?", "NULL", 1)
+	}
+	queryParams = append(queryParams, arg.Statescount)
+	rows, err := q.db.QueryContext(ctx, query, queryParams...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, err
+		}
+		items = append(items, name)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

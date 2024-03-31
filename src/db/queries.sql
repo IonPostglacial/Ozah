@@ -88,3 +88,12 @@ left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Re
 left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
 where descriptor.Taxon_Ref = ?
 order by doc.Path asc, doc.Doc_Order asc;
+
+-- name: TaxonsWithStates :many
+select doc.Name from Document doc 
+where Ref in (
+    select Taxon_Ref from Taxon_Description 
+    where Description_Ref in (sqlc.slice(states)) 
+    group by Taxon_Ref 
+    having Count(Taxon_Ref) = sqlc.arg(statesCount)
+);
