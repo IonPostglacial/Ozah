@@ -17,6 +17,12 @@ insert into Document (Ref, Path, Doc_Order, Name, Details)
 -- name: GetDocument :one
 select * from Document doc where (doc.Ref = ?);
 
+-- name: GetDocumentTr2 :one
+select doc.*, tr1.name name_tr1, tr2.name name_tr2 from Document doc
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = sqlc.arg(lang1)
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = sqlc.arg(lang2)
+where (doc.Ref = ?);
+
 -- name: GetDocumentsNames :many
 select Ref, Name from Document doc 
 where doc.Ref in (sqlc.slice(path))

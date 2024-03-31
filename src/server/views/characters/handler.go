@@ -8,8 +8,10 @@ import (
 	"net/http"
 
 	"nicolas.galipot.net/hazo/db"
+	"nicolas.galipot.net/hazo/db/storage"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/breadcrumbs"
+	"nicolas.galipot.net/hazo/server/components/picturebox"
 	"nicolas.galipot.net/hazo/server/components/popover"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 	"nicolas.galipot.net/hazo/server/views"
@@ -25,11 +27,13 @@ type State struct {
 	MenuState         *treemenu.State
 	ViewMenuState     *popover.State
 	BreadCrumbsState  *breadcrumbs.State
+	SelectedCharacter *views.DocState
+	PictureBoxModel   *picturebox.Model
 }
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	dbName := r.PathValue("dsName")
-	docId := r.PathValue("id")
+	docRef := r.PathValue("id")
 	ctx := context.Background()
 	queries, err := db.Open(fmt.Sprintf("%s.sq3", dbName))
 	if err != nil {
@@ -44,30 +48,49 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	ch, err := queries.GetDocument(ctx, docId)
+	var character *views.DocState
+	ch, err := queries.GetDocumentTr2(ctx, storage.GetDocumentTr2Params{
+		Lang1: "EN",
+		Lang2: "CN",
+		Ref:   docRef,
+	})
+	if err == nil {
+		// TODO: handle non empty row error
+		character = &views.DocState{
+			Ref:         ch.Ref,
+			Path:        ch.Path,
+			Name:        ch.Name,
+			NameEN:      ch.NameTr1.String,
+			NameCN:      ch.NameTr2.String,
+			Description: ch.Details.String,
+		}
+	}
+	breadCrumbs, err := views.GetDocumentBranch(ctx, queries, character, dbName, "characters")
 	if err != nil {
 		return err
 	}
-	character := views.DocState{
-		Ref:         ch.Ref,
-		Path:        ch.Path,
-		Name:        ch.Name,
-		Description: ch.Details.String,
+	attach, err := queries.GetDocumentAttachments(ctx, ch.Ref)
+	picboxModel := picturebox.Model{Index: 0, Count: 0, Name: ch.Name}
+	if err == nil {
+		picboxModel.Count = len(attach)
+		if len(attach) > 0 {
+			picboxModel.Index = 1
+			picboxModel.Source = attach[0].Source
+		}
 	}
-	breadCrumbs, err := views.GetDocumentBranch(ctx, queries, &character, dbName, "characters")
-	if err != nil {
-		return err
-	}
+	template.Must(cc.Template.Parse(FormTemplate))
 	err = cc.Template.Execute(w, State{
 		PageTitle:         "Hazo",
 		DatasetName:       dbName,
 		AvailableDatasets: datasets,
 		MenuState: &treemenu.State{
-			Selected: docId,
+			Selected: docRef,
 			Root:     items,
 		},
-		ViewMenuState:    views.NewMenuState("Characters", dbName),
-		BreadCrumbsState: breadCrumbs,
+		ViewMenuState:     views.NewMenuState("Characters", dbName),
+		BreadCrumbsState:  breadCrumbs,
+		SelectedCharacter: character,
+		PictureBoxModel:   &picboxModel,
 	})
 	if err != nil {
 		return err

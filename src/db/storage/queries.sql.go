@@ -371,6 +371,44 @@ func (q *Queries) GetDocumentHierarchyTr2(ctx context.Context, arg GetDocumentHi
 	return items, nil
 }
 
+const getDocumentTr2 = `-- name: GetDocumentTr2 :one
+select doc.ref, doc.path, doc.doc_order, doc.name, doc.details, tr1.name name_tr1, tr2.name name_tr2 from Document doc
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = ?
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = ?
+where (doc.Ref = ?)
+`
+
+type GetDocumentTr2Params struct {
+	Lang1 string
+	Lang2 string
+	Ref   string
+}
+
+type GetDocumentTr2Row struct {
+	Ref      string
+	Path     string
+	DocOrder int32
+	Name     string
+	Details  sql.NullString
+	NameTr1  sql.NullString
+	NameTr2  sql.NullString
+}
+
+func (q *Queries) GetDocumentTr2(ctx context.Context, arg GetDocumentTr2Params) (GetDocumentTr2Row, error) {
+	row := q.db.QueryRowContext(ctx, getDocumentTr2, arg.Lang1, arg.Lang2, arg.Ref)
+	var i GetDocumentTr2Row
+	err := row.Scan(
+		&i.Ref,
+		&i.Path,
+		&i.DocOrder,
+		&i.Name,
+		&i.Details,
+		&i.NameTr1,
+		&i.NameTr2,
+	)
+	return i, err
+}
+
 const getDocumentsNames = `-- name: GetDocumentsNames :many
 select Ref, Name from Document doc 
 where doc.Ref in (/*SLICE:path*/?)

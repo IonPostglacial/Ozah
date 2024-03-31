@@ -21,12 +21,17 @@ type State struct {
 
 type Descriptor struct {
 	Label  MultilangText
-	Color  string
 	States []State
 }
 
-type Model struct {
+type Section struct {
+	Label       MultilangText
+	Color       string
 	Descriptors []Descriptor
+}
+
+type Model struct {
+	Sections []Section
 }
 
 func LoadForTaxon(ctx context.Context, queries *storage.Queries, taxonRef string) (*Model, error) {
@@ -46,28 +51,55 @@ func LoadForTaxon(ctx context.Context, queries *storage.Queries, taxonRef string
 			Color: state.Color.String,
 		})
 	}
-	characterIds := make([]string, 0, len(statesByPath))
+	characterRefs := make([]string, 0, len(statesByPath))
 	for path := range statesByPath {
 		parentId := path[strings.LastIndex(path, ".")+1:]
-		characterIds = append(characterIds, parentId)
+		characterRefs = append(characterRefs, parentId)
 	}
 	characters, err := queries.GetCatCharactersNameTr2(ctx, storage.GetCatCharactersNameTr2Params{
-		Lang1: "EN", Lang2: "CN", Refs: characterIds,
+		Lang1: "EN", Lang2: "CN", Refs: characterRefs,
 	})
 	if err != nil {
 		return nil, err
 	}
+	descriptionsBySection := make(map[string][]Descriptor)
 	for _, ch := range characters {
 		fullPath := fmt.Sprintf("%s.%s", ch.Path, ch.Ref)
 		states := statesByPath[fullPath]
-		summary.Descriptors = append(summary.Descriptors, Descriptor{
+		path := strings.Split(ch.Path, ".")
+		section := "c0"
+		if len(path) > 1 {
+			section = path[1]
+		}
+		descriptionsBySection[section] = append(descriptionsBySection[section], Descriptor{
 			Label: MultilangText{
 				Name: ch.Name,
 				Tr1:  ch.NameTr1.String,
 				Tr2:  ch.NameTr2.String,
 			},
-			Color:  ch.Color.String,
 			States: states,
+		})
+	}
+	sectionRefs := make([]string, 0, len(descriptionsBySection))
+	for ref := range descriptionsBySection {
+		sectionRefs = append(sectionRefs, ref)
+	}
+	sections, err := queries.GetCatCharactersNameTr2(ctx, storage.GetCatCharactersNameTr2Params{
+		Lang1: "EN", Lang2: "CN", Refs: sectionRefs,
+	})
+	if err != nil {
+		return nil, err
+	}
+	for _, sec := range sections {
+		descriptors := descriptionsBySection[sec.Ref]
+		summary.Sections = append(summary.Sections, Section{
+			Label: MultilangText{
+				Name: sec.Name,
+				Tr1:  sec.NameTr1.String,
+				Tr2:  sec.NameTr2.String,
+			},
+			Color:       sec.Color.String,
+			Descriptors: descriptors,
 		})
 	}
 	return summary, nil

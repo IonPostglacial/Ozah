@@ -42,7 +42,7 @@ func HandlerWrapper(docType string) func(handler common.Handler) common.Handler 
 					if err != nil {
 						return ""
 					}
-					return template.HTMLAttr(fmt.Sprintf("style='background-color: color-mix(in hsl, %s 25%%, transparent);'", color))
+					return template.HTMLAttr(fmt.Sprintf("style='background-color: color-mix(in hsl, %s 40%%, white);'", color))
 				},
 			})
 			cc.Template = tmpl

@@ -15,6 +15,8 @@ type DocState struct {
 	Ref         string
 	Path        string
 	Name        string
+	NameEN      string
+	NameCN      string
 	Description string
 }
 
@@ -47,7 +49,7 @@ func NewDatasetMenuState(label string) (*popover.State, error) {
 }
 
 func GetDocumentBranch(ctx context.Context, queries *storage.Queries, doc *DocState, dbName string, docType string) (*breadcrumbs.State, error) {
-	if doc.Path == "" {
+	if doc == nil || doc.Path == "" {
 		return &breadcrumbs.State{}, nil
 	}
 	branch := strings.Split(doc.Path, ".")

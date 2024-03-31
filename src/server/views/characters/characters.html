@@ -10,8 +10,14 @@
         <div class="top-bar-height hbox vertical-align separated-bottom padded">
             {{ template "navbar" . }}
         </div>
-        <main class="relative height-below-top-bar hbox responsive-1100 flex-fill separated-children">
-            TOTO
+        <main class="relative height-below-top-bar vbox responsive-1100 flex-fill separated-children">
+            {{ if .SelectedCharacter }}
+            <details open class="separated-bottom">
+                <summary class="padded">Pictures</summary>
+                {{ template "picture_box" .PictureBoxModel }}
+            </details>
+            {{ template "character_form" .SelectedCharacter }}
+            {{ end }}
         </main>
     </div>
 </body>

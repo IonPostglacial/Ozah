@@ -11,6 +11,7 @@ import (
 	"nicolas.galipot.net/hazo/db/storage"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/breadcrumbs"
+	"nicolas.galipot.net/hazo/server/components/picturebox"
 	"nicolas.galipot.net/hazo/server/components/popover"
 	"nicolas.galipot.net/hazo/server/components/summary"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
@@ -31,6 +32,7 @@ type State struct {
 	DescriptorsBreadCrumbsState *breadcrumbs.State
 	Descriptors                 []storage.GetDescriptorsRow
 	SummaryModel                *summary.Model
+	PictureBoxModel             *picturebox.Model
 }
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
@@ -84,6 +86,15 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
+	attach, err := queries.GetDocumentAttachments(ctx, taxon.Ref)
+	picboxModel := picturebox.Model{Index: 0, Count: 0, Name: taxon.Name}
+	if err == nil {
+		picboxModel.Count = len(attach)
+		if len(attach) > 0 {
+			picboxModel.Index = 1
+			picboxModel.Source = attach[0].Source
+		}
+	}
 	err = cc.Template.Execute(w, State{
 		PageTitle:         "Hazo",
 		DatasetName:       dbName,
@@ -98,6 +109,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		DescriptorsBreadCrumbsState: descBreadcrumbs,
 		Descriptors:                 descriptors,
 		SummaryModel:                summary,
+		PictureBoxModel:             &picboxModel,
 	})
 	if err != nil {
 		return err
