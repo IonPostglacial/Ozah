@@ -11,6 +11,41 @@ import (
 	"strings"
 )
 
+const distinctiveCharacters = `-- name: DistinctiveCharacters :many
+select ch.Name from Document ch 
+where (ch.Path || '.' || ch.Ref) in (
+    select doc.Path from Document doc 
+    where Ref in (
+        select Description_Ref from Taxon_Description 
+        group by Description_ref 
+        order by count(Taxon_Ref)
+    )
+)
+`
+
+func (q *Queries) DistinctiveCharacters(ctx context.Context) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, distinctiveCharacters)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, err
+		}
+		items = append(items, name)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCatCharactersNameTr2 = `-- name: GetCatCharactersNameTr2 :many
 select doc.Ref, doc.Path, doc.Name, tr1.name name_tr1, tr2.name name_tr2, ch.Color from Document doc 
 left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = ?

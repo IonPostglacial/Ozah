@@ -97,3 +97,14 @@ where Ref in (
     group by Taxon_Ref 
     having Count(Taxon_Ref) = sqlc.arg(statesCount)
 );
+
+-- name: DistinctiveCharacters :many
+select ch.Name from Document ch 
+where (ch.Path || '.' || ch.Ref) in (
+    select doc.Path from Document doc 
+    where Ref in (
+        select Description_Ref from Taxon_Description 
+        group by Description_ref 
+        order by count(Taxon_Ref)
+    )
+);
