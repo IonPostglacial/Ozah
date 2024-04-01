@@ -25,7 +25,7 @@ where (doc.Ref = ?);
 
 -- name: GetDocumentsNames :many
 select Ref, Name from Document doc 
-where doc.Ref in (sqlc.slice(path))
+where doc.Ref in (sqlc.slice(refs))
 order by doc.Path;
 
 -- name: GetCatCharactersNameTr2 :many
@@ -89,17 +89,9 @@ left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Re
 where descriptor.Taxon_Ref = ?
 order by doc.Path asc, doc.Doc_Order asc;
 
--- name: TaxonsWithStates :many
-select doc.Name from Document doc 
-where Ref in (
-    select Taxon_Ref from Taxon_Description 
-    where Description_Ref in (sqlc.slice(states)) 
-    group by Taxon_Ref 
-    having Count(Taxon_Ref) = sqlc.arg(statesCount)
-);
-
 -- name: DistinctiveCharacters :many
-select ch.Name from Document ch 
+select ch.Ref, ch.Name, s.Ref State_ref, s.Name State_Name from Document ch
+inner join Document s on s.Path = (ch.Path || '.' || ch.Ref)
 where (ch.Path || '.' || ch.Ref) in (
     select doc.Path from Document doc 
     where Ref in (
@@ -108,3 +100,8 @@ where (ch.Path || '.' || ch.Ref) in (
         order by count(Taxon_Ref)
     )
 );
+
+-- name: GetMeasurementCharacters :many
+select doc.Ref, doc.Name, mc.Unit_Ref from Measurement_Character mc
+inner join Document doc on doc.Ref = mc.Document_Ref
+order by doc.Name

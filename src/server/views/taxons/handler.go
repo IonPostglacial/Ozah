@@ -66,11 +66,11 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	branch, err := views.GetDocumentBranch(ctx, queries, &taxon.DocState, dbName, "taxons")
+	branch, err := views.GetDocumentBranch(ctx, queries, &taxon.DocState, dbName)
 	if err != nil {
 		return err
 	}
-	descBreadcrumbs, err := views.GetDocumentBranch(ctx, queries, currentDescriptor, dbName, "characters")
+	descBreadcrumbs, err := views.GetDocumentBranch(ctx, queries, currentDescriptor, dbName)
 	if err != nil {
 		return err
 	}

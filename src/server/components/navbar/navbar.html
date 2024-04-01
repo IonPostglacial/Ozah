@@ -1,5 +1,5 @@
 {{ define "navbar" }}
-<div class="btn-group hbox vertical-align">
+<div hx-boost="true" class="btn-group hbox vertical-align">
     {{ template "popover" .ViewMenuState }}
     {{ template "breadcrumbs" .BreadCrumbsState }}
 </div>

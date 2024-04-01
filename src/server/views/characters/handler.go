@@ -65,7 +65,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 			Description: ch.Details.String,
 		}
 	}
-	breadCrumbs, err := views.GetDocumentBranch(ctx, queries, character, dbName, "characters")
+	breadCrumbs, err := views.GetDocumentBranch(ctx, queries, character, dbName)
 	if err != nil {
 		return err
 	}

@@ -55,7 +55,7 @@ type Lang struct {
 	Name string
 }
 
-type MesurementCharacter struct {
+type MeasurementCharacter struct {
 	DocumentRef string
 	Color       sql.NullString
 	UnitRef     sql.NullString

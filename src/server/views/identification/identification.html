@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+{{ template "page_head" . }}
+<body class="hbox">
+    <div id="doc-content" class="vbox flex-fill">
+        <nav class="hbox flex-fill">
+            {{ template "main_toolbar" . }}
+            <div class="btn-group hbox vertical-align separated-bottom flex-fill">
+                {{ template "popover" .ViewMenuState }}
+            </div>
+        </nav>
+        <main id="main" hx-boost="true" class="relative height-below-top-bar hbox responsive-1100 flex-fill separated-children">
+            <section class="vbox vertical-scroll">
+                <h2 class="fixed-to-top padded separated-bottom">Characters</h2>
+                <ul class="no-list-style padded">
+                {{ range .Characters }}
+                    <li>
+                        <details>
+                            <summary>
+                                {{ .Name }}
+                            </summary>
+                            <ul class="no-list-style indented vbox">
+                                {{ range .States }}
+                                    <li class="hbox">
+                                        <a href="{{ .Url }}" class="btn flex-fill"
+                                            hx-target="#main" 
+                                            hx-select="#main" 
+                                            hx-swap="outerHTML">
+                                            {{ .Name }}
+                                        </a>
+                                    </li>
+                                {{ end }}
+                            </ul>
+                        </details>
+                    </li>
+                {{ end }}
+                </ul>
+            </section>
+            <section class="vbox vertical-scroll">
+                <h2 class="fixed-to-top padded separated-bottom">Measurements</h2>
+                <div class="form-2-col vertical-align padded" >
+                    {{ range .MeasurementCharacters }}
+                    <form id="identification-form-{{ .Ref }}" method="get" action="{{ .UnsetUrl }}" class="contents">
+                        <label for="m-{{ .Ref }}">{{ .Name }}</label>
+                        <div class="hbox gapped vertical-align">
+                            <input id="m-{{ .Ref }}" name="m-{{ .Ref }}" type="text" {{ if .HasValue }} value={{ .Value }} {{ end }}>
+                            {{ if .UnitRef }}
+                                <span>({{ .UnitRef }})</span>
+                            {{ end }}
+                            <div class="spacer"></div>
+                            <a href="{{ .UnsetUrl }}" class="btn">
+                                <i class="fa-solid fa-close"></i>
+                            </a>
+                        </div>
+                    </form>
+                    {{ end }}
+                </div>
+            </section>
+            <section id="identified-taxa" class="vbox vertical-scroll flex-fill padded">
+                <h2>Selected States</h2>
+                <div class="hbox wrap">
+                {{ range .SelectedStates }}
+                    <a href="{{ .Url }}" class="btn" 
+                        hx-target="#main" 
+                        hx-select="#main" 
+                        hx-swap="outerHTML">
+                        <i class="fa-solid fa-close"></i>
+                        {{ .Name }}
+                    </a>
+                {{ end }}
+                </div>
+                <h2 class="fixed-to-top padded separated-bottom">Identified taxa</h2>
+                <table>
+                    <tr><th>Name</th></tr>
+                    {{ range .IdentifiedTaxa }}
+                        <tr><td><a href="{{ .Url }}">{{ .Name }}</a></td></tr>
+                    {{ end }}
+                </table>
+            </section>
+        </main>
+    </div>
+</body>

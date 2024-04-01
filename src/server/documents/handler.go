@@ -10,12 +10,13 @@ import (
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
+	"nicolas.galipot.net/hazo/server/views"
 )
 
 func HandlerWrapper(docType string) func(handler common.Handler) common.Handler {
 	return func(handler common.Handler) common.Handler {
 		return func(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
-			dbName := r.PathValue("dsName")
+			dsName := r.PathValue("dsName")
 			docId := r.PathValue("id")
 			tmpl := components.NewTemplate()
 			tmpl.Funcs(template.FuncMap{
@@ -29,7 +30,7 @@ func HandlerWrapper(docType string) func(handler common.Handler) common.Handler 
 					return items
 				},
 				"documentUrl": func(taxon *treemenu.Item) string {
-					return fmt.Sprintf("/ds/%s/%s/%s", dbName, docType, taxon.Id)
+					return views.LinkToDocument(dsName, taxon.Id)
 				},
 				"colorize": func(color string) template.HTMLAttr {
 					if color == "" {

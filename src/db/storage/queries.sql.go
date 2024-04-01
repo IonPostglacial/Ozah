@@ -12,7 +12,8 @@ import (
 )
 
 const distinctiveCharacters = `-- name: DistinctiveCharacters :many
-select ch.Name from Document ch 
+select ch.Ref, ch.Name, s.Ref State_ref, s.Name State_Name from Document ch
+inner join Document s on s.Path = (ch.Path || '.' || ch.Ref)
 where (ch.Path || '.' || ch.Ref) in (
     select doc.Path from Document doc 
     where Ref in (
@@ -23,19 +24,31 @@ where (ch.Path || '.' || ch.Ref) in (
 )
 `
 
-func (q *Queries) DistinctiveCharacters(ctx context.Context) ([]string, error) {
+type DistinctiveCharactersRow struct {
+	Ref       string
+	Name      string
+	StateRef  string
+	StateName string
+}
+
+func (q *Queries) DistinctiveCharacters(ctx context.Context) ([]DistinctiveCharactersRow, error) {
 	rows, err := q.db.QueryContext(ctx, distinctiveCharacters)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []string
+	var items []DistinctiveCharactersRow
 	for rows.Next() {
-		var name string
-		if err := rows.Scan(&name); err != nil {
+		var i DistinctiveCharactersRow
+		if err := rows.Scan(
+			&i.Ref,
+			&i.Name,
+			&i.StateRef,
+			&i.StateName,
+		); err != nil {
 			return nil, err
 		}
-		items = append(items, name)
+		items = append(items, i)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err
@@ -446,7 +459,7 @@ func (q *Queries) GetDocumentTr2(ctx context.Context, arg GetDocumentTr2Params) 
 
 const getDocumentsNames = `-- name: GetDocumentsNames :many
 select Ref, Name from Document doc 
-where doc.Ref in (/*SLICE:path*/?)
+where doc.Ref in (/*SLICE:refs*/?)
 order by doc.Path
 `
 
@@ -455,16 +468,16 @@ type GetDocumentsNamesRow struct {
 	Name string
 }
 
-func (q *Queries) GetDocumentsNames(ctx context.Context, path []string) ([]GetDocumentsNamesRow, error) {
+func (q *Queries) GetDocumentsNames(ctx context.Context, refs []string) ([]GetDocumentsNamesRow, error) {
 	query := getDocumentsNames
 	var queryParams []interface{}
-	if len(path) > 0 {
-		for _, v := range path {
+	if len(refs) > 0 {
+		for _, v := range refs {
 			queryParams = append(queryParams, v)
 		}
-		query = strings.Replace(query, "/*SLICE:path*/?", strings.Repeat(",?", len(path))[1:], 1)
+		query = strings.Replace(query, "/*SLICE:refs*/?", strings.Repeat(",?", len(refs))[1:], 1)
 	} else {
-		query = strings.Replace(query, "/*SLICE:path*/?", "NULL", 1)
+		query = strings.Replace(query, "/*SLICE:refs*/?", "NULL", 1)
 	}
 	rows, err := q.db.QueryContext(ctx, query, queryParams...)
 	if err != nil {
@@ -475,6 +488,41 @@ func (q *Queries) GetDocumentsNames(ctx context.Context, path []string) ([]GetDo
 	for rows.Next() {
 		var i GetDocumentsNamesRow
 		if err := rows.Scan(&i.Ref, &i.Name); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getMeasurementCharacters = `-- name: GetMeasurementCharacters :many
+select doc.Ref, doc.Name, mc.Unit_Ref from Measurement_Character mc
+inner join Document doc on doc.Ref = mc.Document_Ref
+order by doc.Name
+`
+
+type GetMeasurementCharactersRow struct {
+	Ref     string
+	Name    string
+	UnitRef sql.NullString
+}
+
+func (q *Queries) GetMeasurementCharacters(ctx context.Context) ([]GetMeasurementCharactersRow, error) {
+	rows, err := q.db.QueryContext(ctx, getMeasurementCharacters)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetMeasurementCharactersRow
+	for rows.Next() {
+		var i GetMeasurementCharactersRow
+		if err := rows.Scan(&i.Ref, &i.Name, &i.UnitRef); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -640,55 +688,6 @@ func (q *Queries) ListLangs(ctx context.Context) ([]Lang, error) {
 			return nil, err
 		}
 		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const taxonsWithStates = `-- name: TaxonsWithStates :many
-select doc.Name from Document doc 
-where Ref in (
-    select Taxon_Ref from Taxon_Description 
-    where Description_Ref in (/*SLICE:states*/?) 
-    group by Taxon_Ref 
-    having Count(Taxon_Ref) = ?
-)
-`
-
-type TaxonsWithStatesParams struct {
-	States      []string
-	Statescount string
-}
-
-func (q *Queries) TaxonsWithStates(ctx context.Context, arg TaxonsWithStatesParams) ([]string, error) {
-	query := taxonsWithStates
-	var queryParams []interface{}
-	if len(arg.States) > 0 {
-		for _, v := range arg.States {
-			queryParams = append(queryParams, v)
-		}
-		query = strings.Replace(query, "/*SLICE:states*/?", strings.Repeat(",?", len(arg.States))[1:], 1)
-	} else {
-		query = strings.Replace(query, "/*SLICE:states*/?", "NULL", 1)
-	}
-	queryParams = append(queryParams, arg.Statescount)
-	rows, err := q.db.QueryContext(ctx, query, queryParams...)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []string
-	for rows.Next() {
-		var name string
-		if err := rows.Scan(&name); err != nil {
-			return nil, err
-		}
-		items = append(items, name)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err

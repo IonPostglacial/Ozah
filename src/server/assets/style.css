@@ -369,6 +369,7 @@ input[type="search"]~.search-icon {
     align-content: start;
 }
 
+.contents,
 .tree-view ul,
 .tree-view li {
     display: contents;

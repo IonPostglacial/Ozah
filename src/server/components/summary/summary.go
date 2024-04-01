@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/db/storage"
 )
 
@@ -34,7 +35,7 @@ type Model struct {
 	Sections []Section
 }
 
-func LoadForTaxon(ctx context.Context, queries *storage.Queries, taxonRef string) (*Model, error) {
+func LoadForTaxon(ctx context.Context, queries *db.Queries, taxonRef string) (*Model, error) {
 	sd, err := queries.GetSummaryDescriptors(ctx, taxonRef)
 	if err != nil {
 		return nil, err

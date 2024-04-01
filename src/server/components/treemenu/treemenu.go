@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"fmt"
 
+	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/db/storage"
 )
 
@@ -24,7 +25,7 @@ type Item struct {
 	Children []*Item
 }
 
-func LoadItemFromDb(ctx context.Context, queries *storage.Queries, root string, langs [3]string) (*Item, error) {
+func LoadItemFromDb(ctx context.Context, queries *db.Queries, root string, langs [3]string) (*Item, error) {
 	docs, err := queries.GetDocumentHierarchyTr2(ctx, storage.GetDocumentHierarchyTr2Params{
 		Path: root, Lang1: langs[1], Lang2: langs[2],
 	})

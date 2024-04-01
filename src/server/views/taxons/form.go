@@ -3,7 +3,7 @@ package taxons
 import (
 	"context"
 
-	"nicolas.galipot.net/hazo/db/storage"
+	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/server/views"
 
 	_ "embed"
@@ -20,7 +20,7 @@ type FormData struct {
 	Website string
 }
 
-func LoadFormDataFromDb(ctx context.Context, queries *storage.Queries, id string) (*FormData, error) {
+func LoadFormDataFromDb(ctx context.Context, queries *db.Queries, id string) (*FormData, error) {
 	data, err := queries.GetTaxonInfo(ctx, id)
 	if err != nil {
 		return nil, err

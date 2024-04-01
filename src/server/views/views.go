@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"nicolas.galipot.net/hazo/db"
-	"nicolas.galipot.net/hazo/db/storage"
 	"nicolas.galipot.net/hazo/server/components/breadcrumbs"
 	"nicolas.galipot.net/hazo/server/components/popover"
 )
@@ -20,12 +19,44 @@ type DocState struct {
 	Description string
 }
 
+func LinkToTaxons(dsName string) string {
+	return fmt.Sprintf("/ds/%s/taxons", dsName)
+}
+
+func LinkToTaxon(dsName string, ref string) string {
+	return fmt.Sprintf("/ds/%s/taxons/%s", dsName, ref)
+}
+
+func LinkToCharacters(dsName string) string {
+	return fmt.Sprintf("/ds/%s/characters", dsName)
+}
+
+func LinkToCharacter(dsName string, ref string) string {
+	return fmt.Sprintf("/ds/%s/characters/%s", dsName, ref)
+}
+
+func LinkToIdentify(dsName string) string {
+	return fmt.Sprintf("/ds/%s/identify", dsName)
+}
+
+func LinkToDocument(dsName string, ref string) string {
+	switch {
+	case strings.HasPrefix(ref, "t"):
+		return LinkToTaxon(dsName, ref)
+	case strings.HasPrefix(ref, "c"):
+		return LinkToCharacter(dsName, ref)
+	default:
+		return LinkToTaxons(dsName)
+	}
+}
+
 func NewMenuState(label, dsName string) *popover.State {
 	return &popover.State{
 		Label: label,
 		Items: []popover.Item{
-			{Url: fmt.Sprintf("/ds/%s/taxons", dsName), Label: "Taxons"},
-			{Url: fmt.Sprintf("/ds/%s/characters", dsName), Label: "Characters"},
+			{Url: LinkToTaxons(dsName), Label: "Taxons"},
+			{Url: LinkToCharacters(dsName), Label: "Characters"},
+			{Url: LinkToIdentify(dsName), Label: "Identification"},
 		},
 	}
 }
@@ -38,7 +69,7 @@ func NewDatasetMenuState(label string) (*popover.State, error) {
 	items := make([]popover.Item, len(datasets))
 	for i, ds := range datasets {
 		items[i] = popover.Item{
-			Url:   fmt.Sprintf("/ds/%s/taxons", ds.Name),
+			Url:   LinkToTaxons(ds.Name),
 			Label: ds.Name,
 		}
 	}
@@ -48,7 +79,7 @@ func NewDatasetMenuState(label string) (*popover.State, error) {
 	}, nil
 }
 
-func GetDocumentBranch(ctx context.Context, queries *storage.Queries, doc *DocState, dbName string, docType string) (*breadcrumbs.State, error) {
+func GetDocumentBranch(ctx context.Context, queries *db.Queries, doc *DocState, dbName string) (*breadcrumbs.State, error) {
 	if doc == nil || doc.Path == "" {
 		return &breadcrumbs.State{}, nil
 	}
@@ -60,11 +91,11 @@ func GetDocumentBranch(ctx context.Context, queries *storage.Queries, doc *DocSt
 	model := make([]breadcrumbs.BreadCrumb, len(docs)+1)
 	for i, doc := range docs {
 		model[i].Label = doc.Name
-		model[i].Url = fmt.Sprintf("/ds/%s/%s/%s", dbName, docType, doc.Ref)
+		model[i].Url = LinkToDocument(dbName, doc.Ref)
 	}
 	model[len(model)-1] = breadcrumbs.BreadCrumb{
 		Label: doc.Name,
-		Url:   fmt.Sprintf("/ds/%s/%s/%s", dbName, docType, doc.Ref),
+		Url:   LinkToDocument(dbName, doc.Ref),
 	}
 	return &breadcrumbs.State{Branch: model}, nil
 }

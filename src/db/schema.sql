@@ -38,7 +38,7 @@ create table Unit (
 	foreign key (Base_Unit_Ref) references Unit(Ref)
 );
 
-create table Mesurement_Character (
+create table Measurement_Character (
     Document_Ref Text not null primary key,
 	Color Text,
 	Unit_Ref Text,
