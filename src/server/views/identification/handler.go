@@ -30,12 +30,20 @@ type Model struct {
 	IdentifiedTaxa        []IdentifiedTaxon
 	Characters            []Character
 	MeasurementCharacters []Measurement
-	SelectedStates        []State
+	SelectedStates        []SelectedState
 }
 
 type IdentifiedTaxon struct {
 	db.IdentifiedTaxon
 	Url string
+}
+
+type SelectedState struct {
+	ParentRef  string
+	ParentName string
+	Ref        string
+	Name       string
+	Url        string
 }
 
 type State struct {
@@ -99,16 +107,19 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 			}
 		}
 	}
-	statesInfo, err := queries.GetDocumentsNames(ctx, stateRefs)
+	statesInfo, err := queries.GetDocumentsAndParentsNames(ctx, stateRefs)
 	if err != nil {
 		return err
 	}
-	selectedStates := make([]State, len(statesInfo))
+	selectedStates := make([]SelectedState, len(statesInfo))
 	for i, state := range statesInfo {
 		refs := slices.Clone(stateRefs)
 		refs = slices.DeleteFunc(refs, func(s string) bool { return s == state.Ref })
 		url := LinkToIdentification(dsName, refs, measurements)
-		selectedStates[i] = State{Ref: state.Ref, Name: state.Name, Url: url}
+		selectedStates[i] = SelectedState{
+			ParentRef: state.ParentRef.String, ParentName: state.ParentName.String,
+			Ref: state.Ref, Name: state.Name, Url: url,
+		}
 	}
 	ms := make([]db.SpecimenMeasurement, 0, len(measurements))
 	for _, v := range measurements {

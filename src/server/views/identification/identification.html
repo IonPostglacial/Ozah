@@ -62,10 +62,10 @@
                 {{ range .SelectedStates }}
                     <a href="{{ .Url }}" class="btn" 
                         hx-target="#main" 
-                        hx-select="#main" 
+                        hx-select="#main"
                         hx-swap="outerHTML">
                         <i class="fa-solid fa-close"></i>
-                        {{ .Name }}
+                        {{ .ParentName }}: {{ .Name }}
                     </a>
                 {{ end }}
                 </div>
