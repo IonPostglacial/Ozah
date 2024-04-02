@@ -1,12 +1,12 @@
 {{ define "icon_menu" }}
-<div class="dynamic-grid gapped wrap padded horizontal-align vertical-align">
+<div class="dynamic-grid gapped wrap padded horizontal-align vertical-align" hx-boost="true">
 {{ range . }}
-    <a href="#" class="separated square text padded stack-container {{ if .DescriptorsCount }}selected{{ end }}">
+    <a href="{{ .Url }}" class="separated square text padded stack-container {{ if .DescriptorsCount }}selected{{ end }}">
         <div class="background-contained transparent" style="background-image: url('{{ .Source }}');"></div>
         <div class="transparent vbox horizontal-align justify-space-around">
             <div class="text-over-img">{{ .Name }}</div>
-            <div class="text-over-img">{{ .NameTr1.String }}</div>
-            <div class="text-over-img">{{ .NameTr2.String }}</div>
+            <div class="text-over-img">{{ .NameTr1 }}</div>
+            <div class="text-over-img">{{ .NameTr2 }}</div>
         </div>
     </a>
 {{ end }}

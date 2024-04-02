@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"nicolas.galipot.net/hazo/db"
-	"nicolas.galipot.net/hazo/db/storage"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/breadcrumbs"
 	"nicolas.galipot.net/hazo/server/components/picturebox"
@@ -29,14 +28,14 @@ type State struct {
 	ViewMenuState               *popover.State
 	BreadCrumbsState            *breadcrumbs.State
 	DescriptorsBreadCrumbsState *breadcrumbs.State
-	Descriptors                 []storage.GetDescriptorsRow
+	Descriptors                 []views.Descriptor
 	SummaryModel                *summary.Model
 	PictureBoxModel             *picturebox.Model
 }
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	dsName := r.PathValue("dsName")
-	docId := r.PathValue("id")
+	docRef := r.PathValue("id")
 	var (
 		taxon *FormData
 		err   error
@@ -47,12 +46,24 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		return err
 	}
 	queries, err := db.Open(ds)
-	currentDescriptor := &views.DocState{Ref: "c0", Path: "c0"}
 	if err != nil {
 		return err
 	}
-	if docId != "" {
-		taxon, err = LoadFormDataFromDb(ctx, queries, docId)
+	queryParams := r.URL.Query()
+	descriptorRef := queryParams.Get("d")
+	var currentDescriptor *views.DocState
+	if descriptorRef == "" {
+		descriptorRef = "c0"
+		currentDescriptor = &views.DocState{Ref: descriptorRef, Path: ""}
+	} else {
+		doc, err := queries.GetDocument(ctx, descriptorRef)
+		if err != nil {
+			return err
+		}
+		currentDescriptor = &views.DocState{Ref: doc.Ref, Path: doc.Path, Name: doc.Name}
+	}
+	if docRef != "" {
+		taxon, err = LoadFormDataFromDb(ctx, queries, docRef)
 		if err != nil {
 			return err
 		}
@@ -69,19 +80,16 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	branch, err := views.GetDocumentBranch(ctx, queries, &taxon.DocState, dsName)
+	branch, err := views.GetDocumentBranch(ctx, queries, &taxon.DocState, dsName, views.LinkToTaxon)
 	if err != nil {
 		return err
 	}
-	descBreadcrumbs, err := views.GetDocumentBranch(ctx, queries, currentDescriptor, dsName)
+	descBreadcrumbs, err := views.GetDocumentBranch(ctx, queries, currentDescriptor, dsName, views.LinkToDescriptor(docRef))
 	if err != nil {
 		return err
 	}
 	// TODO: retrieve selection by taxon
-	descriptors, err := queries.GetDescriptors(ctx, storage.GetDescriptorsParams{
-		Path:     currentDescriptor.Ref,
-		TaxonRef: taxon.Ref,
-	})
+	descriptors, err := views.GetTaxonDescriptors(ctx, queries, dsName, taxon.Ref, currentDescriptor)
 	if err != nil {
 		return err
 	}

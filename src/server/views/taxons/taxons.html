@@ -63,7 +63,14 @@
                             <input type="search" name="filter-descriptors" id="filter-descriptors" class="flex-fill" placeholder="filter descriptors" />
                             <i class="search-icon fa-solid fa-search"></i>
                         </div>
-                        {{ template "breadcrumbs" .DescriptorsBreadCrumbsState }}
+                        {{ if lt 0 (len .DescriptorsBreadCrumbsState.Branch) }}
+                        <div class="hbox vertical-align relative" hx-boost="true">
+                            <a href="/ds/{{ .DatasetName }}/taxons/{{ .SelectedTaxon.Ref }}" class="btn">
+                                <i class="fa-solid fa-home"></i>
+                            </a>
+                            {{ template "breadcrumbs" .DescriptorsBreadCrumbsState }}
+                        </div>
+                        {{ end }}
                     </div>
                     {{ template "icon_menu" .Descriptors }}
                 </div>

@@ -15,3 +15,10 @@ func Open(ds PrivateDataset) (*Queries, error) {
 	queries := &Queries{Queries: storage.New(db), db: db}
 	return queries, nil
 }
+
+func FullPath(path string, ref string) string {
+	if path == "" {
+		return ref
+	}
+	return fmt.Sprintf("%s.%s", path, ref)
+}

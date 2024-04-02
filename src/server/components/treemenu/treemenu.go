@@ -3,7 +3,6 @@ package treemenu
 import (
 	"context"
 	_ "embed"
-	"fmt"
 
 	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/db/storage"
@@ -48,7 +47,7 @@ func LoadItemFromDb(ctx context.Context, queries *db.Queries, root string, langs
 				parent = breadcrumb[len(breadcrumb)-1]
 			}
 		}
-		fullPath := fmt.Sprintf("%s.%s", doc.Path, doc.Ref)
+		fullPath := db.FullPath(doc.Path, doc.Ref)
 		taxon := &Item{
 			Id:       doc.Ref,
 			FullPath: fullPath,

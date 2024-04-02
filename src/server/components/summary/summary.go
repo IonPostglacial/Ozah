@@ -2,7 +2,6 @@ package summary
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"nicolas.galipot.net/hazo/db"
@@ -65,7 +64,7 @@ func LoadForTaxon(ctx context.Context, queries *db.Queries, taxonRef string) (*M
 	}
 	descriptionsBySection := make(map[string][]Descriptor)
 	for _, ch := range characters {
-		fullPath := fmt.Sprintf("%s.%s", ch.Path, ch.Ref)
+		fullPath := db.FullPath(ch.Path, ch.Ref)
 		states := statesByPath[fullPath]
 		path := strings.Split(ch.Path, ".")
 		section := "c0"

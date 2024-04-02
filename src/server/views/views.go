@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"nicolas.galipot.net/hazo/db"
+	"nicolas.galipot.net/hazo/db/storage"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/breadcrumbs"
 	"nicolas.galipot.net/hazo/server/components/popover"
@@ -19,6 +20,8 @@ type DocState struct {
 	NameCN      string
 	Description string
 }
+
+type linkMaker = func(dsName string, ref string) string
 
 func LinkToTaxons(dsName string) string {
 	return fmt.Sprintf("/ds/%s/taxons", dsName)
@@ -34,6 +37,12 @@ func LinkToCharacters(dsName string) string {
 
 func LinkToCharacter(dsName string, ref string) string {
 	return fmt.Sprintf("/ds/%s/characters/%s", dsName, ref)
+}
+
+func LinkToDescriptor(taxonRef string) linkMaker {
+	return func(dsName string, ref string) string {
+		return fmt.Sprintf("/ds/%s/taxons/%s?d=%s", dsName, taxonRef, ref)
+	}
 }
 
 func LinkToIdentify(dsName string) string {
@@ -80,7 +89,44 @@ func NewDatasetMenuState(cc *common.Context, label string) (*popover.State, erro
 	}, nil
 }
 
-func GetDocumentBranch(ctx context.Context, queries *db.Queries, doc *DocState, dbName string) (*breadcrumbs.State, error) {
+type Descriptor struct {
+	Ref              string
+	Name             string
+	NameTr1          string
+	NameTr2          string
+	Url              string
+	Source           string
+	DescriptorsCount int64
+}
+
+func GetTaxonDescriptors(ctx context.Context, queries *db.Queries, dsName string, taxonRef string, currentDescriptor *DocState) ([]Descriptor, error) {
+	rows, err := queries.GetDescriptors(ctx, storage.GetDescriptorsParams{
+		Path:     db.FullPath(currentDescriptor.Path, currentDescriptor.Ref),
+		TaxonRef: taxonRef,
+	})
+	if err != nil {
+		return nil, err
+	}
+	descriptors := make([]Descriptor, len(rows))
+	for i, row := range rows {
+		source := ""
+		if src, ok := row.Source.(string); ok {
+			source = src
+		}
+		descriptors[i] = Descriptor{
+			Ref:              row.Ref,
+			Name:             row.Name,
+			NameTr1:          row.NameTr1.String,
+			NameTr2:          row.NameTr2.String,
+			Url:              LinkToDescriptor(taxonRef)(dsName, row.Ref),
+			Source:           source,
+			DescriptorsCount: row.DescriptorsCount,
+		}
+	}
+	return descriptors, nil
+}
+
+func GetDocumentBranch(ctx context.Context, queries *db.Queries, doc *DocState, dbName string, makeLink linkMaker) (*breadcrumbs.State, error) {
 	if doc == nil || doc.Path == "" {
 		return &breadcrumbs.State{}, nil
 	}
@@ -92,11 +138,11 @@ func GetDocumentBranch(ctx context.Context, queries *db.Queries, doc *DocState, 
 	model := make([]breadcrumbs.BreadCrumb, len(docs)+1)
 	for i, doc := range docs {
 		model[i].Label = doc.Name
-		model[i].Url = LinkToDocument(dbName, doc.Ref)
+		model[i].Url = makeLink(dbName, doc.Ref)
 	}
 	model[len(model)-1] = breadcrumbs.BreadCrumb{
 		Label: doc.Name,
-		Url:   LinkToDocument(dbName, doc.Ref),
+		Url:   makeLink(dbName, doc.Ref),
 	}
 	return &breadcrumbs.State{Branch: model}, nil
 }
