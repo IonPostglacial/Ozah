@@ -13,7 +13,7 @@ type tmplData struct {
 //go:embed import_template.txt
 var tmpl string
 
-func ImportCsv(csvPath string, to string) error {
+func ImportCsv(csvPath string, ds PrivateDataset) error {
 	tmpl, err := template.New("import_template").Parse(tmpl)
 	if err != nil {
 		return err
@@ -23,5 +23,5 @@ func ImportCsv(csvPath string, to string) error {
 	if err != nil {
 		return err
 	}
-	return ExecSqlite(to, buf.String())
+	return ExecSqlite(string(ds), buf.String())
 }

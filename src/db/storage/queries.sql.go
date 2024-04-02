@@ -457,6 +457,58 @@ func (q *Queries) GetDocumentTr2(ctx context.Context, arg GetDocumentTr2Params) 
 	return i, err
 }
 
+const getDocumentsAndParentsNames = `-- name: GetDocumentsAndParentsNames :many
+select parent.Ref Parent_Ref, parent.Name Parent_Name, doc.Ref, doc.Name from Document doc
+left join Document parent on doc.Path = (parent.Path || '.' || parent.Ref)
+where doc.Ref in (/*SLICE:refs*/?)
+order by parent.Ref, doc.Doc_Order
+`
+
+type GetDocumentsAndParentsNamesRow struct {
+	ParentRef  sql.NullString
+	ParentName sql.NullString
+	Ref        string
+	Name       string
+}
+
+func (q *Queries) GetDocumentsAndParentsNames(ctx context.Context, refs []string) ([]GetDocumentsAndParentsNamesRow, error) {
+	query := getDocumentsAndParentsNames
+	var queryParams []interface{}
+	if len(refs) > 0 {
+		for _, v := range refs {
+			queryParams = append(queryParams, v)
+		}
+		query = strings.Replace(query, "/*SLICE:refs*/?", strings.Repeat(",?", len(refs))[1:], 1)
+	} else {
+		query = strings.Replace(query, "/*SLICE:refs*/?", "NULL", 1)
+	}
+	rows, err := q.db.QueryContext(ctx, query, queryParams...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetDocumentsAndParentsNamesRow
+	for rows.Next() {
+		var i GetDocumentsAndParentsNamesRow
+		if err := rows.Scan(
+			&i.ParentRef,
+			&i.ParentName,
+			&i.Ref,
+			&i.Name,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getDocumentsNames = `-- name: GetDocumentsNames :many
 select Ref, Name from Document doc 
 where doc.Ref in (/*SLICE:refs*/?)

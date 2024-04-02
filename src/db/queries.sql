@@ -28,6 +28,12 @@ select Ref, Name from Document doc
 where doc.Ref in (sqlc.slice(refs))
 order by doc.Path;
 
+-- name: GetDocumentsAndParentsNames :many
+select parent.Ref Parent_Ref, parent.Name Parent_Name, doc.Ref, doc.Name from Document doc
+left join Document parent on doc.Path = (parent.Path || '.' || parent.Ref)
+where doc.Ref in (sqlc.slice(refs))
+order by parent.Ref, doc.Doc_Order;
+
 -- name: GetCatCharactersNameTr2 :many
 select doc.Ref, doc.Path, doc.Name, tr1.name name_tr1, tr2.name name_tr2, ch.Color from Document doc 
 left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = sqlc.arg(lang1)

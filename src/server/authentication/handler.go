@@ -38,8 +38,8 @@ func HandlerWrapper(handler common.Handler) common.Handler {
 				fmt.Printf("error logging: %s\n", err)
 				// TODO: handle case with error not login error
 			} else {
-				cc.User = &common.User{
-					Login: username,
+				if err := cc.RegisterUser(username); err != nil {
+					return err
 				}
 				return handler(w, r, cc)
 			}
@@ -75,8 +75,8 @@ func HandlerWrapper(handler common.Handler) common.Handler {
 				Path:     "/",
 				SameSite: http.SameSiteLaxMode,
 			})
-			cc.User = &common.User{
-				Login: username,
+			if err := cc.RegisterUser(username); err != nil {
+				return err
 			}
 			return handler(w, r, cc)
 		} else {

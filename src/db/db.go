@@ -7,8 +7,8 @@ import (
 	"nicolas.galipot.net/hazo/db/storage"
 )
 
-func Open(dbPath string) (*Queries, error) {
-	db, err := sql.Open("sqlite3", "file:"+dbPath)
+func Open(ds PrivateDataset) (*Queries, error) {
+	db, err := sql.Open("sqlite3", "file:"+string(ds))
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to the database: %w", err)
 	}

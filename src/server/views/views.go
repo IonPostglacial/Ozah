@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"nicolas.galipot.net/hazo/db"
+	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/breadcrumbs"
 	"nicolas.galipot.net/hazo/server/components/popover"
 )
@@ -61,8 +62,8 @@ func NewMenuState(label, dsName string) *popover.State {
 	}
 }
 
-func NewDatasetMenuState(label string) (*popover.State, error) {
-	datasets, err := db.ListDatasets()
+func NewDatasetMenuState(cc *common.Context, label string) (*popover.State, error) {
+	datasets, err := cc.User.ListDatasets()
 	if err != nil {
 		return nil, err
 	}

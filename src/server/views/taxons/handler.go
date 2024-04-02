@@ -3,7 +3,6 @@ package taxons
 import (
 	"context"
 	_ "embed"
-	"fmt"
 	"html/template"
 	"net/http"
 
@@ -36,14 +35,18 @@ type State struct {
 }
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
-	dbName := r.PathValue("dsName")
+	dsName := r.PathValue("dsName")
 	docId := r.PathValue("id")
 	var (
 		taxon *FormData
 		err   error
 	)
 	ctx := context.Background()
-	queries, err := db.Open(fmt.Sprintf("%s.sq3", dbName))
+	ds, err := cc.User.GetDataset(dsName)
+	if err != nil {
+		return err
+	}
+	queries, err := db.Open(ds)
 	currentDescriptor := &views.DocState{Ref: "c0", Path: "c0"}
 	if err != nil {
 		return err
@@ -62,15 +65,15 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	datasets, err := views.NewDatasetMenuState(dbName)
+	datasets, err := views.NewDatasetMenuState(cc, dsName)
 	if err != nil {
 		return err
 	}
-	branch, err := views.GetDocumentBranch(ctx, queries, &taxon.DocState, dbName)
+	branch, err := views.GetDocumentBranch(ctx, queries, &taxon.DocState, dsName)
 	if err != nil {
 		return err
 	}
-	descBreadcrumbs, err := views.GetDocumentBranch(ctx, queries, currentDescriptor, dbName)
+	descBreadcrumbs, err := views.GetDocumentBranch(ctx, queries, currentDescriptor, dsName)
 	if err != nil {
 		return err
 	}
@@ -97,14 +100,14 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	}
 	err = cc.Template.Execute(w, State{
 		PageTitle:         "Hazo",
-		DatasetName:       dbName,
+		DatasetName:       dsName,
 		AvailableDatasets: datasets,
 		SelectedTaxon:     taxon,
 		MenuState: &treemenu.State{
 			Selected: taxon.Ref,
 			Root:     items,
 		},
-		ViewMenuState:               views.NewMenuState("Taxons", dbName),
+		ViewMenuState:               views.NewMenuState("Taxons", dsName),
 		BreadCrumbsState:            branch,
 		DescriptorsBreadCrumbsState: descBreadcrumbs,
 		Descriptors:                 descriptors,

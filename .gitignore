@@ -1,2 +1,3 @@
-src/samples
-*.sqlite
+src/private
+*.sq3
+*.db

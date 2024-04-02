@@ -11,12 +11,12 @@ var schema string
 //go:embed index.sql
 var index string
 
-func Init(dbPath string) error {
-	err := ExecSqlite(dbPath, fmt.Sprintf("%s\n.exit\n", schema))
+func Init(ds PrivateDataset) error {
+	err := ExecSqlite(string(ds), fmt.Sprintf("%s\n.exit\n", schema))
 	if err != nil {
 		return err
 	}
-	err = ExecSqlite(dbPath, fmt.Sprintf("%s\n.exit\n", index))
+	err = ExecSqlite(string(ds), fmt.Sprintf("%s\n.exit\n", index))
 	if err != nil {
 		return err
 	}

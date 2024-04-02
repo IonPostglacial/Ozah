@@ -100,7 +100,11 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) e
 				return fmt.Errorf("error copying file '%s': %w", filePath, err)
 			}
 		}
-		dbPath := fmt.Sprintf("%s.sq3", strings.TrimSuffix(fileName, ".zip"))
+		dbName := strings.TrimSuffix(fileName, ".zip")
+		dbPath, err := cc.User.GetDataset(dbName)
+		if err != nil {
+			return err
+		}
 		err = db.Init(dbPath)
 		if err != nil {
 			return fmt.Errorf("error creating db '%s': %w", dbPath, err)
@@ -121,7 +125,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) er
 	if err != nil {
 		return err
 	}
-	datasets, err := db.ListDatasets()
+	datasets, err := cc.User.ListDatasets()
 	if err != nil {
 		return err
 	}

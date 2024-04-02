@@ -21,3 +21,8 @@ type Session struct {
 	Login      string
 	ExpiryDate string
 }
+
+type UserConfiguration struct {
+	Login            string
+	PrivateDirectory string
+}

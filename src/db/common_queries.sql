@@ -16,3 +16,10 @@ values (?, ?, ?);
 
 -- name: DeleteUserSessions :execresult
 delete from Session where Login = ?;
+
+-- name: GetUserConfiguration :one
+select * from User_Configuration where Login = ?;
+
+-- name: InsertUserConfiguration :execresult
+insert into User_Configuration (Login, Private_Directory)
+values (?, ?);

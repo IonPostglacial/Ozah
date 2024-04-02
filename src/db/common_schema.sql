@@ -6,6 +6,12 @@ create table Credentials (
     Last_Modified Text
 );
 
+create table User_Configuration (
+    Login Text primary key,
+    Private_Directory text not null,
+    foreign key (Login) references Credentials(Login)
+);
+
 create table Session (
     Token Text primary key,
     Login Text not null,

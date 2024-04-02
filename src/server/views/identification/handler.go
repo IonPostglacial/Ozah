@@ -86,7 +86,11 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	dsName := r.PathValue("dsName")
 	ctx := context.Background()
 	cc.Template = components.NewTemplate()
-	queries, err := db.Open(fmt.Sprintf("%s.sq3", dsName))
+	ds, err := cc.User.GetDataset(dsName)
+	if err != nil {
+		return err
+	}
+	queries, err := db.Open(ds)
 	if err != nil {
 		return err
 	}
@@ -136,7 +140,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	for i, taxon := range taxa {
 		identifiedTaxa[i] = IdentifiedTaxon{taxon, views.LinkToTaxon(dsName, taxon.Ref)}
 	}
-	datasets, err := views.NewDatasetMenuState(dsName)
+	datasets, err := views.NewDatasetMenuState(cc, dsName)
 	if err != nil {
 		return err
 	}

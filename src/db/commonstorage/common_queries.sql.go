@@ -59,6 +59,17 @@ func (q *Queries) GetSession(ctx context.Context, token string) (GetSessionRow, 
 	return i, err
 }
 
+const getUserConfiguration = `-- name: GetUserConfiguration :one
+select login, private_directory from User_Configuration where Login = ?
+`
+
+func (q *Queries) GetUserConfiguration(ctx context.Context, login string) (UserConfiguration, error) {
+	row := q.db.QueryRowContext(ctx, getUserConfiguration, login)
+	var i UserConfiguration
+	err := row.Scan(&i.Login, &i.PrivateDirectory)
+	return i, err
+}
+
 const insertCredentials = `-- name: InsertCredentials :execresult
 insert into Credentials (Login, Encryption, Password)
 values (?, ?, ?)
@@ -87,4 +98,18 @@ type InsertSessionParams struct {
 
 func (q *Queries) InsertSession(ctx context.Context, arg InsertSessionParams) (sql.Result, error) {
 	return q.db.ExecContext(ctx, insertSession, arg.Token, arg.Login, arg.ExpiryDate)
+}
+
+const insertUserConfiguration = `-- name: InsertUserConfiguration :execresult
+insert into User_Configuration (Login, Private_Directory)
+values (?, ?)
+`
+
+type InsertUserConfigurationParams struct {
+	Login            string
+	PrivateDirectory string
+}
+
+func (q *Queries) InsertUserConfiguration(ctx context.Context, arg InsertUserConfigurationParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertUserConfiguration, arg.Login, arg.PrivateDirectory)
 }

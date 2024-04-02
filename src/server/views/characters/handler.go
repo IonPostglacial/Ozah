@@ -3,7 +3,6 @@ package characters
 import (
 	"context"
 	_ "embed"
-	"fmt"
 	"html/template"
 	"net/http"
 
@@ -32,10 +31,14 @@ type State struct {
 }
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
-	dbName := r.PathValue("dsName")
+	dsName := r.PathValue("dsName")
 	docRef := r.PathValue("id")
 	ctx := context.Background()
-	queries, err := db.Open(fmt.Sprintf("%s.sq3", dbName))
+	ds, err := cc.User.GetDataset(dsName)
+	if err != nil {
+		return err
+	}
+	queries, err := db.Open(ds)
 	if err != nil {
 		return err
 	}
@@ -44,7 +47,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	datasets, err := views.NewDatasetMenuState(dbName)
+	datasets, err := views.NewDatasetMenuState(cc, dsName)
 	if err != nil {
 		return err
 	}
@@ -65,7 +68,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 			Description: ch.Details.String,
 		}
 	}
-	breadCrumbs, err := views.GetDocumentBranch(ctx, queries, character, dbName)
+	breadCrumbs, err := views.GetDocumentBranch(ctx, queries, character, dsName)
 	if err != nil {
 		return err
 	}
@@ -81,13 +84,13 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	template.Must(cc.Template.Parse(FormTemplate))
 	err = cc.Template.Execute(w, State{
 		PageTitle:         "Hazo",
-		DatasetName:       dbName,
+		DatasetName:       dsName,
 		AvailableDatasets: datasets,
 		MenuState: &treemenu.State{
 			Selected: docRef,
 			Root:     items,
 		},
-		ViewMenuState:     views.NewMenuState("Characters", dbName),
+		ViewMenuState:     views.NewMenuState("Characters", dsName),
 		BreadCrumbsState:  breadCrumbs,
 		SelectedCharacter: character,
 		PictureBoxModel:   &picboxModel,
