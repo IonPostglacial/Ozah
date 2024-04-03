@@ -2,7 +2,7 @@
 {{ if .Branch }}
     <nav class="hbox vertical-align breadcrumbs">
     {{ range .Branch }}
-        <a href="{{ .Url }}">{{ .Label }}</a>
+        <a href="{{ .Url }}" class="nowrap">{{ .Label }}</a>
     {{ end }}
     </nav>
 {{ end }}
