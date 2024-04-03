@@ -25,28 +25,7 @@
                     {{ template "picture_box" .PictureBoxModel }}
                 </details>
                 {{ template "taxon_form" .SelectedTaxon }}
-                <details class="separated-bottom">
-                    <summary class="padded">Flore de Madagascar et Comores</summary>
-                    <form action="" class="form-2-col vertical-align padded">
-                        <label for="fasc">Bool</label><input type="text" name="fasc" id="fasc" />
-                        <label for="page">Page</label><input type="text" name="page" id="page" />
-                        <label for="bookText">Text</label><textarea name="bookText" id="bookText" cols="30" rows="10"></textarea>
-                    </form>
-                </details>
-                <details class="separated-bottom">
-                    <summary class="padded">Manuel de Botanique Forestière</summary>
-                    <form action="" class="form-2-col vertical-align padded">
-                        <label for="fasc2">Bool</label><input type="text" name="fasc2" id="fasc2" />
-                        <label for="page2">Page</label><input type="text" name="page2" id="page2" />
-                        <label for="bookText2">Text</label><textarea name="bookText2" id="bookText2" cols="30" rows="10"></textarea>
-                    </form>
-                </details>
-                <details class="separated-bottom">
-                    <summary class="padded">Additional Text</summary>
-                    <form action="" class="form-2-col vertical-align padded">
-                        <label for="additionalText">Text</label><textarea name="additionalText" id="additionalText" cols="30" rows="10"></textarea>
-                    </form>
-                </details>
+                {{ template "book_info" .BookInfoModel }}
             </section>
             <section class="vertical-scroll vbox flex-fill">
                 <header class="hbox vertical-align padded separated-bottom fixed-to-top">

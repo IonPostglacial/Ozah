@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"nicolas.galipot.net/hazo/db"
+	"nicolas.galipot.net/hazo/db/storage"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/breadcrumbs"
 	"nicolas.galipot.net/hazo/server/components/picturebox"
@@ -19,7 +20,7 @@ import (
 //go:embed taxons.html
 var taxonPage string
 
-type State struct {
+type Model struct {
 	PageTitle                   string
 	DatasetName                 string
 	AvailableDatasets           *popover.State
@@ -31,6 +32,7 @@ type State struct {
 	Descriptors                 []views.Descriptor
 	SummaryModel                *summary.Model
 	PictureBoxModel             *picturebox.Model
+	BookInfoModel               []storage.GetTaxonBookInfoRow
 }
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
@@ -106,7 +108,11 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 			picboxModel.Source = attach[0].Source
 		}
 	}
-	err = cc.Template.Execute(w, State{
+	bookInfo, err := queries.GetTaxonBookInfo(ctx, taxon.Ref)
+	if err != nil {
+		return err
+	}
+	err = cc.Template.Execute(w, Model{
 		PageTitle:         "Hazo",
 		DatasetName:       dsName,
 		AvailableDatasets: datasets,
@@ -121,6 +127,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		Descriptors:                 descriptors,
 		SummaryModel:                summary,
 		PictureBoxModel:             &picboxModel,
+		BookInfoModel:               bookInfo,
 	})
 	if err != nil {
 		return err

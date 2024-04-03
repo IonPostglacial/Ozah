@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"nicolas.galipot.net/hazo/db"
-	"nicolas.galipot.net/hazo/db/storage"
 )
 
 func LsDoc(args []string) error {
@@ -16,7 +15,7 @@ func LsDoc(args []string) error {
 	if err != nil {
 		return err
 	}
-	acanthaceae, err := queries.GetDocumentHierarchy(ctx, storage.GetDocumentHierarchyParams{Path: docPath})
+	acanthaceae, err := queries.GetDocumentHierarchy(ctx, docPath)
 	if err != nil {
 		return err
 	}

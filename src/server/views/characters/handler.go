@@ -3,6 +3,7 @@ package characters
 import (
 	"context"
 	_ "embed"
+	"fmt"
 	"html/template"
 	"net/http"
 
@@ -67,6 +68,8 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 			NameCN:      ch.NameTr2.String,
 			Description: ch.Details.String,
 		}
+	} else {
+		fmt.Printf("error: %s\n", err.Error())
 	}
 	breadCrumbs, err := views.GetDocumentBranch(ctx, queries, character, dsName, views.LinkToCharacter)
 	if err != nil {

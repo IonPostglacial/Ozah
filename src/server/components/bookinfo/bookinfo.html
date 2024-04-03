@@ -1,0 +1,13 @@
+{{ define "book_info" }}
+{{ range . }}
+<details class="separated-bottom">
+    <summary class="padded">{{ .Name }}</summary>
+    <form action="" class="form-2-col vertical-align padded">
+        <label for="fasc">Book</label><input type="text" name="fasc" id="fasc" value="{{ .Fasc.Int64 }}" />
+        <label for="page">Page</label><input type="text" name="page" id="page" value="{{ .Page.Int64 }}" />
+        <label for="bookText">Details</label>
+        <textarea name="bookText" id="bookText" cols="30" rows="10">{{ .Details.String }}</textarea>
+    </form>
+</details>
+{{ end}}
+{{ end }}

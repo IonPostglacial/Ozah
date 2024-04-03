@@ -381,6 +381,7 @@ input[type="search"]~.search-icon {
 }
 
 .tree-view li:hover>a,
+.selected > a,
 a.selected {
     background-color: var(--bg-color-primary);
     color: var(--text-color-primary);

@@ -109,6 +109,11 @@ func GetTaxonDescriptors(ctx context.Context, queries *db.Queries, dsName string
 	}
 	descriptors := make([]Descriptor, len(rows))
 	for i, row := range rows {
+		unsel, ok := row.Unselected.(int64)
+		isSelected := false
+		if ok {
+			isSelected = unsel == 0
+		}
 		descriptors[i] = Descriptor{
 			Ref:        row.Ref,
 			Name:       row.Name,
@@ -116,7 +121,7 @@ func GetTaxonDescriptors(ctx context.Context, queries *db.Queries, dsName string
 			NameTr2:    row.NameTr2.String,
 			Url:        LinkToDescriptor(taxonRef)(dsName, row.Ref),
 			Source:     row.Source.String,
-			IsSelected: !row.Unselected,
+			IsSelected: isSelected,
 		}
 	}
 	return descriptors, nil
