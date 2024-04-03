@@ -90,13 +90,13 @@ func NewDatasetMenuState(cc *common.Context, label string) (*popover.State, erro
 }
 
 type Descriptor struct {
-	Ref              string
-	Name             string
-	NameTr1          string
-	NameTr2          string
-	Url              string
-	Source           string
-	DescriptorsCount int64
+	Ref        string
+	Name       string
+	NameTr1    string
+	NameTr2    string
+	Url        string
+	Source     string
+	IsSelected bool
 }
 
 func GetTaxonDescriptors(ctx context.Context, queries *db.Queries, dsName string, taxonRef string, currentDescriptor *DocState) ([]Descriptor, error) {
@@ -109,18 +109,14 @@ func GetTaxonDescriptors(ctx context.Context, queries *db.Queries, dsName string
 	}
 	descriptors := make([]Descriptor, len(rows))
 	for i, row := range rows {
-		source := ""
-		if src, ok := row.Source.(string); ok {
-			source = src
-		}
 		descriptors[i] = Descriptor{
-			Ref:              row.Ref,
-			Name:             row.Name,
-			NameTr1:          row.NameTr1.String,
-			NameTr2:          row.NameTr2.String,
-			Url:              LinkToDescriptor(taxonRef)(dsName, row.Ref),
-			Source:           source,
-			DescriptorsCount: row.DescriptorsCount,
+			Ref:        row.Ref,
+			Name:       row.Name,
+			NameTr1:    row.NameTr1.String,
+			NameTr2:    row.NameTr2.String,
+			Url:        LinkToDescriptor(taxonRef)(dsName, row.Ref),
+			Source:     row.Source.String,
+			IsSelected: !row.Unselected,
 		}
 	}
 	return descriptors, nil

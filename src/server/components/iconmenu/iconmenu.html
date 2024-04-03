@@ -1,7 +1,7 @@
 {{ define "icon_menu" }}
 <div class="dynamic-grid gapped wrap padded horizontal-align vertical-align" hx-boost="true">
 {{ range . }}
-    <a href="{{ .Url }}" class="separated square text padded stack-container {{ if .DescriptorsCount }}selected{{ end }}">
+    <a href="{{ .Url }}" class="separated square text padded stack-container {{ if .IsSelected }}selected{{ end }}">
         <div class="background-contained transparent" style="background-image: url('{{ .Source }}');"></div>
         <div class="transparent vbox horizontal-align justify-space-around">
             <div class="text-over-img">{{ .Name }}</div>
