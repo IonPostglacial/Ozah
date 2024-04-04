@@ -6,7 +6,10 @@
         <label for="fasc">Book</label><input type="text" name="fasc" id="fasc" value="{{ .Fasc.Int64 }}" />
         <label for="page">Page</label><input type="text" name="page" id="page" value="{{ .Page.Int64 }}" />
         <label for="bookText">Details</label>
-        <textarea name="bookText" id="bookText" cols="30" rows="10">{{ .Details.String }}</textarea>
+        <div>
+            <input id="book-info-{{ .Ref }}" value="{{ .Details.String }}" type="hidden" name="book-info-{{ .Ref }}">
+            <trix-editor input="book-info-{{ .Ref }}" class="text"></trix-editor>
+        </div>
     </form>
 </details>
 {{ end}}

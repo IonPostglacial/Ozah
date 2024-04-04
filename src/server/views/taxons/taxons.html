@@ -51,7 +51,9 @@
                         </div>
                         {{ end }}
                     </div>
-                    {{ template "icon_menu" .Descriptors }}
+                    {{ if .SelectedTaxon.Ref }}
+                        {{ template "icon_menu" .Descriptors }}
+                    {{ end }}
                 </div>
             </section>
             <section class="vertical-scroll vbox flex-fill">

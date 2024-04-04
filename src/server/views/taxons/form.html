@@ -6,9 +6,11 @@
         <label for="author">Author</label><input type="text" name="author" id="author" value="{{ .Author }}" />
         <label for="nameCn">中文名</label><input type="text" name="nameCn" id="nameCn" value="{{ .NameCN }}" />
         <label for="nameV">NV</label><input type="text" name="nameV" id="nameV" value="{{ .NameV }}" />
-        <label for="description">Description</label><textarea name="description" id="description" cols="30" rows="10">
-            {{ .Description }}
-        </textarea>
+        <label for="description">Description</label>
+        <div>
+            <input id="description" value="{{ .Description }}" type="hidden" name="description">
+            <trix-editor input="description" class="text"></trix-editor>
+        </div>
     </form>
 </details>
 {{ end }}
