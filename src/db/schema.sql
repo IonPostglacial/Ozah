@@ -30,6 +30,47 @@ create table Categorical_Character (
     foreign key (Document_Ref) references Document(Ref) on delete cascade
 );
 
+create table State (
+    Document_Ref Text not null primary key,
+	Color Text,
+
+    foreign key (Document_Ref) references Document(Ref) on delete cascade
+);
+
+create table Periodic_Character (
+    Document_Ref Text not null primary key,
+    Periodic_Category_Ref Text not null,
+	Color Text,
+
+    foreign key (Document_Ref) references Document(Ref) on delete cascade,
+    foreign key (Periodic_Category_Ref) references Document(Ref) on delete cascade
+);
+
+create table Geographical_Place (
+    Document_Ref Text not null primary key,
+    Map_File Text not null,
+
+    foreign key (Document_Ref) references Document(Ref) on delete cascade
+);
+
+create table Geographical_Map (
+    Document_Ref Text not null primary key,
+    Place_Ref Text not null,
+    Map_File Text not null,
+
+    foreign key (Document_Ref) references Document(Ref) on delete cascade,
+    foreign key (Place_Ref) references Geographical_Place(Document_Ref) on delete cascade
+);
+
+create table Geographical_Character (
+    Document_Ref Text not null primary key,
+    Map_Ref Text not null,
+	Color Text,
+
+    foreign key (Document_Ref) references Document(Ref) on delete cascade,
+    foreign key (Map_Ref) references Geographical_Map(Document_Ref) on delete cascade
+);
+
 create table Unit (
 	Ref Text not null primary key,
 	Base_Unit_Ref Text,
@@ -45,13 +86,6 @@ create table Measurement_Character (
 
     foreign key (Document_Ref) references Document(Ref) on delete cascade,
 	foreign key (Unit_Ref) references Unit(Ref)
-);
-
-create table State (
-    Document_Ref Text not null primary key,
-	Color Text,
-
-    foreign key (Document_Ref) references Document(Ref) on delete cascade
 );
 
 create table Document_Attachment (

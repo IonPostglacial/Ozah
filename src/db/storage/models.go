@@ -50,6 +50,23 @@ type DocumentTranslation struct {
 	Details     sql.NullString
 }
 
+type GeographicalCharacter struct {
+	DocumentRef string
+	MapRef      string
+	Color       sql.NullString
+}
+
+type GeographicalMap struct {
+	DocumentRef string
+	PlaceRef    string
+	MapFile     string
+}
+
+type GeographicalPlace struct {
+	DocumentRef string
+	MapFile     string
+}
+
 type Lang struct {
 	Ref  string
 	Name string
@@ -59,6 +76,12 @@ type MeasurementCharacter struct {
 	DocumentRef string
 	Color       sql.NullString
 	UnitRef     sql.NullString
+}
+
+type PeriodicCharacter struct {
+	DocumentRef         string
+	PeriodicCategoryRef string
+	Color               sql.NullString
 }
 
 type State struct {
