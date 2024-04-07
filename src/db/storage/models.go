@@ -57,14 +57,17 @@ type GeographicalCharacter struct {
 }
 
 type GeographicalMap struct {
-	DocumentRef string
-	PlaceRef    string
-	MapFile     string
+	DocumentRef        string
+	PlaceRef           string
+	MapFile            string
+	MapFileFeatureName string
 }
 
 type GeographicalPlace struct {
 	DocumentRef string
-	MapFile     string
+	Latitude    interface{}
+	Longitude   interface{}
+	Scale       interface{}
 }
 
 type Lang struct {

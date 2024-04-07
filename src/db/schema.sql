@@ -48,7 +48,9 @@ create table Periodic_Character (
 
 create table Geographical_Place (
     Document_Ref Text not null primary key,
-    Map_File Text not null,
+    Latitude Number not null,
+    Longitude Number not null,
+    Scale Number not null,
 
     foreign key (Document_Ref) references Document(Ref) on delete cascade
 );
@@ -57,6 +59,7 @@ create table Geographical_Map (
     Document_Ref Text not null primary key,
     Place_Ref Text not null,
     Map_File Text not null,
+    Map_File_Feature_Name Text not null,
 
     foreign key (Document_Ref) references Document(Ref) on delete cascade,
     foreign key (Place_Ref) references Geographical_Place(Document_Ref) on delete cascade
