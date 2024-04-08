@@ -690,8 +690,8 @@ type GetTaxonInfoRow struct {
 	Meaning          sql.NullString
 	HerbariumNo      sql.NullString
 	HerbariumPicture sql.NullString
-	Fasc             sql.NullString
-	Page             sql.NullString
+	Fasc             sql.NullInt64
+	Page             sql.NullInt64
 	Ref              string
 	Path             string
 	DocOrder         int64

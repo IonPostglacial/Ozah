@@ -48,9 +48,9 @@ create table Periodic_Character (
 
 create table Geographical_Place (
     Document_Ref Text not null primary key,
-    Latitude Number not null,
-    Longitude Number not null,
-    Scale Number not null,
+    Latitude Real not null,
+    Longitude Real not null,
+    Scale Integer not null,
 
     foreign key (Document_Ref) references Document(Ref) on delete cascade
 );
@@ -135,8 +135,8 @@ create table Taxon (
 	Meaning Text,
     Herbarium_No Text,
     Herbarium_Picture Text,
-    Fasc Text,
-    Page Text,
+    Fasc Integer,
+    Page Integer,
 
     foreign key (Document_Ref) references Document(Ref) on delete cascade
 );

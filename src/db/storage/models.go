@@ -65,9 +65,9 @@ type GeographicalMap struct {
 
 type GeographicalPlace struct {
 	DocumentRef string
-	Latitude    interface{}
-	Longitude   interface{}
-	Scale       interface{}
+	Latitude    float64
+	Longitude   float64
+	Scale       int64
 }
 
 type Lang struct {
@@ -99,8 +99,8 @@ type Taxon struct {
 	Meaning          sql.NullString
 	HerbariumNo      sql.NullString
 	HerbariumPicture sql.NullString
-	Fasc             sql.NullString
-	Page             sql.NullString
+	Fasc             sql.NullInt64
+	Page             sql.NullInt64
 }
 
 type TaxonBookInfo struct {
