@@ -1,24 +1,18 @@
 package db
 
 import (
+	"context"
 	_ "embed"
 	"encoding/csv"
 	"fmt"
-	"html/template"
 	"io"
 	"net/url"
 	"os"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 )
-
-type tmplData struct {
-	DirectoryPath string
-}
-
-//go:embed import_template.txt
-var tmpl string
 
 var tableNames = []string{
 	"lang", "unit",
@@ -36,16 +30,7 @@ func ImportCsv(csvPath string, ds PrivateDataset) error {
 			return fmt.Errorf("error importing CSV '%s': %w", csvPath, err)
 		}
 	}
-	tmpl, err := template.New("import_template").Parse(tmpl)
-	if err != nil {
-		return err
-	}
-	var buf strings.Builder
-	err = tmpl.Execute(&buf, tmplData{DirectoryPath: csvPath})
-	if err != nil {
-		return err
-	}
-	return ExecSqlite(string(ds), buf.String())
+	return nil
 }
 
 func importFile(csvPath string, ds PrivateDataset, tableName string) error {
@@ -55,7 +40,40 @@ func importFile(csvPath string, ds PrivateDataset, tableName string) error {
 	if err != nil {
 		return fmt.Errorf("error importing file '%s': %w", filePath, err)
 	}
-	fmt.Printf("content: %#v\n", content)
+	if content.rowCount == 0 {
+		return nil
+	}
+	db, err := Connect(ds)
+	if err != nil {
+		return err
+	}
+	ctx := context.Background()
+	sep := ""
+	var colNames, valueRow, valueRows strings.Builder
+	valueRow.WriteRune('(')
+	for _, column := range content.columns {
+		colNames.WriteString(sep)
+		valueRow.WriteString(sep)
+
+		colNames.WriteRune('\'')
+		colNames.WriteString(column.Name)
+		colNames.WriteRune('\'')
+
+		valueRow.WriteRune('?')
+		sep = ","
+	}
+	valueRow.WriteRune(')')
+	sep = ""
+	for range content.rowCount {
+		valueRows.WriteString(sep)
+		valueRows.WriteString(valueRow.String())
+		sep = ","
+	}
+	query := fmt.Sprintf("insert into '%s' (%s) values %s;", tableName, colNames.String(), valueRows.String())
+	_, err = db.ExecContext(ctx, query, content.rows...)
+	if err != nil {
+		return fmt.Errorf("error importing into table '%s': %w", tableName, err)
+	}
 	return nil
 }
 
@@ -67,8 +85,9 @@ type column struct {
 }
 
 type csvContent struct {
-	columns []column
-	rows    [][]any
+	columns  []column
+	rows     []any
+	rowCount int
 }
 
 var ErrInvalidColor = fmt.Errorf("invalid color format, expected hexadecimal rgb(a)")
@@ -118,6 +137,8 @@ func parseUrl(text string) (any, error) {
 	return text, nil
 }
 
+var validColumnName = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_.]*$`)
+
 func parseHeader(r *csv.Reader) ([]column, error) {
 	header, err := r.Read()
 	if err != nil {
@@ -126,12 +147,16 @@ func parseHeader(r *csv.Reader) ([]column, error) {
 	columns := make([]column, len(header))
 	for i, colName := range header {
 		nameType := strings.SplitN(colName, ":", 2)
-		if len(nameType) <= 1 {
-			columns[i].Name = colName
+		name := nameType[0]
+		if !validColumnName.MatchString(name) {
+			return nil, fmt.Errorf("invalid CSV column name '%s'", name)
+		}
+		if len(nameType) == 1 {
+			columns[i].Name = name
 			columns[i].Parse = parseString
 			continue
 		}
-		columns[i].Name = nameType[0]
+		columns[i].Name = name
 		switch nameType[1] {
 		case "i64":
 			columns[i].Parse = parseInt64
@@ -164,7 +189,8 @@ func parseCsvFile(fileName string) (*csvContent, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error reading CSV header: %w", err)
 	}
-	rows := make([][]any, 0)
+	rows := make([]any, 0)
+	rowCount := 0
 	for {
 		rec, err := r.Read()
 		if err == io.EOF {
@@ -173,14 +199,14 @@ func parseCsvFile(fileName string) (*csvContent, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error reading CSV record: %w", err)
 		}
-		row := make([]any, len(columns))
 		for i, text := range rec {
-			row[i], err = columns[i].Parse(text)
+			value, err := columns[i].Parse(text)
 			if err != nil {
 				return nil, fmt.Errorf("error parsing value '%s' for column '%s': %w", text, columns[i].Name, err)
 			}
+			rows = append(rows, value)
 		}
-		rows = append(rows, row)
+		rowCount++
 	}
-	return &csvContent{columns, rows}, nil
+	return &csvContent{columns, rows, rowCount}, nil
 }
