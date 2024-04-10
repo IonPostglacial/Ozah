@@ -1,16 +1,16 @@
 function onLoad() {
     document.body.addEventListener('click', function (e) {
         const clickedPopover = e.target.closest(".popover");
-        let selectedPopover = null;
+        let selectedCheckbox = null
         if (clickedPopover !== null) {
             const checkbox = clickedPopover.querySelector("input[type=checkbox]");
             if (checkbox.checked) {
-                selectedPopover = clickedPopover;
+                selectedCheckbox = checkbox;
             }
         }
-        document.querySelectorAll(".popover").forEach(popover => {
-            if (popover !== selectedPopover) {
-                popover.querySelector("input[type=checkbox]").checked = false;
+        document.querySelectorAll(".popover > input[type=checkbox]").forEach(cb => {
+            if (cb !== selectedCheckbox) {
+                cb.checked = false;
             }
         });
     });
