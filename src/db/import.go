@@ -99,14 +99,14 @@ func parseString(text string) (any, error) {
 }
 
 func parseInt64(text string) (any, error) {
-	if text == "" || text == "null" || text == "undefined" {
+	if text == "" || text == "null" {
 		return nil, nil
 	}
 	return strconv.ParseInt(text, 10, 64)
 }
 
 func parseFloat64(text string) (any, error) {
-	if text == "" || text == "null" || text == "undefined" {
+	if text == "" || text == "null" {
 		return nil, nil
 	}
 	return strconv.ParseFloat(text, 64)
