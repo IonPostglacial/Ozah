@@ -110,3 +110,67 @@ func (q *Queries) IdentifyTaxa(ctx context.Context, arg TaxonIdentificationParam
 	}
 	return items, nil
 }
+
+const getDocumentsHierarchyQueryPrelude = `select doc.ref, doc.path, doc.doc_order, doc.name, doc.details`
+const getDocumentsHierarchyQueryIntro = ` from Document doc`
+const getDocumentsHierarchyTrQuery = `
+left join Document_Translation tr%[1]d on doc.Ref = tr%[1]d.Document_Ref and tr%[1]d.Lang_Ref = ?%[2]d`
+const getDocumentsHierarchyQueryCoda = `
+where (doc.Path >= ?1 and doc.Path < (?1 || '.~'))
+order by (Path || '.' || Ref) asc;`
+
+type Document struct {
+	Ref      string
+	Path     string
+	DocOrder int64
+	Name     string
+	NameTr   []sql.NullString
+	Details  string
+}
+
+func (q *Queries) GetDocumentHierarchy(ctx context.Context, documentPath string, langs []string) ([]Document, error) {
+	var query, queryTr strings.Builder
+	query.WriteString(getDocumentsHierarchyQueryPrelude)
+	args := make([]any, len(langs)+1)
+	args[0] = documentPath
+	for i, lang := range langs {
+		args[i+1] = lang
+		query.WriteString(fmt.Sprintf(", tr%[1]d.name name_tr%[1]d", i+1))
+		queryTr.WriteString(fmt.Sprintf(getDocumentsHierarchyTrQuery, i+1, i+2))
+	}
+	query.WriteString(getDocumentsHierarchyQueryIntro)
+	query.WriteString(queryTr.String())
+	query.WriteString(getDocumentsHierarchyQueryCoda)
+
+	rows, err := q.db.QueryContext(ctx, query.String(), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Document
+	for rows.Next() {
+		doc := Document{
+			NameTr: make([]sql.NullString, len(langs)),
+		}
+		etc := make([]any, 5+len(langs))
+		etc[0] = &doc.Ref
+		etc[1] = &doc.Path
+		etc[2] = &doc.DocOrder
+		etc[3] = &doc.Name
+		etc[4] = &doc.Details
+		for i := range doc.NameTr {
+			etc[5+i] = &doc.NameTr[i]
+		}
+		if err := rows.Scan(etc...); err != nil {
+			return nil, err
+		}
+		items = append(items, doc)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

@@ -7,8 +7,9 @@
     </label>
     {{ $variable := documentUrl . }}
     <a href="{{ $variable }}" class="nowrap" hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML">{{ .Name }}</a>
-    <a href="{{ $variable }}" class="nowrap" hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML">{{ .NameV }}</a>
-    <a href="{{ $variable }}" class="nowrap" hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML">{{ .NameCN }}</a>
+    {{ range .NameTr }}
+    <a href="{{ $variable }}" class="nowrap" hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML">{{ . }}</a>
+    {{ end }}
     {{ if .Children }}
         <ul class="contents-if-checked">
         {{ range sortDocs .Children }}

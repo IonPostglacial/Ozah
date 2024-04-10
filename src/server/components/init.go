@@ -43,7 +43,7 @@ func NewTemplate() *template.Template {
 		},
 		"sortDocs": func(items []*treemenu.Item) []*treemenu.Item {
 			slices.SortFunc(items, func(i, o *treemenu.Item) int {
-				return i.Order - o.Order
+				return int(i.Order - o.Order)
 			})
 			return items
 		},

@@ -91,6 +91,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		AvailableDatasets: datasets,
 		MenuState: &treemenu.State{
 			Selected: docRef,
+			Langs:    []string{"FR", "EN", "CN"},
 			Root:     items,
 		},
 		ViewMenuState:     views.NewMenuState("Characters", dsName),

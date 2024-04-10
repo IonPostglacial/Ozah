@@ -15,7 +15,7 @@ func LsDoc(args []string) error {
 	if err != nil {
 		return err
 	}
-	acanthaceae, err := queries.GetDocumentHierarchy(ctx, docPath)
+	acanthaceae, err := queries.GetDocumentHierarchy(ctx, docPath, []string{})
 	if err != nil {
 		return err
 	}

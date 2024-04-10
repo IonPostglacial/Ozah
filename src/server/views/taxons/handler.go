@@ -119,6 +119,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		SelectedTaxon:     taxon,
 		MenuState: &treemenu.State{
 			Selected: taxon.Ref,
+			Langs:    []string{"S", "V", "CN"},
 			Root:     items,
 		},
 		ViewMenuState:               views.NewMenuState("Taxons", dsName),

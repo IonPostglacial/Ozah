@@ -7,15 +7,11 @@
         </div>
         <div class="hbox vertical-align">
             <div class="hbox vertical-align btn-group">
+                {{ range .Langs }}
                 <div class="toggle">
-                    <input type="checkbox" checked name="langS" id="langS" /><label for="langS">NS</label>
+                    <input type="checkbox" checked name="lang{{ . }}" id="lang{{ . }}" /><label for="lang{{ . }}">{{ . }}</label>
                 </div>
-                <div class="toggle">
-                    <input type="checkbox" checked name="langV" id="langV" /><label for="langV">NV</label>
-                </div>
-                <div class="toggle">
-                    <input type="checkbox" checked name="langCn" id="langCn" /><label for="langCn">中文名</label>
-                </div>
+                {{ end }}
             </div>
             <div class="spacer"></div>
             <div class="btn-group">

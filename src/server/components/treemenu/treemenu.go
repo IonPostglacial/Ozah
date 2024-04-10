@@ -5,11 +5,11 @@ import (
 	_ "embed"
 
 	"nicolas.galipot.net/hazo/db"
-	"nicolas.galipot.net/hazo/db/storage"
 )
 
 type State struct {
 	Selected string
+	Langs    []string
 	Root     *Item
 }
 
@@ -17,17 +17,14 @@ type Item struct {
 	Id       string
 	Url      string
 	FullPath string
-	Order    int
+	Order    int64
 	Name     string
-	NameV    string
-	NameCN   string
+	NameTr   []string
 	Children []*Item
 }
 
 func LoadItemFromDb(ctx context.Context, queries *db.Queries, root string, langs [3]string) (*Item, error) {
-	docs, err := queries.GetDocumentHierarchyTr2(ctx, storage.GetDocumentHierarchyTr2Params{
-		Path: root, Lang1: langs[1], Lang2: langs[2],
-	})
+	docs, err := queries.GetDocumentHierarchy(ctx, root, langs[1:])
 	if err != nil {
 		return nil, err
 	}
@@ -48,11 +45,16 @@ func LoadItemFromDb(ctx context.Context, queries *db.Queries, root string, langs
 			}
 		}
 		fullPath := db.FullPath(doc.Path, doc.Ref)
+		nameTr := make([]string, len(doc.NameTr))
+		for i, name := range doc.NameTr {
+			nameTr[i] = name.String
+		}
 		taxon := &Item{
 			Id:       doc.Ref,
 			FullPath: fullPath,
-			Order:    int(doc.DocOrder),
-			Name:     doc.Name, NameV: doc.NameTr1.String, NameCN: doc.NameTr2.String,
+			Order:    doc.DocOrder,
+			Name:     doc.Name,
+			NameTr:   nameTr,
 		}
 		parent.Children = append(parent.Children, taxon)
 		previous = taxon
