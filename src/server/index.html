@@ -20,7 +20,8 @@
             <input type="file" name="upload" id="upload" accept="application/zip">
         </form>
         <div>
-            <input type="submit" name="upload-btn" value="Upload" form="upload-form">
+            <div id="upload-msg"></div>
+            <input type="submit" name="upload-btn" value="Upload" form="upload-form" hx-select="upload-msg" hx-target="upload-msg">
             <div class="spacer"></div>
         </div>
     </div>

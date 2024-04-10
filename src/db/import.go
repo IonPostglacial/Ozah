@@ -99,14 +99,14 @@ func parseString(text string) (any, error) {
 }
 
 func parseInt64(text string) (any, error) {
-	if text == "" {
+	if text == "" || text == "null" || text == "undefined" {
 		return nil, nil
 	}
 	return strconv.ParseInt(text, 10, 64)
 }
 
 func parseFloat64(text string) (any, error) {
-	if text == "" {
+	if text == "" || text == "null" || text == "undefined" {
 		return nil, nil
 	}
 	return strconv.ParseFloat(text, 64)
@@ -130,11 +130,12 @@ func parseUrl(text string) (any, error) {
 	if text == "" {
 		return nil, nil
 	}
-	_, err := url.Parse(text)
+	urlText := strings.TrimSpace(text)
+	_, err := url.Parse(urlText)
 	if err != nil {
-		return nil, fmt.Errorf("unexpected text '%s': %w", text, ErrInvalidUrl)
+		return nil, fmt.Errorf("unexpected text '%s': %w", urlText, ErrInvalidUrl)
 	}
-	return text, nil
+	return urlText, nil
 }
 
 var validColumnName = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z0-9_.]*$`)

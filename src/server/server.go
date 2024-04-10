@@ -115,7 +115,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) e
 		}
 	}
 	w.Header().Add("Content-Type", "text/html")
-	w.Write([]byte("<!DOCTYPE html><html><body>Upload successful!</body></html>"))
+	w.Write([]byte("<!DOCTYPE html><html><body><div class='upload-msg'>Upload successful!</div></body></html>"))
 	return nil
 }
 
