@@ -74,7 +74,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	}
 	template.Must(cc.Template.Parse(taxonPage))
 	template.Must(cc.Template.Parse(FormTemplate))
-	items, err := treemenu.LoadItemFromDb(ctx, queries, "t0", [3]string{"S", "V", "CN"})
+	items, err := treemenu.LoadItemFromDb(ctx, queries, "t0", [3]string{"S", "V", "CN"}, queryParams.Get("filterMenu"))
 	if err != nil {
 		return err
 	}

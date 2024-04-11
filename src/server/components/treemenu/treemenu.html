@@ -1,10 +1,14 @@
 {{ define "treemenu" }}
 <div class="height-below-top-bar vbox vertical-scroll">
     <header class="vbox padded separated-bottom fixed-to-top">
-        <div class="hbox vertical-align relative">
-            <input type="search" name="filter-menu" id="filter-menu" class="flex-fill" placeholder="filter taxons" />
+        <form class="hbox vertical-align relative">
+            <input type="search" name="filterMenu" id="filter-menu" class="flex-fill" placeholder="filter taxons"
+                hx-get=""
+                hx-trigger="keyup delay:500ms changed"
+                hx-swap="outerHTML"
+                hx-select="#main-menu" hx-target="#main-menu" />
             <i class="search-icon fa-solid fa-search"></i>
-        </div>
+        </form>
         <div class="hbox vertical-align">
             <div class="hbox vertical-align btn-group">
                 {{ range .Langs }}
@@ -20,7 +24,7 @@
             </div>
         </div>
     </header>
-    <menu class="text flex-fill tree-view tree-cols-3">
+    <menu id="main-menu" class="text flex-fill tree-view tree-cols-3">
     {{ range sortDocs .Root.Children }}
         {{ template "treemenu_entry" . }}
     {{ end }}

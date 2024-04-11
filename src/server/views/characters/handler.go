@@ -43,8 +43,9 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
+	queryParams := r.URL.Query()
 	template.Must(cc.Template.Parse(charactersPage))
-	items, err := treemenu.LoadItemFromDb(ctx, queries, "c0", [3]string{"FR", "EN", "CN"})
+	items, err := treemenu.LoadItemFromDb(ctx, queries, "c0", [3]string{"FR", "EN", "CN"}, queryParams.Get("filterMenu"))
 	if err != nil {
 		return err
 	}

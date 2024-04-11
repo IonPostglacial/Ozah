@@ -23,8 +23,8 @@ type Item struct {
 	Children []*Item
 }
 
-func LoadItemFromDb(ctx context.Context, queries *db.Queries, root string, langs [3]string) (*Item, error) {
-	docs, err := queries.GetDocumentHierarchy(ctx, root, langs[1:], "")
+func LoadItemFromDb(ctx context.Context, queries *db.Queries, root string, langs [3]string, filter string) (*Item, error) {
+	docs, err := queries.GetDocumentHierarchy(ctx, root, langs[1:], filter)
 	if err != nil {
 		return nil, err
 	}
