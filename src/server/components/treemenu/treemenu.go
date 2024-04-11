@@ -24,7 +24,7 @@ type Item struct {
 }
 
 func LoadItemFromDb(ctx context.Context, queries *db.Queries, root string, langs [3]string) (*Item, error) {
-	docs, err := queries.GetDocumentHierarchy(ctx, root, langs[1:])
+	docs, err := queries.GetDocumentHierarchy(ctx, root, langs[1:], "")
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,9 @@ func LoadItemFromDb(ctx context.Context, queries *db.Queries, root string, langs
 		case doc.Path != parent.FullPath:
 			for doc.Path != parent.FullPath && len(breadcrumb) > 0 {
 				breadcrumb = breadcrumb[:len(breadcrumb)-1]
-				parent = breadcrumb[len(breadcrumb)-1]
+				if len(breadcrumb) > 0 {
+					parent = breadcrumb[len(breadcrumb)-1]
+				}
 			}
 		}
 		fullPath := db.FullPath(doc.Path, doc.Ref)

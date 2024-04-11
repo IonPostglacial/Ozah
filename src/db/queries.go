@@ -111,13 +111,81 @@ func (q *Queries) IdentifyTaxa(ctx context.Context, arg TaxonIdentificationParam
 	return items, nil
 }
 
+func reserveBuffer(buf []byte, appendSize int) []byte {
+	newSize := len(buf) + appendSize
+	if cap(buf) < newSize {
+		newBuf := make([]byte, len(buf)*2+appendSize)
+		copy(newBuf, buf)
+		buf = newBuf
+	}
+	return buf[:newSize]
+}
+
+func escapeBytesBackslash(buf []byte, v []byte) []byte {
+	pos := len(buf)
+	buf = reserveBuffer(buf, len(v)*2)
+
+	for _, c := range v {
+		switch c {
+		case '\x00':
+			buf[pos] = '\\'
+			buf[pos+1] = '0'
+			pos += 2
+		case '\n':
+			buf[pos] = '\\'
+			buf[pos+1] = 'n'
+			pos += 2
+		case '\r':
+			buf[pos] = '\\'
+			buf[pos+1] = 'r'
+			pos += 2
+		case '\x1a':
+			buf[pos] = '\\'
+			buf[pos+1] = 'Z'
+			pos += 2
+		case '\'':
+			buf[pos] = '\\'
+			buf[pos+1] = '\''
+			pos += 2
+		case '"':
+			buf[pos] = '\\'
+			buf[pos+1] = '"'
+			pos += 2
+		case '\\':
+			buf[pos] = '\\'
+			buf[pos+1] = '\\'
+			pos += 2
+		default:
+			buf[pos] = c
+			pos++
+		}
+	}
+
+	return buf[:pos]
+}
+
+func escapeStringBackslash(buf []byte, v string) []byte {
+	return escapeBytesBackslash(buf, []byte(v))
+}
+
+func EscapeString(s string) string {
+	buf := make([]byte, 0, len(s))
+	return string(escapeStringBackslash(buf, s))
+}
+
 const getDocumentsHierarchyQueryPrelude = `select doc.ref, doc.path, doc.doc_order, doc.name, doc.details`
 const getDocumentsHierarchyQueryIntro = ` from Document doc`
 const getDocumentsHierarchyTrQuery = `
 left join Document_Translation tr%[1]d on doc.Ref = tr%[1]d.Document_Ref and tr%[1]d.Lang_Ref = ?%[2]d`
 const getDocumentsHierarchyQueryCoda = `
 where (doc.Path >= ?1 and doc.Path < (?1 || '.~'))
-order by (Path || '.' || Ref) asc;`
+order by (Path || '.' || Ref) asc`
+const getDocumentsHierarchyQueryFilter = `
+left join Document children on children.Path = (doc.Path || '.' || doc.Ref)
+where (children.Name is null or children.Name like '%%%[1]s%%')
+group by doc.Ref
+having doc.Name like '%%%[1]s%%' or count(children.Ref) > 0
+order by (doc.Path || '.' || doc.Ref) asc`
 
 type Document struct {
 	Ref      string
@@ -128,8 +196,11 @@ type Document struct {
 	Details  string
 }
 
-func (q *Queries) GetDocumentHierarchy(ctx context.Context, documentPath string, langs []string) ([]Document, error) {
+func (q *Queries) GetDocumentHierarchy(ctx context.Context, documentPath string, langs []string, filter string) ([]Document, error) {
 	var query, queryTr strings.Builder
+	if len(filter) > 0 {
+		query.WriteString("select doc.* from (")
+	}
 	query.WriteString(getDocumentsHierarchyQueryPrelude)
 	args := make([]any, len(langs)+1)
 	args[0] = documentPath
@@ -141,6 +212,11 @@ func (q *Queries) GetDocumentHierarchy(ctx context.Context, documentPath string,
 	query.WriteString(getDocumentsHierarchyQueryIntro)
 	query.WriteString(queryTr.String())
 	query.WriteString(getDocumentsHierarchyQueryCoda)
+	if len(filter) > 0 {
+		query.WriteString(") doc ")
+		query.WriteString(fmt.Sprintf(getDocumentsHierarchyQueryFilter, EscapeString(filter)))
+	}
+	query.WriteRune(';')
 
 	rows, err := q.db.QueryContext(ctx, query.String(), args...)
 	if err != nil {
