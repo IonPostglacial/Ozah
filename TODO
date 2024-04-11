@@ -4,7 +4,14 @@ Handle hiding / showing panes
 Handle resizing panes
 Display Maps
 Choose languages
-Add search to the menus
+Add search to the menus:
+```
+select doc.Name, count(children.Ref) childrenCount from Document doc
+left join Document children on children.Path = (doc.Path || '.' || doc.Ref)
+where (children.Name is null or children.Name like '%Ad%') and (doc.Path >= 't0' and doc.Path < ('t0' || '.~'))
+group by doc.Ref
+having doc.Name like '%Ad%' or childrenCount > 0;
+```
 Add search to descriptors
 Display measurements in Summary
 Display measurements in Descriptors
