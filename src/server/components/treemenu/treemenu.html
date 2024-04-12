@@ -13,7 +13,8 @@
             <div class="hbox vertical-align btn-group">
                 {{ range .Langs }}
                 <div class="toggle">
-                    <input type="checkbox" checked name="lang{{ . }}" id="lang{{ . }}" /><label for="lang{{ . }}">{{ . }}</label>
+                    <input type="checkbox" id="lang-{{ .Value }}" {{ if .Selected }}checked{{ end }} name="menuLangs" value="{{ .Value }}" />
+                    <label for="lang-{{ .Value }}">{{ .Name }}</label>
                 </div>
                 {{ end }}
             </div>
@@ -24,7 +25,7 @@
             </div>
         </div>
     </header>
-    <menu id="main-menu" class="text flex-fill tree-view tree-cols-3">
+    <menu id="main-menu" hx-boost="true" class="text flex-fill tree-view tree-cols-{{ .ColumnsCount }}">
     {{ range sortDocs .Root.Children }}
         {{ template "treemenu_entry" . }}
     {{ end }}

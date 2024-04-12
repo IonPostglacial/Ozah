@@ -52,6 +52,10 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		return err
 	}
 	queryParams := r.URL.Query()
+	menuLangSet := treemenu.LangFromString(queryParams.Get("menuLangs"))
+	menuLangNames := []string{"S", "V", "CN"}
+	menuSelectedLangs := menuLangSet.SelectedNames(menuLangNames)
+	menuLangs := menuLangSet.LangsFromNames(menuLangNames)
 	descriptorRef := queryParams.Get("d")
 	var currentDescriptor *views.DocState
 	if descriptorRef == "" {
@@ -74,7 +78,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	}
 	template.Must(cc.Template.Parse(taxonPage))
 	template.Must(cc.Template.Parse(FormTemplate))
-	items, err := treemenu.LoadItemFromDb(ctx, queries, "t0", [3]string{"S", "V", "CN"}, queryParams.Get("filterMenu"))
+	items, err := treemenu.LoadItemFromDb(ctx, queries, "t0", menuSelectedLangs, queryParams.Get("filterMenu"))
 	if err != nil {
 		return err
 	}
@@ -118,9 +122,10 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		AvailableDatasets: datasets,
 		SelectedTaxon:     taxon,
 		MenuState: &treemenu.State{
-			Selected: taxon.Ref,
-			Langs:    []string{"S", "V", "CN"},
-			Root:     items,
+			Selected:     taxon.Ref,
+			Langs:        menuLangs,
+			ColumnsCount: len(menuSelectedLangs),
+			Root:         items,
 		},
 		ViewMenuState:               views.NewMenuState("Taxons", dsName),
 		BreadCrumbsState:            branch,

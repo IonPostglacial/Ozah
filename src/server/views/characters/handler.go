@@ -44,8 +44,12 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		return err
 	}
 	queryParams := r.URL.Query()
+	menuLangSet := treemenu.LangFromString(queryParams.Get("menuLangs"))
+	menuLangNames := []string{"FR", "EN", "CN"}
+	menuSelectedLangs := menuLangSet.SelectedNames(menuLangNames)
+	menuLangs := menuLangSet.LangsFromNames(menuLangNames)
 	template.Must(cc.Template.Parse(charactersPage))
-	items, err := treemenu.LoadItemFromDb(ctx, queries, "c0", [3]string{"FR", "EN", "CN"}, queryParams.Get("filterMenu"))
+	items, err := treemenu.LoadItemFromDb(ctx, queries, "c0", menuSelectedLangs, queryParams.Get("filterMenu"))
 	if err != nil {
 		return err
 	}
@@ -91,9 +95,10 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		DatasetName:       dsName,
 		AvailableDatasets: datasets,
 		MenuState: &treemenu.State{
-			Selected: docRef,
-			Langs:    []string{"FR", "EN", "CN"},
-			Root:     items,
+			Selected:     docRef,
+			Langs:        menuLangs,
+			ColumnsCount: len(menuSelectedLangs),
+			Root:         items,
 		},
 		ViewMenuState:     views.NewMenuState("Characters", dsName),
 		BreadCrumbsState:  breadCrumbs,
