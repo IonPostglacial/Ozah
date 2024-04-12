@@ -177,14 +177,17 @@ const getDocumentsHierarchyQueryPrelude = `select doc.ref, doc.path, doc.doc_ord
 const getDocumentsHierarchyQueryIntro = ` from Document doc`
 const getDocumentsHierarchyTrQuery = `
 left join Document_Translation tr%[1]d on doc.Ref = tr%[1]d.Document_Ref and tr%[1]d.Lang_Ref = ?%[2]d`
+const getDocumentsChildrenTrQuery = `
+left join Document_Translation ctr%[1]d on children.Ref = ctr%[1]d.Document_Ref and ctr%[1]d.Lang_Ref = ?%[2]d`
 const getDocumentsHierarchyQueryCoda = `
 where (doc.Path >= ?1 and doc.Path < (?1 || '.~'))
 order by (Path || '.' || Ref) asc`
 const getDocumentsHierarchyQueryFilter = `
 left join Document children on children.Path = (doc.Path || '.' || doc.Ref)
-where (children.Name is null or children.Name like '%%%[1]s%%')
+%[3]s
+where (children.Name is null or children.Name like '%%%[1]s%%' %[2]s)
 group by doc.Ref
-having doc.Name like '%%%[1]s%%' or count(children.Ref) > 0
+having (doc.Name like '%%%[1]s%%' %[4]s) or count(children.Ref) > 0
 order by (doc.Path || '.' || doc.Ref) asc`
 
 type Document struct {
@@ -197,8 +200,10 @@ type Document struct {
 }
 
 func (q *Queries) GetDocumentHierarchy(ctx context.Context, documentPath string, langs []string, filter string) ([]Document, error) {
-	var query, queryTr strings.Builder
+	var query, queryTr, queryNameFilterTr, queryChildrenNameTrJoin, queryChildrenNameFilterTr strings.Builder
+	var escapedFilter string
 	if len(filter) > 0 {
+		escapedFilter = EscapeString(filter)
 		query.WriteString("select doc.* from (")
 	}
 	query.WriteString(getDocumentsHierarchyQueryPrelude)
@@ -206,18 +211,24 @@ func (q *Queries) GetDocumentHierarchy(ctx context.Context, documentPath string,
 	args[0] = documentPath
 	for i, lang := range langs {
 		args[i+1] = lang
-		query.WriteString(fmt.Sprintf(", tr%[1]d.name name_tr%[1]d", i+1))
-		queryTr.WriteString(fmt.Sprintf(getDocumentsHierarchyTrQuery, i+1, i+2))
+		if len(filter) > 0 {
+			fmt.Fprintf(&queryNameFilterTr, " or name_tr%d like '%%%s%%'", i+1, escapedFilter)
+			fmt.Fprintf(&queryChildrenNameFilterTr, " or ctr%[1]d.Name like '%%%[2]s%%'", i+1, escapedFilter)
+		}
+		fmt.Fprintf(&query, ", tr%[1]d.name name_tr%[1]d", i+1)
+		fmt.Fprintf(&queryTr, getDocumentsHierarchyTrQuery, i+1, i+2)
+		if len(filter) > 0 {
+			fmt.Fprintf(&queryChildrenNameTrJoin, getDocumentsChildrenTrQuery, i+1, i+2)
+		}
 	}
 	query.WriteString(getDocumentsHierarchyQueryIntro)
 	query.WriteString(queryTr.String())
 	query.WriteString(getDocumentsHierarchyQueryCoda)
 	if len(filter) > 0 {
 		query.WriteString(") doc ")
-		query.WriteString(fmt.Sprintf(getDocumentsHierarchyQueryFilter, EscapeString(filter)))
+		fmt.Fprintf(&query, getDocumentsHierarchyQueryFilter, escapedFilter, queryChildrenNameFilterTr.String(), queryChildrenNameTrJoin.String(), queryNameFilterTr.String())
 	}
 	query.WriteRune(';')
-
 	rows, err := q.db.QueryContext(ctx, query.String(), args...)
 	if err != nil {
 		return nil, err
