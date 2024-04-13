@@ -9,15 +9,27 @@
     <div id="doc-content" class="vbox flex-fill">
         <div class="top-bar-height hbox vertical-align separated-bottom padded">
             {{ template "navbar" . }}
+            <div class="spacer"></div>
+            <div class="btn-group" hx-boost="true">
+            {{ range .UnselectedPanels }}<a href="{{ panelAddUrl .Value }}" class="btn">{{ .Name }}</a>{{ end }}
+            </div>
         </div>
         <main class="relative height-below-top-bar hbox responsive-1100 flex-fill separated-children">
+            {{ if isPanelVisible "Properties" }}
             <section class="vertical-scroll vbox flex-fill">
                 <header class="hbox vertical-align padded separated-bottom fixed-to-top">
                     <h1>Properties</h1>
                     <div class="spacer"></div>
                     <div class="btn-group">
-                        <button><i class="fa-solid fa-magnifying-glass"></i>
-                        </button><button><i class="fa-solid fa-close"></i></button>
+                        <a class="btn" href="{{ panelZoomUrl 1 }}" hx-get="{{ panelZoomUrl 1 }}"
+                            hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML"
+                            hx-push-url="true">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </a><a class="btn" href="{{ panelRemoveUrl 1 }}" hx-get="{{ panelRemoveUrl 1 }}"
+                            hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML"
+                            hx-push-url="true">
+                            <i class="fa-solid fa-close"></i>
+                        </a>
                     </div>
                 </header>
                 <details open class="separated-bottom">
@@ -27,13 +39,22 @@
                 {{ template "taxon_form" .SelectedTaxon }}
                 {{ template "book_info" .BookInfoModel }}
             </section>
+            {{ end }}
+            {{ if isPanelVisible "Descriptors" }}
             <section class="vertical-scroll vbox flex-fill">
                 <header class="hbox vertical-align padded separated-bottom fixed-to-top">
                     <h1>Descriptors</h1>
                     <div class="spacer"></div>
                     <div class="btn-group">
-                        <button><i class="fa-solid fa-magnifying-glass"></i>
-                        </button><button><i class="fa-solid fa-close"></i></button>
+                        <a class="btn" href="{{ panelZoomUrl 2 }}" hx-get="{{ panelZoomUrl 2 }}"
+                            hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML"
+                            hx-push-url="true">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </a><a class="btn" href="{{ panelRemoveUrl 2 }}" hx-get="{{ panelRemoveUrl 2 }}"
+                            hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML"
+                            hx-push-url="true">
+                            <i class="fa-solid fa-close"></i>
+                        </a>
                     </div>
                 </header>
                 <div class="vbox flex-fill">
@@ -56,17 +77,27 @@
                     {{ end }}
                 </div>
             </section>
+            {{ end }}
+            {{ if isPanelVisible "Summary" }}
             <section class="vertical-scroll vbox flex-fill">
                 <header class="hbox vertical-align padded separated-bottom fixed-to-top">
                     <h1>Summary</h1>
                     <div class="spacer"></div>
                     <div class="btn-group">
-                        <button><i class="fa-solid fa-magnifying-glass"></i>
-                        </button><button><i class="fa-solid fa-close"></i></button>
+                        <a class="btn" href="{{ panelZoomUrl 4 }}" hx-get="{{ panelZoomUrl 4 }}"
+                            hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML"
+                            hx-push-url="true">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </a><a class="btn" href="{{ panelRemoveUrl 4 }}" hx-get="{{ panelRemoveUrl 4 }}"
+                            hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML"
+                            hx-push-url="true">
+                            <i class="fa-solid fa-close"></i>
+                        </a>
                     </div>
                 </header>
                 {{ template "summary" .SummaryModel }}
             </section>
+            {{ end }}
         </main>
     </div>
 </body>

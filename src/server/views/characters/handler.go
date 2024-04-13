@@ -48,7 +48,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	queryParams := r.URL.Query()
 	menuLangSet := treemenu.LangSetFromString(queryParams.Get("menuLangs"))
 	menuLangNames := []string{"FR", "EN", "CN"}
-	menuSelectedLangs := menuLangSet.SelectedNames(menuLangNames)
+	menuSelectedLangs := menuLangSet.MaskNames(menuLangNames)
 	menuLangs := menuLangSet.LangsFromNames(r.URL, menuLangNames)
 	template.Must(cc.Template.Parse(charactersPage))
 	items, err := treemenu.LoadItemFromDb(ctx, queries, "c0", menuSelectedLangs, queryParams.Get("filterMenu"))

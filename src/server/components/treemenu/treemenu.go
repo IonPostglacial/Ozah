@@ -48,16 +48,6 @@ func LangSetFromString(s string) LangSet {
 	return LangSet{common.BitSetFromString(s, common.BitSet(Lang1|Lang2|Lang3), common.BitSet(Lang1))}
 }
 
-func (lang LangSet) SelectedNames(names []string) []string {
-	langNames := make([]string, 0, len(names))
-	for i, name := range names {
-		if lang.Contains(common.BitSet(1 << i)) {
-			langNames = append(langNames, name)
-		}
-	}
-	return langNames
-}
-
 func (lang LangSet) LangsFromNames(url *url.URL, names []string) []Lang {
 	langs := make([]Lang, len(names))
 	for i, name := range names {

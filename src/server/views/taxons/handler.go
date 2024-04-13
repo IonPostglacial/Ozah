@@ -36,6 +36,7 @@ type Model struct {
 	SummaryModel                *summary.Model
 	PictureBoxModel             *picturebox.Model
 	BookInfoModel               []storage.GetTaxonBookInfoRow
+	UnselectedPanels            []common.UnselectedItem
 }
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
@@ -57,8 +58,10 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	queryParams := r.URL.Query()
 	menuLangSet := treemenu.LangSetFromString(queryParams.Get("menuLangs"))
 	menuLangNames := []string{"S", "V", "CN"}
-	menuSelectedLangs := menuLangSet.SelectedNames(menuLangNames)
+	menuSelectedLangs := menuLangSet.MaskNames(menuLangNames)
 	menuLangs := menuLangSet.LangsFromNames(r.URL, menuLangNames)
+	selectedPanels := PanelSetFromString(queryParams.Get("panels"))
+	selectedPanelNames, unselectedPanels := selectedPanels.DivideNamesByMask(panelNames)
 	descriptorRef := queryParams.Get("d")
 	var currentDescriptor *documents.Model
 	if descriptorRef == "" {
@@ -79,6 +82,25 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	} else {
 		taxon = &FormData{}
 	}
+	cc.Template.Funcs(template.FuncMap{
+		"isPanelVisible": func(panelName string) bool {
+			for _, name := range selectedPanelNames {
+				if name == panelName {
+					return true
+				}
+			}
+			return false
+		},
+		"panelZoomUrl": func(panel Panel) string {
+			return PanelSet{common.BitSet(panel)}.LinkToPanelState(r.URL)
+		},
+		"panelAddUrl": func(panel uint64) string {
+			return PanelSet{selectedPanels.With(common.BitSet(panel))}.LinkToPanelState(r.URL)
+		},
+		"panelRemoveUrl": func(panel Panel) string {
+			return PanelSet{selectedPanels.Without(common.BitSet(panel))}.LinkToPanelState(r.URL)
+		},
+	})
 	template.Must(cc.Template.Parse(taxonPage))
 	template.Must(cc.Template.Parse(FormTemplate))
 	items, err := treemenu.LoadItemFromDb(ctx, queries, "t0", menuSelectedLangs, queryParams.Get("filterMenu"))
@@ -137,6 +159,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		SummaryModel:                summary,
 		PictureBoxModel:             &picboxModel,
 		BookInfoModel:               bookInfo,
+		UnselectedPanels:            unselectedPanels,
 	})
 	if err != nil {
 		return err

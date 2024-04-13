@@ -4,23 +4,25 @@ import "strconv"
 
 type BitSet uint64
 
-func (lang BitSet) Contains(other BitSet) bool {
-	return lang&other != 0
+const EmptyBitSet = BitSet(0)
+
+func (bs BitSet) Contains(other BitSet) bool {
+	return bs&other != 0
 }
 
-func (lang BitSet) With(other BitSet) BitSet {
-	return BitSet(lang | other)
+func (bs BitSet) With(other BitSet) BitSet {
+	return BitSet(bs | other)
 }
 
-func (lang BitSet) Without(other BitSet) BitSet {
-	return BitSet(lang & ^other)
+func (bs BitSet) Without(other BitSet) BitSet {
+	return BitSet(bs & ^other)
 }
 
-func (lang BitSet) Toggle(other BitSet) BitSet {
-	if lang.Contains(other) {
-		return lang.Without(other)
+func (bs BitSet) Toggle(other BitSet) BitSet {
+	if bs.Contains(other) {
+		return bs.Without(other)
 	}
-	return lang.With(other)
+	return bs.With(other)
 }
 
 func BitSetFromString(s string, defaultValue BitSet, zeroValue BitSet) BitSet {
@@ -34,6 +36,38 @@ func BitSetFromString(s string, defaultValue BitSet, zeroValue BitSet) BitSet {
 	return BitSet(n)
 }
 
-func (lang BitSet) String() string {
-	return strconv.FormatUint(uint64(lang), 10)
+func (bs BitSet) String() string {
+	return strconv.FormatUint(uint64(bs), 10)
+}
+
+func (bs BitSet) MaskNames(names []string) []string {
+	maskedNames := make([]string, 0, len(names))
+	for i, name := range names {
+		if bs.Contains(BitSet(1 << i)) {
+			maskedNames = append(maskedNames, name)
+		}
+	}
+	return maskedNames
+}
+
+type UnselectedItem struct {
+	Value uint64
+	Name  string
+}
+
+func (bs BitSet) DivideNamesByMask(names []string) ([]string, []UnselectedItem) {
+	maskedNames := make([]string, 0, len(names))
+	unmaskedNames := make([]UnselectedItem, 0, len(names))
+	for i, name := range names {
+		value := BitSet(1 << i)
+		if bs.Contains(value) {
+			maskedNames = append(maskedNames, name)
+		} else {
+			unmaskedNames = append(unmaskedNames, UnselectedItem{
+				Value: uint64(value),
+				Name:  name,
+			})
+		}
+	}
+	return maskedNames, unmaskedNames
 }
