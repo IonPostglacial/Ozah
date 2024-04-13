@@ -7,6 +7,10 @@ function onLoad() {
             items.forEach(item => item.classList.remove("selected"));
             selectedItem.classList.add("selected");
         }
+        const toggleButton = e.target.closest(".btn.toggle");
+        if (toggleButton !== null) {
+            toggleButton.classList.toggle("primary");
+        }
     });
 }
 window.addEventListener("load", onLoad);

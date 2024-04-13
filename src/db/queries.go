@@ -202,6 +202,9 @@ type Document struct {
 func (q *Queries) GetDocumentHierarchy(ctx context.Context, documentPath string, langs []string, filter string) ([]Document, error) {
 	var query, queryTr, queryNameFilterTr, queryChildrenNameTrJoin, queryChildrenNameFilterTr strings.Builder
 	var escapedFilter string
+	if len(langs) > 0 {
+		langs = langs[1:]
+	}
 	if len(filter) > 0 {
 		escapedFilter = EscapeString(filter)
 		query.WriteString("select doc.* from (")

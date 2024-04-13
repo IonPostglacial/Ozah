@@ -1,5 +1,5 @@
 {{ define "treemenu" }}
-<div class="height-below-top-bar vbox vertical-scroll">
+<div id="tree-menu-container" class="height-below-top-bar vbox vertical-scroll">
     <header class="vbox padded separated-bottom fixed-to-top">
         <form class="hbox vertical-align relative">
             <input type="search" name="filterMenu" id="filter-menu" class="flex-fill" placeholder="filter taxons"
@@ -12,10 +12,13 @@
         <div class="hbox vertical-align">
             <div class="hbox vertical-align btn-group">
                 {{ range .Langs }}
-                <div class="toggle">
-                    <input type="checkbox" id="lang-{{ .Value }}" {{ if .Selected }}checked{{ end }} name="menuLangs" value="{{ .Value }}" />
-                    <label for="lang-{{ .Value }}">{{ .Name }}</label>
-                </div>
+                <a href="{{ .Url }}" class="btn toggle {{ if .Selected }}primary{{ end }}"
+                    hx-get="{{ .Url }}"
+                    hx-push-url="true"
+                    hx-swap="outerHTML"
+                    hx-select="#tree-menu-container" hx-target="#tree-menu-container">
+                    {{ .Name }}
+                </a>
                 {{ end }}
             </div>
             <div class="spacer"></div>

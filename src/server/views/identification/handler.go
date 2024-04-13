@@ -17,6 +17,7 @@ import (
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components"
 	"nicolas.galipot.net/hazo/server/components/popover"
+	"nicolas.galipot.net/hazo/server/link"
 	"nicolas.galipot.net/hazo/server/views"
 )
 
@@ -68,7 +69,7 @@ type Measurement struct {
 }
 
 func LinkToIdentification(dsName string, stateRefs []string, measures map[string]db.SpecimenMeasurement) string {
-	link := strings.Builder{}
+	linkUrl := strings.Builder{}
 	urlQuery := url.Values{}
 	for _, ref := range stateRefs {
 		urlQuery.Add("s", ref)
@@ -76,10 +77,10 @@ func LinkToIdentification(dsName string, stateRefs []string, measures map[string
 	for _, measure := range measures {
 		urlQuery.Add(fmt.Sprintf("m-%s", measure.CharacterRef), fmt.Sprintf("%f", measure.Value))
 	}
-	link.WriteString(views.LinkToIdentify(dsName))
-	link.WriteRune('?')
-	link.WriteString(urlQuery.Encode())
-	return link.String()
+	linkUrl.WriteString(link.ToIdentify(dsName))
+	linkUrl.WriteRune('?')
+	linkUrl.WriteString(urlQuery.Encode())
+	return linkUrl.String()
 }
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
@@ -138,7 +139,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	}
 	identifiedTaxa := make([]IdentifiedTaxon, len(taxa))
 	for i, taxon := range taxa {
-		identifiedTaxa[i] = IdentifiedTaxon{taxon, views.LinkToTaxon(dsName, taxon.Ref)}
+		identifiedTaxa[i] = IdentifiedTaxon{taxon, link.ToTaxon(dsName, taxon.Ref)}
 	}
 	datasets, err := views.NewDatasetMenuState(cc, dsName)
 	if err != nil {

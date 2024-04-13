@@ -10,10 +10,13 @@ import (
 	"nicolas.galipot.net/hazo/db/storage"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/breadcrumbs"
+	"nicolas.galipot.net/hazo/server/components/iconmenu"
 	"nicolas.galipot.net/hazo/server/components/picturebox"
 	"nicolas.galipot.net/hazo/server/components/popover"
 	"nicolas.galipot.net/hazo/server/components/summary"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
+	"nicolas.galipot.net/hazo/server/documents"
+	"nicolas.galipot.net/hazo/server/link"
 	"nicolas.galipot.net/hazo/server/views"
 )
 
@@ -29,7 +32,7 @@ type Model struct {
 	ViewMenuState               *popover.State
 	BreadCrumbsState            *breadcrumbs.State
 	DescriptorsBreadCrumbsState *breadcrumbs.State
-	Descriptors                 []views.Descriptor
+	Descriptors                 []iconmenu.Model
 	SummaryModel                *summary.Model
 	PictureBoxModel             *picturebox.Model
 	BookInfoModel               []storage.GetTaxonBookInfoRow
@@ -52,21 +55,21 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		return err
 	}
 	queryParams := r.URL.Query()
-	menuLangSet := treemenu.LangFromString(queryParams.Get("menuLangs"))
+	menuLangSet := treemenu.LangSetFromString(queryParams.Get("menuLangs"))
 	menuLangNames := []string{"S", "V", "CN"}
 	menuSelectedLangs := menuLangSet.SelectedNames(menuLangNames)
-	menuLangs := menuLangSet.LangsFromNames(menuLangNames)
+	menuLangs := menuLangSet.LangsFromNames(r.URL, menuLangNames)
 	descriptorRef := queryParams.Get("d")
-	var currentDescriptor *views.DocState
+	var currentDescriptor *documents.Model
 	if descriptorRef == "" {
 		descriptorRef = "c0"
-		currentDescriptor = &views.DocState{Ref: descriptorRef, Path: ""}
+		currentDescriptor = &documents.Model{Ref: descriptorRef, Path: ""}
 	} else {
 		doc, err := queries.GetDocument(ctx, descriptorRef)
 		if err != nil {
 			return err
 		}
-		currentDescriptor = &views.DocState{Ref: doc.Ref, Path: doc.Path, Name: doc.Name}
+		currentDescriptor = &documents.Model{Ref: doc.Ref, Path: doc.Path, Name: doc.Name}
 	}
 	if docRef != "" {
 		taxon, err = LoadFormDataFromDb(ctx, queries, docRef)
@@ -86,16 +89,16 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	branch, err := views.GetDocumentBranch(ctx, queries, &taxon.DocState, dsName, views.LinkToTaxon)
+	branch, err := views.GetDocumentBranch(ctx, queries, &taxon.Model, dsName, link.ToTaxon)
 	if err != nil {
 		return err
 	}
-	descBreadcrumbs, err := views.GetDocumentBranch(ctx, queries, currentDescriptor, dsName, views.LinkToDescriptor(docRef))
+	descBreadcrumbs, err := views.GetDocumentBranch(ctx, queries, currentDescriptor, dsName, link.ToDescriptor(docRef))
 	if err != nil {
 		return err
 	}
 	// TODO: retrieve selection by taxon
-	descriptors, err := views.GetTaxonDescriptors(ctx, queries, dsName, taxon.Ref, currentDescriptor)
+	descriptors, err := iconmenu.GetTaxonDescriptors(ctx, queries, dsName, taxon.Ref, currentDescriptor)
 	if err != nil {
 		return err
 	}

@@ -3,9 +3,10 @@ package treemenu
 import (
 	"context"
 	_ "embed"
-	"strconv"
+	"net/url"
 
 	"nicolas.galipot.net/hazo/db"
+	"nicolas.galipot.net/hazo/server/common"
 )
 
 type State struct {
@@ -25,61 +26,60 @@ type Item struct {
 	Children []*Item
 }
 
-type LangSet uint8
+type LangSet struct {
+	common.BitSet
+}
+
+type Language uint64
 
 const (
-	Lang1 = LangSet(1 << iota)
+	Lang1 = Language(1 << iota)
 	Lang2
 	Lang3
 )
 
 type Lang struct {
 	Name     string
-	Value    LangSet
+	Url      string
 	Selected bool
 }
 
-func LangFromString(s string) LangSet {
-	n, err := strconv.ParseUint(s, 10, 3)
-	if err != nil {
-		return LangSet(Lang1 | Lang2 | Lang3)
-	}
-	lang := LangSet(n & 0b00000111)
-	if lang == 0 {
-		lang |= Lang1
-	}
-	return lang
-}
-
-func (lang LangSet) Contains(other LangSet) bool {
-	return lang&other != 0
+func LangSetFromString(s string) LangSet {
+	return LangSet{common.BitSetFromString(s, common.BitSet(Lang1|Lang2|Lang3), common.BitSet(Lang1))}
 }
 
 func (lang LangSet) SelectedNames(names []string) []string {
 	langNames := make([]string, 0, len(names))
 	for i, name := range names {
-		if lang.Contains(LangSet(1 << i)) {
+		if lang.Contains(common.BitSet(1 << i)) {
 			langNames = append(langNames, name)
 		}
 	}
 	return langNames
 }
 
-func (lang LangSet) LangsFromNames(names []string) []Lang {
+func (lang LangSet) LangsFromNames(url *url.URL, names []string) []Lang {
 	langs := make([]Lang, len(names))
 	for i, name := range names {
-		value := LangSet(1 << i)
+		value := common.BitSet(1 << i)
+		selected := lang.Contains(value)
+		newLangs := lang.Toggle(value)
+		query := url.Query()
+		query.Del("menuLangs")
+		query.Add("menuLangs", newLangs.String())
+		newUrl := *url
+		newUrl.RawQuery = query.Encode()
 		langs[i] = Lang{
 			Name:     name,
-			Value:    value,
-			Selected: lang.Contains(value),
+			Url:      newUrl.String(),
+			Selected: selected,
 		}
 	}
 	return langs
 }
 
 func LoadItemFromDb(ctx context.Context, queries *db.Queries, root string, langs []string, filter string) (*Item, error) {
-	docs, err := queries.GetDocumentHierarchy(ctx, root, langs[1:], filter)
+	docs, err := queries.GetDocumentHierarchy(ctx, root, langs, filter)
 	if err != nil {
 		return nil, err
 	}

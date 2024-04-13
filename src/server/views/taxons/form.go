@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"nicolas.galipot.net/hazo/db"
-	"nicolas.galipot.net/hazo/server/views"
+	"nicolas.galipot.net/hazo/server/documents"
 
 	_ "embed"
 )
@@ -13,7 +13,7 @@ import (
 var FormTemplate string
 
 type FormData struct {
-	views.DocState
+	documents.Model
 	NameV   string
 	NameCN  string
 	Author  string
@@ -26,7 +26,7 @@ func LoadFormDataFromDb(ctx context.Context, queries *db.Queries, id string) (*F
 		return nil, err
 	}
 	return &FormData{
-		DocState: views.DocState{
+		Model: documents.Model{
 			Ref:         id,
 			Path:        data.Path,
 			Name:        data.Name,

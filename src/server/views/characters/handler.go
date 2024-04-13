@@ -14,6 +14,8 @@ import (
 	"nicolas.galipot.net/hazo/server/components/picturebox"
 	"nicolas.galipot.net/hazo/server/components/popover"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
+	"nicolas.galipot.net/hazo/server/documents"
+	"nicolas.galipot.net/hazo/server/link"
 	"nicolas.galipot.net/hazo/server/views"
 )
 
@@ -27,7 +29,7 @@ type State struct {
 	MenuState         *treemenu.State
 	ViewMenuState     *popover.State
 	BreadCrumbsState  *breadcrumbs.State
-	SelectedCharacter *views.DocState
+	SelectedCharacter *documents.Model
 	PictureBoxModel   *picturebox.Model
 }
 
@@ -44,10 +46,10 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		return err
 	}
 	queryParams := r.URL.Query()
-	menuLangSet := treemenu.LangFromString(queryParams.Get("menuLangs"))
+	menuLangSet := treemenu.LangSetFromString(queryParams.Get("menuLangs"))
 	menuLangNames := []string{"FR", "EN", "CN"}
 	menuSelectedLangs := menuLangSet.SelectedNames(menuLangNames)
-	menuLangs := menuLangSet.LangsFromNames(menuLangNames)
+	menuLangs := menuLangSet.LangsFromNames(r.URL, menuLangNames)
 	template.Must(cc.Template.Parse(charactersPage))
 	items, err := treemenu.LoadItemFromDb(ctx, queries, "c0", menuSelectedLangs, queryParams.Get("filterMenu"))
 	if err != nil {
@@ -57,7 +59,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	var character *views.DocState
+	var character *documents.Model
 	ch, err := queries.GetDocumentTr2(ctx, storage.GetDocumentTr2Params{
 		Lang1: "EN",
 		Lang2: "CN",
@@ -65,7 +67,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	})
 	if err == nil {
 		// TODO: handle non empty row error
-		character = &views.DocState{
+		character = &documents.Model{
 			Ref:         ch.Ref,
 			Path:        ch.Path,
 			Name:        ch.Name,
@@ -76,7 +78,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	} else {
 		fmt.Printf("error: %s\n", err.Error())
 	}
-	breadCrumbs, err := views.GetDocumentBranch(ctx, queries, character, dsName, views.LinkToCharacter)
+	breadCrumbs, err := views.GetDocumentBranch(ctx, queries, character, dsName, link.ToCharacter)
 	if err != nil {
 		return err
 	}

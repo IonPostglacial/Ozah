@@ -10,7 +10,7 @@ import (
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
-	"nicolas.galipot.net/hazo/server/views"
+	"nicolas.galipot.net/hazo/server/link"
 )
 
 func HandlerWrapper(docType string) func(handler common.Handler) common.Handler {
@@ -30,7 +30,7 @@ func HandlerWrapper(docType string) func(handler common.Handler) common.Handler 
 					return items
 				},
 				"documentUrl": func(taxon *treemenu.Item) string {
-					return views.LinkToDocument(dsName, taxon.Id)
+					return link.ToDocument(dsName, taxon.Id)
 				},
 				"colorize": func(color string) template.HTMLAttr {
 					if color == "" {
