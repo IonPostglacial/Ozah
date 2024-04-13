@@ -134,6 +134,7 @@ input[type=submit],
 .btn,
 select,
 .breadcrumbs,
+#doc-content trix-toolbar .trix-button,
 .toggle>label {
     display: inline-block;
     background-color: var(--widget-color);
@@ -193,11 +194,18 @@ select:active {
     white-space: nowrap;
 }
 
+#doc-content trix-toolbar .trix-button-group {
+    margin-bottom: 0.5ch;
+    border: none;
+    border-radius: 0;
+}
+
 .btn-group>button,
 .btn-group>input[type=submit],
 .btn-group>select,
 .btn-group>.breadcrumbs,
 .btn-group>.btn,
+#doc-content trix-toolbar .trix-button-group .trix-button,
 .btn-group>.toggle>label {
     border-radius: 0;
     border-left-width: 0;
@@ -208,9 +216,11 @@ select:active {
 .btn-group>select:first-child,
 .btn-group>.breadcrumbs:first-child,
 .btn-group>.btn:first-child,
+#doc-content trix-toolbar .trix-button-group .trix-button:first-child,
 .btn-group>.toggle:first-child>label {
     border-start-start-radius: var(--widget-radius);
     border-end-start-radius: var(--widget-radius);
+    border-left-width: var(--widget-border-width);
 }
 
 .btn-group>button:last-child,
@@ -218,6 +228,7 @@ select:active {
 .btn-group>select:last-child,
 .btn-group>.breadcrumbs:last-child,
 .btn-group>.btn:last-child,
+#doc-content trix-toolbar .trix-button-group .trix-button:last-child,
 .btn-group>.toggle:last-child>label {
     border-start-end-radius: var(--widget-radius);
     border-end-end-radius: var(--widget-radius);
@@ -377,7 +388,7 @@ input[type="search"]~.search-icon {
 }
 
 .tree-view li:hover>a,
-.selected > a,
+.selected>a,
 a.selected {
     background-color: var(--bg-color-primary);
     color: var(--text-color-primary);
@@ -473,7 +484,7 @@ input[type="checkbox"]:checked.visibility-trigger~*>.rotate-90-if-checked-p {
 }
 
 .padded {
-    padding: 1px 5px;
+    padding: 1px 3px;
 }
 
 .illustration {
@@ -547,7 +558,7 @@ input[type="checkbox"]:checked.visibility-trigger~*>.rotate-90-if-checked-p {
     position: relative;
 }
 
-.no-list-style > li {
+.no-list-style>li {
     list-style: none;
 }
 

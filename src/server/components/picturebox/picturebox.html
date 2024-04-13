@@ -1,5 +1,5 @@
 {{ define "picture_box" }}
-<div class="vbox">
+<div class="vbox padded">
     <a class="hbox horizontal-align text" id="pictureLink">
         <img class="illustration" src="{{ .Source }}" alt="Some plant"></img>
     </a>
@@ -13,7 +13,7 @@
             <img class="fullscreen-img" src="{{ .Source }}" alt="Some plant"></img>
         </div>
     </dialog>
-    <div class="hbox vertical-align padded">
+    <div class="hbox vertical-align">
         <div class="btn-group">
             <button><i class="fa-solid fa-arrow-left"></i>
             </button><button><i class="fa-solid fa-arrow-right"></i></button>
