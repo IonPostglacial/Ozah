@@ -8,7 +8,7 @@ import (
 )
 
 func OpenCommon() (*sql.DB, *commonstorage.Queries, error) {
-	db, err := sql.Open("sqlite3", "file:common.db")
+	db, err := sql.Open("sqlite3", "file:common.db?_foreign_keys=on")
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not connect to the database: %w", err)
 	}
