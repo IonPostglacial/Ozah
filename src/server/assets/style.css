@@ -353,53 +353,20 @@ input[type="search"]~.search-icon {
     right: 0;
 }
 
-.tree-cols-1 {
-    --tree-column-number: 1;
-}
-
-.tree-cols-2 {
-    --tree-column-number: 2;
-}
-
-.tree-cols-3 {
-    --tree-column-number: 3;
-}
-
 .min-width-5ch {
     min-width: 5ch;
 }
 
-.tree-view {
-    display: grid;
-    padding-left: 6ch;
-    grid-template-columns: min-content repeat(var(--tree-column-number), auto);
-    align-content: start;
-}
 
-.contents,
-.tree-view ul,
-.tree-view li {
+
+.contents {
     display: contents;
 }
 
-.tree-view li>* {
-    border-left: 1px solid var(--separator-color);
-    border-radius: 0;
-}
-
-.tree-view li:hover>a,
 .selected>a,
 a.selected {
     background-color: var(--bg-color-primary);
     color: var(--text-color-primary);
-}
-
-.tree-view li>a {
-    padding: 4px;
-}
-
-.tree-view li>*:nth-child(2) {
-    border-left: none;
 }
 
 .indent {
@@ -412,30 +379,6 @@ a.selected {
 
 .indent div {
     background-color: transparent;
-}
-
-.tree-view li>.indent {
-    width: 0ch;
-}
-
-.tree-view li li>.indent {
-    width: 5ch;
-}
-
-.tree-view li li li>.indent {
-    width: 10ch;
-}
-
-.tree-view li li li li>.indent {
-    width: 15ch;
-}
-
-.tree-view li li li li>.indent {
-    width: 18ch;
-}
-
-.tree-view li li li li>.indent {
-    width: 20ch;
 }
 
 input[type="checkbox"].visibility-trigger~.contents-if-checked {
@@ -553,38 +496,8 @@ input[type="checkbox"]:checked.visibility-trigger~*>.rotate-90-if-checked-p {
     display: none;
 }
 
-.popover {
-    display: inline-block;
-    position: relative;
-}
-
 .no-list-style>li {
     list-style: none;
-}
-
-.popover .popover-panel {
-    position: absolute;
-    z-index: 100;
-    opacity: 0;
-    border-radius: var(--widget-radius);
-    box-shadow: 0px 2px 9px #0000005c;
-    transition-property: opacity, padding, visibility;
-    transition: 0.15s ease-out;
-    visibility: hidden;
-    padding: var(--widget-padding);
-    --offset: -13px;
-    left: 0;
-}
-
-.popover>input[type="checkbox"] {
-    visibility: hidden;
-    position: absolute;
-}
-
-.popover>input[type="checkbox"]:checked~.popover-panel {
-    visibility: visible;
-    opacity: 1;
-    top: calc(-2 * var(--offset));
 }
 
 .popover-panel:before {

@@ -1,0 +1,68 @@
+hazo-treemenu>menu {
+    display: grid;
+    grid-template-columns: min-content repeat(var(--tree-column-number), auto);
+    align-content: start;
+}
+
+hazo-treemenu>menu.text {
+    padding-left: 6ch;
+}
+
+hazo-treemenu ul,
+hazo-treemenu li {
+    display: contents;
+}
+
+hazo-treemenu li:hover>a {
+    background-color: var(--bg-color-primary);
+    color: var(--text-color-primary);
+}
+
+hazo-treemenu .tree-cols-1 {
+    --tree-column-number: 1;
+}
+
+hazo-treemenu .tree-cols-2 {
+    --tree-column-number: 2;
+}
+
+hazo-treemenu .tree-cols-3 {
+    --tree-column-number: 3;
+}
+
+hazo-treemenu li>* {
+    border-left: 1px solid var(--separator-color);
+    border-radius: 0;
+}
+
+hazo-treemenu li>a {
+    padding: 4px;
+}
+
+hazo-treemenu li>*:nth-child(2) {
+    border-left: none;
+}
+
+hazo-treemenu li>.indent {
+    width: 0ch;
+}
+
+hazo-treemenu li li>.indent {
+    width: 5ch;
+}
+
+hazo-treemenu li li li>.indent {
+    width: 10ch;
+}
+
+hazo-treemenu li li li li>.indent {
+    width: 15ch;
+}
+
+hazo-treemenu li li li li>.indent {
+    width: 18ch;
+}
+
+hazo-treemenu li li li li>.indent {
+    width: 20ch;
+}

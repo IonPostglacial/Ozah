@@ -1,6 +1,12 @@
+class HazoPopover extends HTMLElement {
+    constructor() {
+        super();
+    }
+}
+
 function onLoad() {
     document.body.addEventListener('click', function (e) {
-        const clickedPopover = e.target.closest(".popover");
+        const clickedPopover = e.target.closest("hazo-popover");
         let selectedCheckbox = null
         if (clickedPopover !== null) {
             const checkbox = clickedPopover.querySelector("input[type=checkbox]");
@@ -8,11 +14,13 @@ function onLoad() {
                 selectedCheckbox = checkbox;
             }
         }
-        document.querySelectorAll(".popover > input[type=checkbox]").forEach(cb => {
+        document.querySelectorAll("hazo-popover>label>input[type=checkbox]").forEach(cb => {
             if (cb !== selectedCheckbox) {
                 cb.checked = false;
             }
         });
     });
 }
+
+customElements.define("hazo-popover", HazoPopover);
 window.addEventListener("load", onLoad);

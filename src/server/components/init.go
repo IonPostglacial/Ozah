@@ -20,6 +20,12 @@ var jsFS embed.FS
 var jsTemplate *txtemplate.Template
 var JavascriptCode string
 
+//go:embed */*.css
+var cssFS embed.FS
+
+var cssTemplate *txtemplate.Template
+var CssCode string
+
 func init() {
 	var err error
 	var buf strings.Builder
@@ -33,6 +39,16 @@ func init() {
 		buf.WriteString("})();")
 	}
 	JavascriptCode = buf.String()
+
+	var cssbuf strings.Builder
+	cssTemplate, err = txtemplate.ParseFS(cssFS, "*/*.css")
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, t := range cssTemplate.Templates() {
+		t.Execute(&cssbuf, nil)
+	}
+	CssCode = cssbuf.String()
 }
 
 func NewTemplate() *template.Template {

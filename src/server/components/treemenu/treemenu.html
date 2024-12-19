@@ -1,5 +1,5 @@
 {{ define "treemenu" }}
-<div id="tree-menu-container" class="height-below-top-bar vbox vertical-scroll">
+<hazo-treemenu id="tree-menu-container" class="height-below-top-bar vbox vertical-scroll">
     <header class="vbox padded separated-bottom fixed-to-top">
         <form class="hbox vertical-align relative">
             <input type="search" name="filterMenu" id="filter-menu" class="flex-fill" placeholder="filter taxons"
@@ -28,10 +28,10 @@
             </div>
         </div>
     </header>
-    <menu id="main-menu" hx-boost="true" class="text flex-fill tree-view tree-cols-{{ .ColumnsCount }}">
+    <menu id="main-menu" hx-boost="true" class="text flex-fill tree-cols-{{ .ColumnsCount }}">
     {{ range sortDocs .Root.Children }}
         {{ template "treemenu_entry" . }}
     {{ end }}
     </menu>
-</div>
+</hazo-treemenu>
 {{ end }}

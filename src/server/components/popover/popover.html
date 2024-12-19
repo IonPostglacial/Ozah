@@ -1,17 +1,19 @@
 {{ define "popover" }}
-<label class="popover btn">
-    <input type="checkbox" />
-    <span>
-        <i class="fa fa-pull-right fa-caret-down"></i>{{ .Label }}
-    </span>
-    <div class="popover-panel">
-        <ul class="no-list-style">
-        {{ range .Items }}
-            <li class="hbox">
-                <a href="{{ .Url }}" class="highlight-on-hover padded flex-fill">{{ .Label }}</a>
-            </li>
-        {{ end }}
-        </ul>
-    </div>
-</label>
+<hazo-popover>
+    <label class="btn">
+        <input type="checkbox" />
+        <span>
+            <i class="fa fa-pull-right fa-caret-down"></i>{{ .Label }}
+        </span>
+        <div class="popover-panel">
+            <ul class="no-list-style">
+            {{ range .Items }}
+                <li class="hbox">
+                    <a href="{{ .Url }}" class="highlight-on-hover padded flex-fill">{{ .Label }}</a>
+                </li>
+            {{ end }}
+            </ul>
+        </div>
+    </label>
+</hazo-popover>
 {{ end }}

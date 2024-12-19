@@ -1,16 +1,21 @@
-function onLoad() {
-    document.body.addEventListener('click', function (e) {
-        const menu = e.target.closest("menu");
-        if (menu !== null) {
+class HazoTreeMenu extends HTMLElement {
+    constructor() {
+        super();
+    }
+
+    connectedCallback() {
+        this.addEventListener("click", (e) => {
             const selectedItem = e.target.closest("li");
-            const items = menu.querySelectorAll("li.selected");
+            const items = this.querySelectorAll("li.selected");
             items.forEach(item => item.classList.remove("selected"));
             selectedItem.classList.add("selected");
-        }
-        const toggleButton = e.target.closest(".btn.toggle");
-        if (toggleButton !== null) {
-            toggleButton.classList.toggle("primary");
-        }
-    });
+
+            const toggleButton = e.target.closest(".btn.toggle");
+            if (toggleButton !== null) {
+                toggleButton.classList.toggle("primary");
+            }
+        });
+    }
 }
-window.addEventListener("load", onLoad);
+
+customElements.define("hazo-treemenu", HazoTreeMenu);
