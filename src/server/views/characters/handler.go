@@ -10,9 +10,7 @@ import (
 	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/db/storage"
 	"nicolas.galipot.net/hazo/server/common"
-	"nicolas.galipot.net/hazo/server/components/breadcrumbs"
 	"nicolas.galipot.net/hazo/server/components/picturebox"
-	"nicolas.galipot.net/hazo/server/components/popover"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 	"nicolas.galipot.net/hazo/server/documents"
 	"nicolas.galipot.net/hazo/server/link"
@@ -21,17 +19,6 @@ import (
 
 //go:embed characters.html
 var charactersPage string
-
-type State struct {
-	PageTitle         string
-	DatasetName       string
-	AvailableDatasets *popover.State
-	MenuState         *treemenu.State
-	ViewMenuState     *popover.State
-	BreadCrumbsState  *breadcrumbs.State
-	SelectedCharacter *documents.Model
-	PictureBoxModel   *picturebox.Model
-}
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	dsName := r.PathValue("dsName")
@@ -55,11 +42,11 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	datasets, err := views.NewDatasetMenuState(cc, dsName)
+	datasets, err := views.NewDatasetMenuViewModel(cc, dsName)
 	if err != nil {
 		return err
 	}
-	var character *documents.Model
+	var character *documents.ViewModel
 	ch, err := queries.GetDocumentTr2(ctx, storage.GetDocumentTr2Params{
 		Lang1: "EN",
 		Lang2: "CN",
@@ -67,7 +54,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	})
 	if err == nil {
 		// TODO: handle non empty row error
-		character = &documents.Model{
+		character = &documents.ViewModel{
 			Ref:         ch.Ref,
 			Path:        ch.Path,
 			Name:        ch.Name,
@@ -83,7 +70,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		return err
 	}
 	attach, err := queries.GetDocumentAttachments(ctx, ch.Ref)
-	picboxModel := picturebox.Model{Index: 0, Count: 0, Name: ch.Name}
+	picboxModel := picturebox.ViewModel{Index: 0, Count: 0, Name: ch.Name}
 	if err == nil {
 		picboxModel.Count = len(attach)
 		if len(attach) > 0 {
@@ -92,17 +79,17 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		}
 	}
 	template.Must(cc.Template.Parse(FormTemplate))
-	err = cc.Template.Execute(w, State{
+	err = cc.Template.Execute(w, ViewModel{
 		PageTitle:         "Hazo",
 		DatasetName:       dsName,
 		AvailableDatasets: datasets,
-		MenuState: &treemenu.State{
+		MenuState: &treemenu.ViewModel{
 			Selected:     docRef,
 			Langs:        menuLangs,
 			ColumnsCount: len(menuSelectedLangs),
 			Root:         items,
 		},
-		ViewMenuState:     views.NewMenuState("Characters", dsName),
+		MenuViewModel:     views.NewViewMenuViewModel("Characters", dsName),
 		BreadCrumbsState:  breadCrumbs,
 		SelectedCharacter: character,
 		PictureBoxModel:   &picboxModel,

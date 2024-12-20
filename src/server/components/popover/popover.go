@@ -5,7 +5,7 @@ type Item struct {
 	Label string
 }
 
-type State struct {
+type ViewModel struct {
 	Label string
 	Items []Item
 }

@@ -9,7 +9,7 @@ import (
 	"nicolas.galipot.net/hazo/server/common"
 )
 
-type State struct {
+type ViewModel struct {
 	Selected     string
 	Langs        []Lang
 	ColumnsCount int

@@ -30,16 +30,16 @@ type Section struct {
 	Descriptors []Descriptor
 }
 
-type Model struct {
+type ViewModel struct {
 	Sections []Section
 }
 
-func LoadForTaxon(ctx context.Context, queries *db.Queries, taxonRef string) (*Model, error) {
+func LoadForTaxon(ctx context.Context, queries *db.Queries, taxonRef string) (*ViewModel, error) {
 	sd, err := queries.GetSummaryDescriptors(ctx, taxonRef)
 	if err != nil {
 		return nil, err
 	}
-	summary := &Model{}
+	summary := &ViewModel{}
 	statesByPath := make(map[string][]State)
 	for _, state := range sd {
 		statesByPath[state.Path] = append(statesByPath[state.Path], State{

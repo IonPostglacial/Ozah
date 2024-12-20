@@ -7,12 +7,9 @@ import (
 	"net/http"
 
 	"nicolas.galipot.net/hazo/db"
-	"nicolas.galipot.net/hazo/db/storage"
 	"nicolas.galipot.net/hazo/server/common"
-	"nicolas.galipot.net/hazo/server/components/breadcrumbs"
 	"nicolas.galipot.net/hazo/server/components/iconmenu"
 	"nicolas.galipot.net/hazo/server/components/picturebox"
-	"nicolas.galipot.net/hazo/server/components/popover"
 	"nicolas.galipot.net/hazo/server/components/summary"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 	"nicolas.galipot.net/hazo/server/documents"
@@ -23,27 +20,11 @@ import (
 //go:embed taxons.html
 var taxonPage string
 
-type Model struct {
-	PageTitle                   string
-	DatasetName                 string
-	AvailableDatasets           *popover.State
-	MenuState                   *treemenu.State
-	SelectedTaxon               *FormData
-	ViewMenuState               *popover.State
-	BreadCrumbsState            *breadcrumbs.State
-	DescriptorsBreadCrumbsState *breadcrumbs.State
-	Descriptors                 []iconmenu.Model
-	SummaryModel                *summary.Model
-	PictureBoxModel             *picturebox.Model
-	BookInfoModel               []storage.GetTaxonBookInfoRow
-	UnselectedPanels            []common.UnselectedItem
-}
-
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	dsName := r.PathValue("dsName")
 	docRef := r.PathValue("id")
 	var (
-		taxon *FormData
+		taxon *FormViewModel
 		err   error
 	)
 	ctx := context.Background()
@@ -63,24 +44,24 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	selectedPanels := PanelSetFromString(queryParams.Get("panels"))
 	selectedPanelNames, unselectedPanels := selectedPanels.DivideNamesByMask(panelNames)
 	descriptorRef := queryParams.Get("d")
-	var currentDescriptor *documents.Model
+	var currentDescriptor *documents.ViewModel
 	if descriptorRef == "" {
 		descriptorRef = "c0"
-		currentDescriptor = &documents.Model{Ref: descriptorRef, Path: ""}
+		currentDescriptor = &documents.ViewModel{Ref: descriptorRef, Path: ""}
 	} else {
 		doc, err := queries.GetDocument(ctx, descriptorRef)
 		if err != nil {
 			return err
 		}
-		currentDescriptor = &documents.Model{Ref: doc.Ref, Path: doc.Path, Name: doc.Name}
+		currentDescriptor = &documents.ViewModel{Ref: doc.Ref, Path: doc.Path, Name: doc.Name}
 	}
 	if docRef != "" {
-		taxon, err = LoadFormDataFromDb(ctx, queries, docRef)
+		taxon, err = LoadFormViewModelFromDb(ctx, queries, docRef)
 		if err != nil {
 			return err
 		}
 	} else {
-		taxon = &FormData{}
+		taxon = &FormViewModel{}
 	}
 	cc.Template.Funcs(template.FuncMap{
 		"isPanelVisible": func(panelName string) bool {
@@ -107,11 +88,11 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	datasets, err := views.NewDatasetMenuState(cc, dsName)
+	datasets, err := views.NewDatasetMenuViewModel(cc, dsName)
 	if err != nil {
 		return err
 	}
-	branch, err := views.GetDocumentBranch(ctx, queries, &taxon.Model, dsName, link.ToTaxon)
+	branch, err := views.GetDocumentBranch(ctx, queries, &taxon.ViewModel, dsName, link.ToTaxon)
 	if err != nil {
 		return err
 	}
@@ -129,7 +110,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		return err
 	}
 	attach, err := queries.GetDocumentAttachments(ctx, taxon.Ref)
-	picboxModel := picturebox.Model{Index: 0, Count: 0, Name: taxon.Name}
+	picboxModel := picturebox.ViewModel{Index: 0, Count: 0, Name: taxon.Name}
 	if err == nil {
 		picboxModel.Count = len(attach)
 		if len(attach) > 0 {
@@ -141,18 +122,18 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	err = cc.Template.Execute(w, Model{
+	err = cc.Template.Execute(w, ViewModel{
 		PageTitle:         "Hazo",
 		DatasetName:       dsName,
 		AvailableDatasets: datasets,
 		SelectedTaxon:     taxon,
-		MenuState: &treemenu.State{
+		MenuState: &treemenu.ViewModel{
 			Selected:     taxon.Ref,
 			Langs:        menuLangs,
 			ColumnsCount: len(menuSelectedLangs),
 			Root:         items,
 		},
-		ViewMenuState:               views.NewMenuState("Taxons", dsName),
+		ViewMenuState:               views.NewViewMenuViewModel("Taxons", dsName),
 		BreadCrumbsState:            branch,
 		DescriptorsBreadCrumbsState: descBreadcrumbs,
 		Descriptors:                 descriptors,

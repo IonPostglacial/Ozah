@@ -9,7 +9,7 @@ import (
 	"nicolas.galipot.net/hazo/server/link"
 )
 
-type Model struct {
+type ViewModel struct {
 	Ref        string
 	Name       string
 	NameTr1    string
@@ -19,7 +19,7 @@ type Model struct {
 	IsSelected bool
 }
 
-func GetTaxonDescriptors(ctx context.Context, queries *db.Queries, dsName string, taxonRef string, currentDescriptor *documents.Model) ([]Model, error) {
+func GetTaxonDescriptors(ctx context.Context, queries *db.Queries, dsName string, taxonRef string, currentDescriptor *documents.ViewModel) ([]ViewModel, error) {
 	rows, err := queries.GetDescriptors(ctx, storage.GetDescriptorsParams{
 		Path:     db.FullPath(currentDescriptor.Path, currentDescriptor.Ref),
 		TaxonRef: taxonRef,
@@ -27,14 +27,14 @@ func GetTaxonDescriptors(ctx context.Context, queries *db.Queries, dsName string
 	if err != nil {
 		return nil, err
 	}
-	descriptors := make([]Model, len(rows))
+	descriptors := make([]ViewModel, len(rows))
 	for i, row := range rows {
 		unsel, ok := row.Unselected.(int64)
 		isSelected := false
 		if ok {
 			isSelected = unsel == 0
 		}
-		descriptors[i] = Model{
+		descriptors[i] = ViewModel{
 			Ref:        row.Ref,
 			Name:       row.Name,
 			NameTr1:    row.NameTr1.String,

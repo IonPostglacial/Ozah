@@ -12,8 +12,8 @@ import (
 	"nicolas.galipot.net/hazo/server/link"
 )
 
-func NewMenuState(label, dsName string) *popover.State {
-	return &popover.State{
+func NewViewMenuViewModel(label, dsName string) *popover.ViewModel {
+	return &popover.ViewModel{
 		Label: label,
 		Items: []popover.Item{
 			{Url: link.ToTaxons(dsName), Label: "Taxons"},
@@ -23,7 +23,7 @@ func NewMenuState(label, dsName string) *popover.State {
 	}
 }
 
-func NewDatasetMenuState(cc *common.Context, label string) (*popover.State, error) {
+func NewDatasetMenuViewModel(cc *common.Context, label string) (*popover.ViewModel, error) {
 	datasets, err := cc.User.ListDatasets()
 	if err != nil {
 		return nil, err
@@ -35,15 +35,15 @@ func NewDatasetMenuState(cc *common.Context, label string) (*popover.State, erro
 			Label: ds.Name,
 		}
 	}
-	return &popover.State{
+	return &popover.ViewModel{
 		Label: label,
 		Items: items,
 	}, nil
 }
 
-func GetDocumentBranch(ctx context.Context, queries *db.Queries, doc *documents.Model, dbName string, makeLink link.Maker) (*breadcrumbs.State, error) {
+func GetDocumentBranch(ctx context.Context, queries *db.Queries, doc *documents.ViewModel, dbName string, makeLink link.Maker) (*breadcrumbs.ViewModel, error) {
 	if doc == nil || doc.Path == "" {
-		return &breadcrumbs.State{}, nil
+		return &breadcrumbs.ViewModel{}, nil
 	}
 	branch := strings.Split(doc.Path, ".")
 	docs, err := queries.GetDocumentsNames(ctx, branch)
@@ -59,5 +59,5 @@ func GetDocumentBranch(ctx context.Context, queries *db.Queries, doc *documents.
 		Label: doc.Name,
 		Url:   makeLink(dbName, doc.Ref),
 	}
-	return &breadcrumbs.State{Branch: model}, nil
+	return &breadcrumbs.ViewModel{Branch: model}, nil
 }

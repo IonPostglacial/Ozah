@@ -5,6 +5,6 @@ type BreadCrumb struct {
 	Url   string
 }
 
-type State struct {
+type ViewModel struct {
 	Branch []BreadCrumb
 }

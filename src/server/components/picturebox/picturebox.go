@@ -1,6 +1,6 @@
 package picturebox
 
-type Model struct {
+type ViewModel struct {
 	Name   string
 	Source string
 	Index  int

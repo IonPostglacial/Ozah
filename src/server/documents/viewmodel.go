@@ -1,6 +1,6 @@
 package documents
 
-type Model struct {
+type ViewModel struct {
 	Ref         string
 	Path        string
 	Name        string

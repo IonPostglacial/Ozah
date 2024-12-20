@@ -16,57 +16,12 @@ import (
 	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components"
-	"nicolas.galipot.net/hazo/server/components/popover"
 	"nicolas.galipot.net/hazo/server/link"
 	"nicolas.galipot.net/hazo/server/views"
 )
 
 //go:embed identification.html
 var identificationPage string
-
-type Model struct {
-	PageTitle             string
-	AvailableDatasets     *popover.State
-	ViewMenuState         *popover.State
-	IdentifiedTaxa        []IdentifiedTaxon
-	Characters            []Character
-	MeasurementCharacters []Measurement
-	SelectedStates        []SelectedState
-}
-
-type IdentifiedTaxon struct {
-	db.IdentifiedTaxon
-	Url string
-}
-
-type SelectedState struct {
-	ParentRef  string
-	ParentName string
-	Ref        string
-	Name       string
-	Url        string
-}
-
-type State struct {
-	Ref  string
-	Name string
-	Url  string
-}
-
-type Character struct {
-	Ref    string
-	Name   string
-	States []State
-}
-
-type Measurement struct {
-	Ref      string
-	Name     string
-	UnitRef  string
-	UnsetUrl string
-	HasValue bool
-	Value    float64
-}
 
 func LinkToIdentification(dsName string, stateRefs []string, measures map[string]db.SpecimenMeasurement) string {
 	linkUrl := strings.Builder{}
@@ -137,11 +92,15 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return fmt.Errorf("error executing identification query: %w", err)
 	}
-	identifiedTaxa := make([]IdentifiedTaxon, len(taxa))
+	identifiedTaxa := make([]TaxonViewModel, len(taxa))
 	for i, taxon := range taxa {
-		identifiedTaxa[i] = IdentifiedTaxon{taxon, link.ToTaxon(dsName, taxon.Ref)}
+		identifiedTaxa[i] = TaxonViewModel{
+			Ref:  taxon.Ref,
+			Name: taxon.Name,
+			Url:  link.ToTaxon(dsName, taxon.Ref),
+		}
 	}
-	datasets, err := views.NewDatasetMenuState(cc, dsName)
+	datasets, err := views.NewDatasetMenuViewModel(cc, dsName)
 	if err != nil {
 		return err
 	}
@@ -149,11 +108,11 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	chars := make([]Character, 0)
-	var lastChar *Character
+	chars := make([]CharacterViewModel, 0)
+	var lastChar *CharacterViewModel
 	for _, ch := range distinctiveCharacters {
 		if lastChar == nil || ch.Ref != lastChar.Ref {
-			chars = append(chars, Character{
+			chars = append(chars, CharacterViewModel{
 				Ref:  ch.Ref,
 				Name: ch.Name,
 			})
@@ -169,13 +128,13 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	measurementChars := make([]Measurement, len(mcs))
+	measurementChars := make([]MeasurementViewModel, len(mcs))
 	for i, mc := range mcs {
 		value := queryParams.Get(fmt.Sprintf("m-%s", mc.Ref))
 		val, err := strconv.ParseFloat(value, 64)
 		ms := maps.Clone(measurements)
 		delete(ms, mc.Ref)
-		measurementChars[i] = Measurement{
+		measurementChars[i] = MeasurementViewModel{
 			Ref: mc.Ref, Name: mc.Name, UnitRef: mc.UnitRef.String,
 			UnsetUrl: LinkToIdentification(dsName, stateRefs, ms),
 			HasValue: err == nil,
@@ -183,11 +142,11 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		}
 	}
 	template.Must(cc.Template.Parse(identificationPage))
-	err = cc.Template.Execute(w, Model{
+	err = cc.Template.Execute(w, ViewModel{
 		PageTitle:             "Identification",
 		AvailableDatasets:     datasets,
-		ViewMenuState:         views.NewMenuState("Identify", dsName),
-		IdentifiedTaxa:        identifiedTaxa,
+		ViewMenuState:         views.NewViewMenuViewModel("Identify", dsName),
+		Taxa:                  identifiedTaxa,
 		Characters:            chars,
 		MeasurementCharacters: measurementChars,
 		SelectedStates:        selectedStates,

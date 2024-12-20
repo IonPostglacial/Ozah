@@ -1,5 +1,5 @@
 package pagehead
 
-type State struct {
+type ViewModel struct {
 	PageTitle string
 }
