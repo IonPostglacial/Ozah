@@ -144,6 +144,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	template.Must(cc.Template.Parse(identificationPage))
 	err = cc.Template.Execute(w, ViewModel{
 		PageTitle:             "Identification",
+		Debug:                 cc.Config.Debug,
 		AvailableDatasets:     datasets,
 		ViewMenuState:         views.NewViewMenuViewModel("Identify", dsName),
 		Taxa:                  identifiedTaxa,

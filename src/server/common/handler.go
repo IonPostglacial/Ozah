@@ -17,11 +17,11 @@ type Model struct {
 //go:embed error.html
 var errorPage string
 
-func (handler Handler) Unwrap() func(http.ResponseWriter, *http.Request) {
+func (handler Handler) Unwrap(config *ServerConfig) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tmpl := template.New("error")
 		tmpl = template.Must(tmpl.Parse(errorPage))
-		err := handler(w, r, &Context{})
+		err := handler(w, r, &Context{Config: config})
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)

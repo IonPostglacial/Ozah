@@ -11,6 +11,7 @@ import (
 type ViewModel struct {
 	PageTitle         string
 	DatasetName       string
+	Debug             bool
 	AvailableDatasets *popover.ViewModel
 	MenuState         *treemenu.ViewModel
 	MenuViewModel     *popover.ViewModel

@@ -9,6 +9,7 @@ import (
 type Context struct {
 	User     *user.T
 	Template *template.Template
+	Config   *ServerConfig
 }
 
 func (cc *Context) RegisterUser(login string) error {

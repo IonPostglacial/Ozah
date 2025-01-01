@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="/components.css">
     <script src="/assets/trix.min.js"></script>
     <script src="/assets/htmx.min.js"></script>
-    <script src="/components.js"></script>
+    {{ if .Debug }}
+    <script src="/debug.js"></script>
+    {{ end }}
 </head>
 {{ end }}

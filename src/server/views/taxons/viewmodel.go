@@ -23,6 +23,7 @@ type FormViewModel struct {
 type ViewModel struct {
 	PageTitle                   string
 	DatasetName                 string
+	Debug                       bool
 	AvailableDatasets           *popover.ViewModel
 	MenuState                   *treemenu.ViewModel
 	SelectedTaxon               *FormViewModel

@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"embed"
 
@@ -29,42 +30,60 @@ var assets embed.FS
 //go:embed index.html
 var indexPage string
 
-func New() *http.ServeMux {
+//go:embed debug.js
+var debugJS string
+
+type Server struct {
+	*http.ServeMux
+}
+
+func New(config *common.ServerConfig) Server {
 	s := http.NewServeMux()
 	s.HandleFunc("/ds/{dsName}/taxons", common.Handler(taxons.Handler).
 		Wrap(authentication.HandlerWrapper).
 		Wrap(documents.HandlerWrapper("taxons")).
-		Unwrap())
+		Unwrap(config))
 	s.HandleFunc("/ds/{dsName}/taxons/{id}", common.Handler(taxons.Handler).
 		Wrap(authentication.HandlerWrapper).
 		Wrap(documents.HandlerWrapper("taxons")).
-		Unwrap())
+		Unwrap(config))
 	s.HandleFunc("/ds/{dsName}/characters", common.Handler(characters.Handler).
 		Wrap(authentication.HandlerWrapper).
 		Wrap(documents.HandlerWrapper("characters")).
-		Unwrap())
+		Unwrap(config))
 	s.HandleFunc("/ds/{dsName}/characters/{id}", common.Handler(characters.Handler).
 		Wrap(authentication.HandlerWrapper).
 		Wrap(documents.HandlerWrapper("characters")).
-		Unwrap())
+		Unwrap(config))
 	s.HandleFunc("/ds/{dsName}/identify", common.Handler(identification.Handler).
 		Wrap(authentication.HandlerWrapper).
-		Unwrap())
+		Unwrap(config))
 	s.HandleFunc("/upload", common.Handler(uploadHandler).
 		Wrap(authentication.HandlerWrapper).
-		Unwrap())
+		Unwrap(config))
 	s.HandleFunc("/", common.Handler(indexHandler).
 		Wrap(authentication.HandlerWrapper).
-		Unwrap())
-	s.HandleFunc("/components.js", common.Handler(components.JavascriptHandler).Unwrap())
-	s.HandleFunc("/components.css", common.Handler(components.CssHandler).Unwrap())
+		Unwrap(config))
+	s.HandleFunc("/components.js", common.Handler(components.JavascriptHandler).Unwrap(config))
+	s.HandleFunc("/components.css", common.Handler(components.CssHandler).Unwrap(config))
 	s.Handle("/assets/", http.FileServer(http.FS(assets)))
-	return s
+	if config.Debug {
+		startedOn := time.Now().Format(time.RFC3339)
+
+		s.HandleFunc("/started-on", func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprint(w, startedOn)
+		})
+		s.HandleFunc("/debug.js", func(w http.ResponseWriter, r *http.Request) {
+			io.Copy(w, strings.NewReader(debugJS))
+		})
+	}
+	return Server{s}
 }
 
-type State struct {
+type ViewModel struct {
 	PageTitle string
 	Datasets  []db.Dataset
+	Debug     bool
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
@@ -129,9 +148,10 @@ func indexHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) er
 		return fmt.Errorf("failed to list datasets in index handler: %w", err)
 	}
 	w.Header().Add("Content-Type", "text/html")
-	err = tmpl.Execute(w, State{
+	err = tmpl.Execute(w, ViewModel{
 		PageTitle: "Hazo Home",
 		Datasets:  datasets,
+		Debug:     cc.Config.Debug,
 	})
 	if err != nil {
 		return fmt.Errorf("template rendering of the index page failed: %w", err)

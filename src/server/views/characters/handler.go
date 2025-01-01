@@ -82,6 +82,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	err = cc.Template.Execute(w, ViewModel{
 		PageTitle:         "Hazo",
 		DatasetName:       dsName,
+		Debug:             cc.Config.Debug,
 		AvailableDatasets: datasets,
 		MenuState: &treemenu.ViewModel{
 			Selected:     docRef,

@@ -125,6 +125,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	err = cc.Template.Execute(w, ViewModel{
 		PageTitle:         "Hazo",
 		DatasetName:       dsName,
+		Debug:             cc.Config.Debug,
 		AvailableDatasets: datasets,
 		SelectedTaxon:     taxon,
 		MenuState: &treemenu.ViewModel{
