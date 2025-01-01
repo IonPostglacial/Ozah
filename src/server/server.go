@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"fmt"
+	"html/template"
 	"io"
 	"net/http"
 	"os"
@@ -77,7 +78,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) e
 		fileName := headers[0].Filename
 		dir, err := os.MkdirTemp("tmp", fileName)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to create temporary directory to upload file '%s': %w", fileName, err)
 		}
 		defer os.RemoveAll(dir)
 		file, _ := io.ReadAll(auxiliar)
@@ -104,7 +105,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) e
 		dbName := strings.TrimSuffix(fileName, ".zip")
 		dbPath, err := cc.User.GetDataset(dbName)
 		if err != nil {
-			return err
+			return fmt.Errorf("uploading file '%s' failed while retrieving user dataset: %w", fileName, err)
 		}
 		err = db.Create(dbPath)
 		if err != nil {
@@ -122,13 +123,10 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) e
 
 func indexHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	tmpl := components.NewTemplate()
-	tmpl, err := tmpl.Parse(indexPage)
-	if err != nil {
-		return err
-	}
+	tmpl = template.Must(tmpl.Parse(indexPage))
 	datasets, err := cc.User.ListDatasets()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to list datasets in index handler: %w", err)
 	}
 	w.Header().Add("Content-Type", "text/html")
 	err = tmpl.Execute(w, State{
@@ -136,7 +134,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) er
 		Datasets:  datasets,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("template rendering of the index page failed: %w", err)
 	}
 	return nil
 }

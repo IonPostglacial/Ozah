@@ -38,14 +38,14 @@ func importFile(csvPath string, ds PrivateDataset, tableName string) error {
 	filePath := path.Join(csvPath, fileName)
 	content, err := parseCsvFile(filePath)
 	if err != nil {
-		return fmt.Errorf("importing file '%s' failed: %w", filePath, err)
+		return fmt.Errorf("importing file '%s' failed during CSV parsing: %w", filePath, err)
 	}
 	if content.rowCount == 0 {
 		return nil
 	}
 	db, err := Connect(ds)
 	if err != nil {
-		return err
+		return fmt.Errorf("importing file '%s' failed during db connection: %w", filePath, err)
 	}
 	ctx := context.Background()
 	sep := ""
