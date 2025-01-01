@@ -72,7 +72,7 @@
                 <h2 class="fixed-to-top padded separated-bottom">Identified taxa</h2>
                 <table>
                     <tr><th>Name</th></tr>
-                    {{ range .IdentifiedTaxa }}
+                    {{ range .Taxa }}
                         <tr><td><a href="{{ .Url }}">{{ .Name }}</a></td></tr>
                     {{ end }}
                 </table>

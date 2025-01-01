@@ -133,7 +133,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 			ColumnsCount: len(menuSelectedLangs),
 			Root:         items,
 		},
-		ViewMenuState:               views.NewViewMenuViewModel("Taxons", dsName),
+		MenuViewModel:               views.NewViewMenuViewModel("Taxons", dsName),
 		BreadCrumbsState:            branch,
 		DescriptorsBreadCrumbsState: descBreadcrumbs,
 		Descriptors:                 descriptors,

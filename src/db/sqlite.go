@@ -1,8 +1,8 @@
 package db
 
 import (
+	"fmt"
 	"io"
-	"log"
 	"os/exec"
 )
 
@@ -16,19 +16,19 @@ func ExecSqlite(dbPath string, code string) error {
 	cmd := exec.Command("sqlite3", dbPath)
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("piping stdin to sqlite3 failed: %w", err)
 	}
 	err = cmd.Start()
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("launching sqlite3 process failed: %w", err)
 	}
 	_, err = io.WriteString(stdin, code)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("writing the query to stdin failed: %w", err)
 	}
 	err = cmd.Wait()
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("waiting for sqlite3 to complete failed: %w", err)
 	}
 	return nil
 }

@@ -26,7 +26,7 @@ type ViewModel struct {
 	AvailableDatasets           *popover.ViewModel
 	MenuState                   *treemenu.ViewModel
 	SelectedTaxon               *FormViewModel
-	ViewMenuState               *popover.ViewModel
+	MenuViewModel               *popover.ViewModel
 	BreadCrumbsState            *breadcrumbs.ViewModel
 	DescriptorsBreadCrumbsState *breadcrumbs.ViewModel
 	Descriptors                 []iconmenu.ViewModel

@@ -83,22 +83,22 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) e
 		file, _ := io.ReadAll(auxiliar)
 		r, err := zip.NewReader(bytes.NewReader(file), int64(len(file)))
 		if err != nil {
-			return fmt.Errorf("error reading zip: %w", err)
+			return fmt.Errorf("reading zip failed: %w", err)
 		}
 		for _, f := range r.File {
 			content, err := f.Open()
 			if err != nil {
-				return fmt.Errorf("error reading file '%s': %w", f.Name, err)
+				return fmt.Errorf("reading file '%s' failed: %w", f.Name, err)
 			}
 			filePath := path.Join(dir, f.Name)
 			file, err := os.Create(filePath)
 			if err != nil {
-				return fmt.Errorf("error creating file '%s': %w", filePath, err)
+				return fmt.Errorf("creating file '%s' failed: %w", filePath, err)
 			}
 			defer file.Close()
 			_, err = io.Copy(file, content)
 			if err != nil {
-				return fmt.Errorf("error copying file '%s': %w", filePath, err)
+				return fmt.Errorf("copying file '%s' failed: %w", filePath, err)
 			}
 		}
 		dbName := strings.TrimSuffix(fileName, ".zip")
@@ -106,13 +106,13 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) e
 		if err != nil {
 			return err
 		}
-		err = db.Init(dbPath)
+		err = db.Create(dbPath)
 		if err != nil {
-			return fmt.Errorf("error creating db '%s': %w", dbPath, err)
+			return fmt.Errorf("creating database '%s' failed: %w", dbPath, err)
 		}
 		err = db.ImportCsv(dir, dbPath)
 		if err != nil {
-			return fmt.Errorf("error importing zip: %w", err)
+			return fmt.Errorf("error importing zip '%s' to '%s' failed: %w", dir, dbPath, err)
 		}
 	}
 	w.Header().Add("Content-Type", "text/html")

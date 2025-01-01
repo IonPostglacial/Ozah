@@ -3,7 +3,7 @@ create table Document (
     Path Text not null default '',
     Doc_Order Integer not null,
     Name Text not null default '',
-    Details Text
+    Details Text default ''
 );
 
 create table Lang (
@@ -16,7 +16,7 @@ create table Document_Translation (
     Lang_Ref Text not null,
 
     Name Text not null,
-    Details Text,
+    Details Text default '',
 
     primary key (Document_Ref, Lang_Ref),
     foreign key (Document_Ref) references Document(Ref),
@@ -79,7 +79,7 @@ create table Unit (
 	Base_Unit_Ref Text,
 	To_Base_Unit_Factor Real,
 	
-	foreign key (Base_Unit_Ref) references Unit(Ref)
+	foreign key (Base_Unit_Ref) references Unit(Ref) deferrable initially deferred
 );
 
 create table Measurement_Character (
@@ -87,8 +87,8 @@ create table Measurement_Character (
 	Color Text,
 	Unit_Ref Text,
 
-    foreign key (Document_Ref) references Document(Ref) on delete cascade,
-	foreign key (Unit_Ref) references Unit(Ref)
+    foreign key (Document_Ref) references Document(Ref) on delete cascade deferrable initially deferred,
+	foreign key (Unit_Ref) references Unit(Ref) deferrable initially deferred
 );
 
 create table Document_Attachment (
@@ -150,7 +150,7 @@ create table Taxon_Measurement (
 	
 	primary key (Taxon_Ref, Character_Ref),
 	foreign key (Taxon_Ref) references Taxon(Document_Ref),
-	foreign key (Character_Ref) references Mesurement_Character(Document_Ref)
+	foreign key (Character_Ref) references Measurement_Character(Document_Ref) deferrable initially deferred
 );
 
 create table Taxon_Description (
@@ -168,7 +168,7 @@ create table Taxon_Book_Info (
 
 	Fasc Integer,
 	Page Integer,
-    Details Text,
+    Details Text default '',
 	
 	primary key (Taxon_Ref, Book_Ref),
 	foreign key (Taxon_Ref) references Taxon(Document_Ref),

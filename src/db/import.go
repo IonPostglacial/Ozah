@@ -27,7 +27,7 @@ func ImportCsv(csvPath string, ds PrivateDataset) error {
 	for _, tableName := range tableNames {
 		err := importFile(csvPath, ds, tableName)
 		if err != nil {
-			return fmt.Errorf("error importing CSV '%s': %w", csvPath, err)
+			return fmt.Errorf("importing CSV '%s' failed: %w", csvPath, err)
 		}
 	}
 	return nil
@@ -38,7 +38,7 @@ func importFile(csvPath string, ds PrivateDataset, tableName string) error {
 	filePath := path.Join(csvPath, fileName)
 	content, err := parseCsvFile(filePath)
 	if err != nil {
-		return fmt.Errorf("error importing file '%s': %w", filePath, err)
+		return fmt.Errorf("importing file '%s' failed: %w", filePath, err)
 	}
 	if content.rowCount == 0 {
 		return nil
@@ -70,9 +70,15 @@ func importFile(csvPath string, ds PrivateDataset, tableName string) error {
 		sep = ","
 	}
 	query := fmt.Sprintf("insert into '%s' (%s) values %s;", tableName, colNames.String(), valueRows.String())
-	_, err = db.ExecContext(ctx, query, content.rows...)
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
-		return fmt.Errorf("error importing into table '%s': %w", tableName, err)
+		return fmt.Errorf("transaction to import table '%s' failed: %w", tableName, err)
+	}
+	defer tx.Commit()
+	_, err = tx.ExecContext(ctx, query, content.rows...)
+	if err != nil {
+		fmt.Println(query)
+		return fmt.Errorf("importing into table '%s' failed: %w", tableName, err)
 	}
 	return nil
 }
@@ -181,14 +187,14 @@ func parseHeader(r *csv.Reader) ([]column, error) {
 func parseCsvFile(fileName string) (*csvContent, error) {
 	f, err := os.Open(fileName)
 	if err != nil {
-		return nil, fmt.Errorf("error opening CSV file to import: %w", err)
+		return nil, fmt.Errorf("opening CSV file during import failed: %w", err)
 	}
 	defer f.Close()
 	r := csv.NewReader(f)
 	r.TrimLeadingSpace = true
 	columns, err := parseHeader(r)
 	if err != nil {
-		return nil, fmt.Errorf("error reading CSV header: %w", err)
+		return nil, fmt.Errorf("reading CSV header during import failed: %w", err)
 	}
 	rows := make([]any, 0)
 	rowCount := 0
@@ -198,12 +204,12 @@ func parseCsvFile(fileName string) (*csvContent, error) {
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("error reading CSV record: %w", err)
+			return nil, fmt.Errorf("reading CSV record udring import failed: %w", err)
 		}
 		for i, text := range rec {
 			value, err := columns[i].Parse(text)
 			if err != nil {
-				return nil, fmt.Errorf("error parsing value '%s' for column '%s': %w", text, columns[i].Name, err)
+				return nil, fmt.Errorf("parsing value '%s' for column '%s' failed: %w", text, columns[i].Name, err)
 			}
 			rows = append(rows, value)
 		}
