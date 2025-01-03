@@ -4,12 +4,12 @@ create table Document (
     Doc_Order Integer not null,
     Name Text not null default '',
     Details Text default ''
-);
+) strict, without rowid;
 
 create table Lang (
     Ref Text not null primary key,
     Name Text not null
-);
+) strict, without rowid;
 
 create table Document_Translation (
     Document_Ref Text not null,
@@ -21,21 +21,21 @@ create table Document_Translation (
     primary key (Document_Ref, Lang_Ref),
     foreign key (Document_Ref) references Document(Ref),
     foreign key (Lang_Ref) references Lang(Ref)
-);
+) strict, without rowid;
 
 create table Categorical_Character (
     Document_Ref Text not null primary key,
 	Color Text,
 
     foreign key (Document_Ref) references Document(Ref) on delete cascade
-);
+) strict, without rowid;
 
 create table State (
     Document_Ref Text not null primary key,
 	Color Text,
 
     foreign key (Document_Ref) references Document(Ref) on delete cascade
-);
+) strict, without rowid;
 
 create table Periodic_Character (
     Document_Ref Text not null primary key,
@@ -44,7 +44,7 @@ create table Periodic_Character (
 
     foreign key (Document_Ref) references Document(Ref) on delete cascade,
     foreign key (Periodic_Category_Ref) references Document(Ref) on delete cascade
-);
+) strict, without rowid;
 
 create table Geographical_Place (
     Document_Ref Text not null primary key,
@@ -53,7 +53,7 @@ create table Geographical_Place (
     Scale Integer not null,
 
     foreign key (Document_Ref) references Document(Ref) on delete cascade
-);
+) strict, without rowid;
 
 create table Geographical_Map (
     Document_Ref Text not null primary key,
@@ -63,7 +63,7 @@ create table Geographical_Map (
 
     foreign key (Document_Ref) references Document(Ref) on delete cascade,
     foreign key (Place_Ref) references Geographical_Place(Document_Ref) on delete cascade
-);
+) strict, without rowid;
 
 create table Geographical_Character (
     Document_Ref Text not null primary key,
@@ -72,7 +72,7 @@ create table Geographical_Character (
 
     foreign key (Document_Ref) references Document(Ref) on delete cascade,
     foreign key (Map_Ref) references Geographical_Map(Document_Ref) on delete cascade
-);
+) strict, without rowid;
 
 create table Unit (
 	Ref Text not null primary key,
@@ -80,7 +80,7 @@ create table Unit (
 	To_Base_Unit_Factor Real,
 	
 	foreign key (Base_Unit_Ref) references Unit(Ref) deferrable initially deferred
-);
+) strict, without rowid;
 
 create table Measurement_Character (
     Document_Ref Text not null primary key,
@@ -89,7 +89,7 @@ create table Measurement_Character (
 
     foreign key (Document_Ref) references Document(Ref) on delete cascade deferrable initially deferred,
 	foreign key (Unit_Ref) references Unit(Ref) deferrable initially deferred
-);
+) strict, without rowid;
 
 create table Document_Attachment (
     Document_Ref Text not null,
@@ -100,14 +100,14 @@ create table Document_Attachment (
 
     primary key (Document_Ref, Attachment_Index),
     foreign key (Document_Ref) references Document(Ref)
-);
+) strict, without rowid;
 
 create table Book (
     Document_Ref Text not null primary key,
 	ISBN Text,
 
     foreign key (Document_Ref) references Document(Ref) on delete cascade
-);
+) strict, without rowid;
 
 create table Descriptor_Visibility_Requirement (
 	Descriptor_Ref Text not null,
@@ -116,7 +116,7 @@ create table Descriptor_Visibility_Requirement (
 	primary key (Descriptor_Ref, Required_Descriptor_Ref),
 	foreign key (Descriptor_Ref) references Document(Ref),
 	foreign key (Required_Descriptor_Ref) references Document(Ref)
-);
+) strict, without rowid;
 
 create table Descriptor_Visibility_Inapplicable (
 	Descriptor_Ref Text not null,
@@ -125,7 +125,7 @@ create table Descriptor_Visibility_Inapplicable (
 	primary key (Descriptor_Ref, Inapplicable_Descriptor_Ref),
 	foreign key (Descriptor_Ref) references Document(Ref),
 	foreign key (Inapplicable_Descriptor_Ref) references Document(Ref)
-);
+) strict, without rowid;
 
 create table Taxon (
     Document_Ref Text not null primary key,
@@ -139,7 +139,7 @@ create table Taxon (
     Page Integer,
 
     foreign key (Document_Ref) references Document(Ref) on delete cascade
-);
+) strict, without rowid;
 
 create table Taxon_Measurement (
 	Taxon_Ref Text not null,
@@ -151,7 +151,7 @@ create table Taxon_Measurement (
 	primary key (Taxon_Ref, Character_Ref),
 	foreign key (Taxon_Ref) references Taxon(Document_Ref),
 	foreign key (Character_Ref) references Measurement_Character(Document_Ref) deferrable initially deferred
-);
+) strict, without rowid;
 
 create table Taxon_Description (
 	Taxon_Ref Text not null,
@@ -160,7 +160,7 @@ create table Taxon_Description (
 	primary key (Taxon_Ref, Description_Ref),
 	foreign key (Taxon_Ref) references Taxon(Document_Ref),
 	foreign key (Description_Ref) references Document(Ref)
-);
+) strict, without rowid;
 
 create table Taxon_Book_Info (
 	Taxon_Ref Text not null,
@@ -173,7 +173,7 @@ create table Taxon_Book_Info (
 	primary key (Taxon_Ref, Book_Ref),
 	foreign key (Taxon_Ref) references Taxon(Document_Ref),
 	foreign key (Book_Ref) references Book(Document_Ref)
-);
+) strict, without rowid;
 
 create table Taxon_Specimen_Location (
     Taxon_Ref Text not null,
@@ -184,4 +184,4 @@ create table Taxon_Specimen_Location (
 
     primary key (Taxon_Ref, Specimen_Index),
     foreign key (Taxon_Ref) references Taxon(Document_Ref)
-);
+) strict, without rowid;

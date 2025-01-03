@@ -8,7 +8,7 @@ import (
 )
 
 func Connect(ds PrivateDataset) (*sql.DB, error) {
-	return sql.Open("sqlite3", "file:"+string(ds)+"?_foreign_keys=on")
+	return sql.Open("sqlite3", "file:"+string(ds)+"?_foreign_keys=on&cache=shared&mode=rwc")
 }
 
 func Open(ds PrivateDataset) (*Queries, error) {
