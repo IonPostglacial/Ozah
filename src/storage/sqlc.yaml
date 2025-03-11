@@ -1,0 +1,16 @@
+version: "2"
+sql:
+  - engine: "sqlite"
+    queries: "dataset_queries.sql"
+    schema: "dataset_schema.sql"
+    gen:
+      go:
+        package: "dsdb"
+        out: "dsdb"
+  - engine: "sqlite"
+    queries: "app_queries.sql"
+    schema: "app_schema.sql"
+    gen:
+      go:
+        package: "appdb"
+        out: "appdb"

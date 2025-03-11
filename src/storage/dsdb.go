@@ -1,18 +1,18 @@
-package db
+package storage
 
 import (
 	"database/sql"
 	"fmt"
 
-	"nicolas.galipot.net/hazo/db/storage"
+	storage "nicolas.galipot.net/hazo/storage/dsdb"
 )
 
-func Connect(ds PrivateDataset) (*sql.DB, error) {
+func ConnectDsDb(ds PrivateDataset) (*sql.DB, error) {
 	return sql.Open("sqlite3", "file:"+string(ds)+"?_foreign_keys=on&cache=shared&mode=rwc")
 }
 
-func Open(ds PrivateDataset) (*Queries, error) {
-	db, err := Connect(ds)
+func OpenDsDb(ds PrivateDataset) (*Queries, error) {
+	db, err := ConnectDsDb(ds)
 	if err != nil {
 		return nil, fmt.Errorf("could not open the database: %w", err)
 	}

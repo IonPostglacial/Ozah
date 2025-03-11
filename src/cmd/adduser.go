@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"golang.org/x/crypto/bcrypt"
-	"nicolas.galipot.net/hazo/db"
-	"nicolas.galipot.net/hazo/db/commonstorage"
+	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/appdb"
 )
 
 const Cost = 11
@@ -20,7 +20,7 @@ func AddUser(args []string) error {
 		return fmt.Errorf("could not create directory '%s': %w", folderPath, err)
 	}
 	ctx := context.Background()
-	_, queries, err := db.OpenCommon()
+	_, queries, err := storage.OpenAppDb()
 	if err != nil {
 		return fmt.Errorf("could not open users database: %w", err)
 	}
@@ -28,7 +28,7 @@ func AddUser(args []string) error {
 	if err != nil {
 		return fmt.Errorf("could not hash password: %w", err)
 	}
-	_, err = queries.InsertCredentials(ctx, commonstorage.InsertCredentialsParams{
+	_, err = queries.InsertCredentials(ctx, appdb.InsertCredentialsParams{
 		Login:      login,
 		Encryption: "bcrypt",
 		Password:   string(hash),
@@ -36,7 +36,7 @@ func AddUser(args []string) error {
 	if err != nil {
 		return fmt.Errorf("could not insert credentials of user '%s': %w", login, err)
 	}
-	_, err = queries.InsertUserConfiguration(ctx, commonstorage.InsertUserConfigurationParams{
+	_, err = queries.InsertUserConfiguration(ctx, appdb.InsertUserConfigurationParams{
 		Login:            login,
 		PrivateDirectory: folderPath,
 	})

@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"nicolas.galipot.net/hazo/db"
-	"nicolas.galipot.net/hazo/db/storage"
+	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/dsdb"
 )
 
 type MultilangText struct {
@@ -34,7 +34,7 @@ type ViewModel struct {
 	Sections []Section
 }
 
-func LoadForTaxon(ctx context.Context, queries *db.Queries, taxonRef string) (*ViewModel, error) {
+func LoadForTaxon(ctx context.Context, queries *storage.Queries, taxonRef string) (*ViewModel, error) {
 	sd, err := queries.GetSummaryDescriptors(ctx, taxonRef)
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func LoadForTaxon(ctx context.Context, queries *db.Queries, taxonRef string) (*V
 		parentId := path[strings.LastIndex(path, ".")+1:]
 		characterRefs = append(characterRefs, parentId)
 	}
-	characters, err := queries.GetCatCharactersNameTr2(ctx, storage.GetCatCharactersNameTr2Params{
+	characters, err := queries.GetCatCharactersNameTr2(ctx, dsdb.GetCatCharactersNameTr2Params{
 		Lang1: "EN", Lang2: "CN", Refs: characterRefs,
 	})
 	if err != nil {
@@ -64,7 +64,7 @@ func LoadForTaxon(ctx context.Context, queries *db.Queries, taxonRef string) (*V
 	}
 	descriptionsBySection := make(map[string][]Descriptor)
 	for _, ch := range characters {
-		fullPath := db.FullPath(ch.Path, ch.Ref)
+		fullPath := storage.FullPath(ch.Path, ch.Ref)
 		states := statesByPath[fullPath]
 		path := strings.Split(ch.Path, ".")
 		section := "c0"
@@ -84,7 +84,7 @@ func LoadForTaxon(ctx context.Context, queries *db.Queries, taxonRef string) (*V
 	for ref := range descriptionsBySection {
 		sectionRefs = append(sectionRefs, ref)
 	}
-	sections, err := queries.GetCatCharactersNameTr2(ctx, storage.GetCatCharactersNameTr2Params{
+	sections, err := queries.GetCatCharactersNameTr2(ctx, dsdb.GetCatCharactersNameTr2Params{
 		Lang1: "EN", Lang2: "CN", Refs: sectionRefs,
 	})
 	if err != nil {

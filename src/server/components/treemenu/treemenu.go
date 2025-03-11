@@ -5,8 +5,8 @@ import (
 	_ "embed"
 	"net/url"
 
-	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/server/common"
+	"nicolas.galipot.net/hazo/storage"
 )
 
 type ViewModel struct {
@@ -68,7 +68,7 @@ func (lang LangSet) LangsFromNames(url *url.URL, names []string) []Lang {
 	return langs
 }
 
-func LoadItemFromDb(ctx context.Context, queries *db.Queries, root string, langs []string, filter string) (*Item, error) {
+func LoadItemFromDb(ctx context.Context, queries *storage.Queries, root string, langs []string, filter string) (*Item, error) {
 	docs, err := queries.GetDocumentHierarchy(ctx, root, langs, filter)
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func LoadItemFromDb(ctx context.Context, queries *db.Queries, root string, langs
 				}
 			}
 		}
-		fullPath := db.FullPath(doc.Path, doc.Ref)
+		fullPath := storage.FullPath(doc.Path, doc.Ref)
 		nameTr := make([]string, len(doc.NameTr))
 		for i, name := range doc.NameTr {
 			nameTr[i] = name.String

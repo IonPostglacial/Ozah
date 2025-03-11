@@ -10,9 +10,9 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components"
+	"nicolas.galipot.net/hazo/storage"
 )
 
 const SessionCookieName = "session_token"
@@ -27,7 +27,7 @@ type Model struct {
 func HandlerWrapper(handler common.Handler) common.Handler {
 	return func(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		ctx := context.Background()
-		cdb, queries, err := db.OpenCommon()
+		cdb, queries, err := storage.OpenAppDb()
 		if err != nil {
 			return err
 		}

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"nicolas.galipot.net/hazo/db/commonstorage"
+	"nicolas.galipot.net/hazo/storage/appdb"
 )
 
 type Session struct {
@@ -21,7 +21,7 @@ var ErrSessionExpired = fmt.Errorf("session expired")
 
 const dateFormat = "2006-01-02T15:04:05"
 
-func loginFromSessionToken(ctx context.Context, queries *commonstorage.Queries, tok string) (string, error) {
+func loginFromSessionToken(ctx context.Context, queries *appdb.Queries, tok string) (string, error) {
 	session, err := queries.GetSession(ctx, tok)
 	if err != nil {
 		return "", err
@@ -52,7 +52,7 @@ func generateToken() (string, error) {
 	return buf.String(), nil
 }
 
-func startSession(ctx context.Context, db *sql.DB, queries *commonstorage.Queries, login string) (*Session, error) {
+func startSession(ctx context.Context, db *sql.DB, queries *appdb.Queries, login string) (*Session, error) {
 	sessionToken, err := generateToken()
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func startSession(ctx context.Context, db *sql.DB, queries *commonstorage.Querie
 	if err != nil {
 		return nil, err
 	}
-	_, err = qtx.InsertSession(ctx, commonstorage.InsertSessionParams{
+	_, err = qtx.InsertSession(ctx, appdb.InsertSessionParams{
 		Token:      sessionToken,
 		Login:      login,
 		ExpiryDate: expiresAt.Format(dateFormat),

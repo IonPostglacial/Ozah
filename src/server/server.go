@@ -14,7 +14,6 @@ import (
 
 	"embed"
 
-	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/server/authentication"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components"
@@ -22,6 +21,7 @@ import (
 	"nicolas.galipot.net/hazo/server/views/characters"
 	"nicolas.galipot.net/hazo/server/views/identification"
 	"nicolas.galipot.net/hazo/server/views/taxons"
+	"nicolas.galipot.net/hazo/storage"
 )
 
 //go:embed assets
@@ -82,7 +82,7 @@ func New(config *common.ServerConfig) Server {
 
 type ViewModel struct {
 	PageTitle string
-	Datasets  []db.Dataset
+	Datasets  []storage.Dataset
 	Debug     bool
 }
 
@@ -126,11 +126,11 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) e
 		if err != nil {
 			return fmt.Errorf("uploading file '%s' failed while retrieving user dataset: %w", fileName, err)
 		}
-		err = db.Create(dbPath)
+		err = storage.Create(dbPath)
 		if err != nil {
 			return fmt.Errorf("creating database '%s' failed: %w", dbPath, err)
 		}
-		err = db.ImportCsv(dir, dbPath)
+		err = storage.ImportCsv(dir, dbPath)
 		if err != nil {
 			return fmt.Errorf("error importing zip '%s' to '%s' failed: %w", dir, dbPath, err)
 		}

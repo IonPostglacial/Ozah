@@ -1,4 +1,4 @@
-package db
+package storage
 
 import (
 	"context"
@@ -6,25 +6,25 @@ import (
 	"fmt"
 	"strings"
 
-	"nicolas.galipot.net/hazo/db/storage"
+	"nicolas.galipot.net/hazo/storage/dsdb"
 )
 
 const identifyTaxonPrelude = `select doc.Ref, doc.Name from Document doc
 where doc.Ref in (`
 
 const identifyTaxonWithMeasurements = `
-	with specimen(Character_Ref, Measurement) as (values %s) 
-	select m.Taxon_Ref from specimen 
-	left join Taxon_Measurement m on m.Character_Ref = specimen.Character_Ref 
-	where 
-		(Minimum is null or specimen.Measurement >= Minimum) and 
+	with specimen(Character_Ref, Measurement) as (values %s)
+	select m.Taxon_Ref from specimen
+	left join Taxon_Measurement m on m.Character_Ref = specimen.Character_Ref
+	where
+		(Minimum is null or specimen.Measurement >= Minimum) and
 		(Maximum is null or specimen.Measurement <= Maximum)
 `
 
 const identifyTaxonWithStates = `
-	select Taxon_Ref from Taxon_Description 
-    where Description_Ref in (%s) 
-    group by Taxon_Ref 
+	select Taxon_Ref from Taxon_Description
+    where Description_Ref in (%s)
+    group by Taxon_Ref
     having Count(Taxon_Ref) = ?
 `
 
@@ -47,7 +47,7 @@ type IdentifiedTaxon struct {
 }
 
 type Queries struct {
-	*storage.Queries
+	*dsdb.Queries
 	db *sql.DB
 }
 

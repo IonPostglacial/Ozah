@@ -13,17 +13,17 @@ import (
 
 	"maps"
 
-	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components"
 	"nicolas.galipot.net/hazo/server/link"
 	"nicolas.galipot.net/hazo/server/views"
+	"nicolas.galipot.net/hazo/storage"
 )
 
 //go:embed identification.html
 var identificationPage string
 
-func LinkToIdentification(dsName string, stateRefs []string, measures map[string]db.SpecimenMeasurement) string {
+func LinkToIdentification(dsName string, stateRefs []string, measures map[string]storage.SpecimenMeasurement) string {
 	linkUrl := strings.Builder{}
 	urlQuery := url.Values{}
 	for _, ref := range stateRefs {
@@ -46,13 +46,13 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	queries, err := db.Open(ds)
+	queries, err := storage.OpenDsDb(ds)
 	if err != nil {
 		return err
 	}
 	queryParams := r.URL.Query()
 	stateRefs := queryParams["s"]
-	measurements := make(map[string]db.SpecimenMeasurement, len(queryParams))
+	measurements := make(map[string]storage.SpecimenMeasurement, len(queryParams))
 	for k, values := range queryParams {
 		if strings.HasPrefix(k, "m-") {
 			for _, v := range values {
@@ -60,7 +60,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 				if err != nil {
 					return fmt.Errorf("wrong measurement query '%s': %w", k, err)
 				}
-				measurements[k[2:]] = db.SpecimenMeasurement{
+				measurements[k[2:]] = storage.SpecimenMeasurement{
 					CharacterRef: k[2:],
 					Value:        value,
 				}
@@ -81,11 +81,11 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 			Ref: state.Ref, Name: state.Name, Url: url,
 		}
 	}
-	ms := make([]db.SpecimenMeasurement, 0, len(measurements))
+	ms := make([]storage.SpecimenMeasurement, 0, len(measurements))
 	for _, v := range measurements {
 		ms = append(ms, v)
 	}
-	taxa, err := queries.IdentifyTaxa(ctx, db.TaxonIdentificationParams{
+	taxa, err := queries.IdentifyTaxa(ctx, storage.TaxonIdentificationParams{
 		Measurements: ms,
 		StateRefs:    stateRefs,
 	})

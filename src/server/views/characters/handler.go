@@ -7,14 +7,14 @@ import (
 	"html/template"
 	"net/http"
 
-	"nicolas.galipot.net/hazo/db"
-	"nicolas.galipot.net/hazo/db/storage"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/picturebox"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 	"nicolas.galipot.net/hazo/server/documents"
 	"nicolas.galipot.net/hazo/server/link"
 	"nicolas.galipot.net/hazo/server/views"
+	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/dsdb"
 )
 
 //go:embed characters.html
@@ -28,7 +28,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	queries, err := db.Open(ds)
+	queries, err := storage.OpenDsDb(ds)
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		return err
 	}
 	var character *documents.ViewModel
-	ch, err := queries.GetDocumentTr2(ctx, storage.GetDocumentTr2Params{
+	ch, err := queries.GetDocumentTr2(ctx, dsdb.GetDocumentTr2Params{
 		Lang1: "EN",
 		Lang2: "CN",
 		Ref:   docRef,

@@ -1,4 +1,4 @@
-package db
+package storage
 
 import (
 	"context"
@@ -43,7 +43,7 @@ func importFile(csvPath string, ds PrivateDataset, tableName string) error {
 	if content.rowCount == 0 {
 		return nil
 	}
-	db, err := Connect(ds)
+	db, err := ConnectDsDb(ds)
 	if err != nil {
 		return fmt.Errorf("importing file '%s' failed during db connection: %w", filePath, err)
 	}

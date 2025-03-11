@@ -3,10 +3,10 @@ package iconmenu
 import (
 	"context"
 
-	"nicolas.galipot.net/hazo/db"
-	"nicolas.galipot.net/hazo/db/storage"
 	"nicolas.galipot.net/hazo/server/documents"
 	"nicolas.galipot.net/hazo/server/link"
+	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/dsdb"
 )
 
 type ViewModel struct {
@@ -19,9 +19,9 @@ type ViewModel struct {
 	IsSelected bool
 }
 
-func GetTaxonDescriptors(ctx context.Context, queries *db.Queries, dsName string, taxonRef string, currentDescriptor *documents.ViewModel) ([]ViewModel, error) {
-	rows, err := queries.GetDescriptors(ctx, storage.GetDescriptorsParams{
-		Path:     db.FullPath(currentDescriptor.Path, currentDescriptor.Ref),
+func GetTaxonDescriptors(ctx context.Context, queries *storage.Queries, dsName string, taxonRef string, currentDescriptor *documents.ViewModel) ([]ViewModel, error) {
+	rows, err := queries.GetDescriptors(ctx, dsdb.GetDescriptorsParams{
+		Path:     storage.FullPath(currentDescriptor.Path, currentDescriptor.Ref),
 		TaxonRef: taxonRef,
 	})
 	if err != nil {

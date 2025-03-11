@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"net/http"
 
-	"nicolas.galipot.net/hazo/db"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/iconmenu"
 	"nicolas.galipot.net/hazo/server/components/picturebox"
@@ -15,6 +14,7 @@ import (
 	"nicolas.galipot.net/hazo/server/documents"
 	"nicolas.galipot.net/hazo/server/link"
 	"nicolas.galipot.net/hazo/server/views"
+	"nicolas.galipot.net/hazo/storage"
 )
 
 //go:embed taxons.html
@@ -32,7 +32,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	queries, err := db.Open(ds)
+	queries, err := storage.OpenDsDb(ds)
 	if err != nil {
 		return err
 	}

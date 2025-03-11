@@ -1,7 +1,6 @@
 package taxons
 
 import (
-	"nicolas.galipot.net/hazo/db/storage"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/breadcrumbs"
 	"nicolas.galipot.net/hazo/server/components/iconmenu"
@@ -10,6 +9,7 @@ import (
 	"nicolas.galipot.net/hazo/server/components/summary"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 	"nicolas.galipot.net/hazo/server/documents"
+	"nicolas.galipot.net/hazo/storage/dsdb"
 )
 
 type FormViewModel struct {
@@ -33,6 +33,6 @@ type ViewModel struct {
 	Descriptors                 []iconmenu.ViewModel
 	SummaryModel                *summary.ViewModel
 	PictureBoxModel             *picturebox.ViewModel
-	BookInfoModel               []storage.GetTaxonBookInfoRow
+	BookInfoModel               []dsdb.GetTaxonBookInfoRow
 	UnselectedPanels            []common.UnselectedItem
 }

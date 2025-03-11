@@ -4,14 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"nicolas.galipot.net/hazo/db"
+	"nicolas.galipot.net/hazo/storage"
 )
 
 func LsDoc(args []string) error {
 	ctx := context.Background()
 	dbPath := args[0]
 	docPath := args[1]
-	queries, err := db.Open(db.PrivateDataset(dbPath))
+	queries, err := storage.OpenDsDb(storage.PrivateDataset(dbPath))
 	if err != nil {
 		return err
 	}
