@@ -16,6 +16,16 @@ type Credential struct {
 	LastModified sql.NullString
 }
 
+type Lang struct {
+	Ref  string
+	Name string
+}
+
+type Panel struct {
+	ID   int64
+	Name string
+}
+
 type Session struct {
 	Token      string
 	Login      string
@@ -25,4 +35,14 @@ type Session struct {
 type UserConfiguration struct {
 	Login            string
 	PrivateDirectory string
+}
+
+type UserHiddenPanel struct {
+	UserLogin string
+	PanelID   int64
+}
+
+type UserSelectedLang struct {
+	UserLogin string
+	LangRef   string
 }

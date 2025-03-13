@@ -3,8 +3,11 @@ package taxons
 import (
 	"context"
 	_ "embed"
+	"fmt"
 	"html/template"
 	"net/http"
+
+	"slices"
 
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/iconmenu"
@@ -65,12 +68,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	}
 	cc.Template.Funcs(template.FuncMap{
 		"isPanelVisible": func(panelName string) bool {
-			for _, name := range selectedPanelNames {
-				if name == panelName {
-					return true
-				}
-			}
-			return false
+			return slices.Contains(selectedPanelNames, panelName)
 		},
 		"panelZoomUrl": func(panel Panel) string {
 			return PanelSet{common.BitSet(panel)}.LinkToPanelState(r.URL)
@@ -144,7 +142,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		UnselectedPanels:            unselectedPanels,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("taxons template execution failed: %w", err)
 	}
 	return nil
 }

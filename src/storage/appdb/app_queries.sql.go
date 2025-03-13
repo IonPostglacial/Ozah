@@ -11,7 +11,9 @@ import (
 )
 
 const deleteUserSessions = `-- name: DeleteUserSessions :execresult
-delete from Session where Login = ?
+delete from Session
+where
+    Login = ?
 `
 
 func (q *Queries) DeleteUserSessions(ctx context.Context, login string) (sql.Result, error) {
@@ -19,8 +21,15 @@ func (q *Queries) DeleteUserSessions(ctx context.Context, login string) (sql.Res
 }
 
 const getCredentials = `-- name: GetCredentials :one
-select Encryption, Password, Created_On, Last_Modified from Credentials
-where Login = ?
+select
+    Encryption,
+    Password,
+    Created_On,
+    Last_Modified
+from
+    Credentials
+where
+    Login = ?
 `
 
 type GetCredentialsRow struct {
@@ -43,8 +52,13 @@ func (q *Queries) GetCredentials(ctx context.Context, login string) (GetCredenti
 }
 
 const getSession = `-- name: GetSession :one
-select Login, Expiry_Date from Session
-where Token = ?
+select
+    Login,
+    Expiry_Date
+from
+    Session
+where
+    Token = ?
 `
 
 type GetSessionRow struct {
@@ -60,7 +74,12 @@ func (q *Queries) GetSession(ctx context.Context, token string) (GetSessionRow, 
 }
 
 const getUserConfiguration = `-- name: GetUserConfiguration :one
-select login, private_directory from User_Configuration where Login = ?
+select
+    login, private_directory
+from
+    User_Configuration
+where
+    Login = ?
 `
 
 func (q *Queries) GetUserConfiguration(ctx context.Context, login string) (UserConfiguration, error) {
@@ -70,9 +89,75 @@ func (q *Queries) GetUserConfiguration(ctx context.Context, login string) (UserC
 	return i, err
 }
 
+const getUserHiddenPanels = `-- name: GetUserHiddenPanels :many
+select
+    Panel_Id
+from
+    User_Hidden_Panel
+where
+    User_Login = ?
+`
+
+func (q *Queries) GetUserHiddenPanels(ctx context.Context, userLogin string) ([]int64, error) {
+	rows, err := q.db.QueryContext(ctx, getUserHiddenPanels, userLogin)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []int64
+	for rows.Next() {
+		var panel_id int64
+		if err := rows.Scan(&panel_id); err != nil {
+			return nil, err
+		}
+		items = append(items, panel_id)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUserSelectedLanguages = `-- name: GetUserSelectedLanguages :many
+select
+    Lang_Ref
+from
+    User_Selected_Lang
+where
+    User_Login = ?
+`
+
+func (q *Queries) GetUserSelectedLanguages(ctx context.Context, userLogin string) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, getUserSelectedLanguages, userLogin)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var lang_ref string
+		if err := rows.Scan(&lang_ref); err != nil {
+			return nil, err
+		}
+		items = append(items, lang_ref)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const insertCredentials = `-- name: InsertCredentials :execresult
-insert into Credentials (Login, Encryption, Password)
-values (?, ?, ?)
+insert into
+    Credentials (Login, Encryption, Password)
+values
+    (?, ?, ?)
 `
 
 type InsertCredentialsParams struct {
@@ -86,8 +171,10 @@ func (q *Queries) InsertCredentials(ctx context.Context, arg InsertCredentialsPa
 }
 
 const insertSession = `-- name: InsertSession :execresult
-insert into Session (Token, Login, Expiry_Date)
-values (?, ?, ?)
+insert into
+    Session (Token, Login, Expiry_Date)
+values
+    (?, ?, ?)
 `
 
 type InsertSessionParams struct {
@@ -101,8 +188,10 @@ func (q *Queries) InsertSession(ctx context.Context, arg InsertSessionParams) (s
 }
 
 const insertUserConfiguration = `-- name: InsertUserConfiguration :execresult
-insert into User_Configuration (Login, Private_Directory)
-values (?, ?)
+insert into
+    User_Configuration (Login, Private_Directory)
+values
+    (?, ?)
 `
 
 type InsertUserConfigurationParams struct {
