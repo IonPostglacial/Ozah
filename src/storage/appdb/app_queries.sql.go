@@ -10,6 +10,37 @@ import (
 	"database/sql"
 )
 
+const deleteUserHiddenPanels = `-- name: DeleteUserHiddenPanels :execresult
+delete from User_Hidden_Panel
+where
+    User_Login = ? and Panel_Id = ?
+`
+
+type DeleteUserHiddenPanelsParams struct {
+	UserLogin string
+	PanelID   int64
+}
+
+func (q *Queries) DeleteUserHiddenPanels(ctx context.Context, arg DeleteUserHiddenPanelsParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, deleteUserHiddenPanels, arg.UserLogin, arg.PanelID)
+}
+
+const deleteUserSelectedLanguage = `-- name: DeleteUserSelectedLanguage :execresult
+delete from User_Selected_Lang
+where
+    User_Login = ?
+    and Lang_Ref = ?
+`
+
+type DeleteUserSelectedLanguageParams struct {
+	UserLogin string
+	LangRef   string
+}
+
+func (q *Queries) DeleteUserSelectedLanguage(ctx context.Context, arg DeleteUserSelectedLanguageParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, deleteUserSelectedLanguage, arg.UserLogin, arg.LangRef)
+}
+
 const deleteUserSessions = `-- name: DeleteUserSessions :execresult
 delete from Session
 where
@@ -170,6 +201,22 @@ func (q *Queries) InsertCredentials(ctx context.Context, arg InsertCredentialsPa
 	return q.db.ExecContext(ctx, insertCredentials, arg.Login, arg.Encryption, arg.Password)
 }
 
+const insertLang = `-- name: InsertLang :execresult
+insert into
+    Lang (Ref, Name)
+values
+    (?, ?)
+`
+
+type InsertLangParams struct {
+	Ref  string
+	Name string
+}
+
+func (q *Queries) InsertLang(ctx context.Context, arg InsertLangParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertLang, arg.Ref, arg.Name)
+}
+
 const insertSession = `-- name: InsertSession :execresult
 insert into
     Session (Token, Login, Expiry_Date)
@@ -201,4 +248,52 @@ type InsertUserConfigurationParams struct {
 
 func (q *Queries) InsertUserConfiguration(ctx context.Context, arg InsertUserConfigurationParams) (sql.Result, error) {
 	return q.db.ExecContext(ctx, insertUserConfiguration, arg.Login, arg.PrivateDirectory)
+}
+
+const insertUserHiddenPanels = `-- name: InsertUserHiddenPanels :execresult
+insert into
+    User_Hidden_Panel (User_Login, Panel_Id)
+values
+    (?, ?)
+`
+
+type InsertUserHiddenPanelsParams struct {
+	UserLogin string
+	PanelID   int64
+}
+
+func (q *Queries) InsertUserHiddenPanels(ctx context.Context, arg InsertUserHiddenPanelsParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertUserHiddenPanels, arg.UserLogin, arg.PanelID)
+}
+
+const insertUserPanel = `-- name: InsertUserPanel :execresult
+insert into
+    Panel (Id, Name)
+values
+    (?, ?)
+`
+
+type InsertUserPanelParams struct {
+	ID   int64
+	Name string
+}
+
+func (q *Queries) InsertUserPanel(ctx context.Context, arg InsertUserPanelParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertUserPanel, arg.ID, arg.Name)
+}
+
+const insertUserSelectedLanguage = `-- name: InsertUserSelectedLanguage :execresult
+insert into
+    User_Selected_Lang (User_Login, Lang_Ref)
+values
+    (?, ?)
+`
+
+type InsertUserSelectedLanguageParams struct {
+	UserLogin string
+	LangRef   string
+}
+
+func (q *Queries) InsertUserSelectedLanguage(ctx context.Context, arg InsertUserSelectedLanguageParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertUserSelectedLanguage, arg.UserLogin, arg.LangRef)
 }

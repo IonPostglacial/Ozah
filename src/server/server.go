@@ -86,6 +86,13 @@ type ViewModel struct {
 	Debug     bool
 }
 
+func createFile(p string) (*os.File, error) {
+	if err := os.MkdirAll(path.Dir(p), 0770); err != nil {
+		return nil, err
+	}
+	return os.Create(p)
+}
+
 func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	r.ParseMultipartForm(5000000) //5 MB in memory, the rest in disk
 	datas := r.MultipartForm
@@ -111,9 +118,9 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) e
 				return fmt.Errorf("reading file '%s' failed: %w", f.Name, err)
 			}
 			filePath := path.Join(dir, f.Name)
-			file, err := os.Create(filePath)
+			file, err := createFile(filePath)
 			if err != nil {
-				return fmt.Errorf("creating file '%s' failed: %w", filePath, err)
+				return fmt.Errorf("creating file '%s' from '%s', '%s' failed: %w", filePath, dir, f.Name, err)
 			}
 			defer file.Close()
 			_, err = io.Copy(file, content)

@@ -9,7 +9,7 @@ import (
 type Panel uint64
 
 const (
-	PropertiesPanel = Panel(1 << iota)
+	PropertiesPanel = Panel(iota)
 	DescriptorsPanel
 	SummaryPanel
 )

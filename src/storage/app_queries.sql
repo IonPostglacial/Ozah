@@ -49,6 +49,24 @@ insert into
 values
     (?, ?);
 
+-- name: InsertLang :execresult
+insert into
+    Lang (Ref, Name)
+values
+    (?, ?);
+
+-- name: InsertUserSelectedLanguage :execresult
+insert into
+    User_Selected_Lang (User_Login, Lang_Ref)
+values
+    (?, ?);
+
+-- name: DeleteUserSelectedLanguage :execresult
+delete from User_Selected_Lang
+where
+    User_Login = ?
+    and Lang_Ref = ?;
+
 -- name: GetUserSelectedLanguages :many
 select
     Lang_Ref
@@ -56,6 +74,23 @@ from
     User_Selected_Lang
 where
     User_Login = ?;
+
+-- name: InsertUserPanel :execresult
+insert into
+    Panel (Id, Name)
+values
+    (?, ?);
+
+-- name: InsertUserHiddenPanels :execresult
+insert into
+    User_Hidden_Panel (User_Login, Panel_Id)
+values
+    (?, ?);
+
+-- name: DeleteUserHiddenPanels :execresult
+delete from User_Hidden_Panel
+where
+    User_Login = ? and Panel_Id = ?;
 
 -- name: GetUserHiddenPanels :many
 select

@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"strconv"
 
 	"slices"
 
+	"nicolas.galipot.net/hazo/application"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/iconmenu"
 	"nicolas.galipot.net/hazo/server/components/picturebox"
@@ -18,6 +20,7 @@ import (
 	"nicolas.galipot.net/hazo/server/link"
 	"nicolas.galipot.net/hazo/server/views"
 	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/appdb"
 )
 
 //go:embed taxons.html
@@ -31,21 +34,84 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		err   error
 	)
 	ctx := context.Background()
+	_, appQueries, err := storage.OpenAppDb()
+	if err != nil {
+		return fmt.Errorf("couldn't open global database: %w", err)
+	}
+	if err = r.ParseForm(); err != nil {
+		return fmt.Errorf("invalid form arguments: %w", err)
+	}
+	// TODO: mutualize code for the panel actions and extract this part out of here
+	if panelAdd := r.PostFormValue("panel-add"); panelAdd != "" {
+		fmt.Println("add panel")
+		panelId, err := strconv.Atoi(panelAdd)
+		if err != nil {
+			return fmt.Errorf("invalid argument to 'panel-add'")
+		}
+		if _, err := appQueries.DeleteUserHiddenPanels(ctx, appdb.DeleteUserHiddenPanelsParams{
+			UserLogin: cc.User.Login,
+			PanelID:   int64(panelId),
+		}); err != nil {
+			return fmt.Errorf("could not execute 'panel-add': %w", err)
+		}
+	}
+	if panelRemove := r.PostFormValue("panel-remove"); panelRemove != "" {
+		fmt.Println("remove panel")
+		panelId, err := strconv.Atoi(panelRemove)
+		if err != nil {
+			return fmt.Errorf("invalid argument to 'panel-remove'")
+		}
+		if _, err := appQueries.InsertUserHiddenPanels(ctx, appdb.InsertUserHiddenPanelsParams{
+			UserLogin: cc.User.Login,
+			PanelID:   int64(panelId),
+		}); err != nil {
+			return fmt.Errorf("could not execute 'panel-remove': %w", err)
+		}
+	}
+	if panelZoom := r.PostFormValue("panel-zoom"); panelZoom != "" {
+		fmt.Println("zoom panel")
+		panelId, err := strconv.Atoi(panelZoom)
+		if err != nil {
+			return fmt.Errorf("invalid argument to 'panel-zoom'")
+		}
+		for id := range application.PanelNames {
+			appQueries.InsertUserHiddenPanels(ctx, appdb.InsertUserHiddenPanelsParams{
+				UserLogin: cc.User.Login,
+				PanelID:   int64(id),
+			})
+		}
+		appQueries.DeleteUserHiddenPanels(ctx, appdb.DeleteUserHiddenPanelsParams{
+			UserLogin: cc.User.Login,
+			PanelID:   int64(panelId),
+		})
+	}
 	ds, err := cc.User.GetDataset(dsName)
 	if err != nil {
-		return err
+		return fmt.Errorf("couldn't get dataset '%s': %w", dsName, err)
 	}
 	queries, err := storage.OpenDsDb(ds)
 	if err != nil {
-		return err
+		return fmt.Errorf("couldn't open database of dataset '%s': %w", dsName, err)
 	}
 	queryParams := r.URL.Query()
 	menuLangSet := treemenu.LangSetFromString(queryParams.Get("menuLangs"))
 	menuLangNames := []string{"S", "V", "CN"}
 	menuSelectedLangs := menuLangSet.MaskNames(menuLangNames)
 	menuLangs := menuLangSet.LangsFromNames(r.URL, menuLangNames)
-	selectedPanels := PanelSetFromString(queryParams.Get("panels"))
-	selectedPanelNames, unselectedPanels := selectedPanels.DivideNamesByMask(panelNames)
+	unselectedPanelIds, err := appQueries.GetUserHiddenPanels(ctx, cc.User.Login)
+	if err != nil {
+		return fmt.Errorf("couldn't get hidden panels: %w", err)
+	}
+	unselectedPanelNames := make([]string, len(unselectedPanelIds))
+	unselectedPanels := make([]common.UnselectedItem, len(unselectedPanelIds))
+	for i, panel := range unselectedPanelIds {
+		name := application.PanelNames[panel]
+		unselectedPanelNames[i] = name
+		unselectedPanels[i] = common.UnselectedItem{
+			Value: uint64(panel),
+			Name:  name,
+		}
+	}
 	descriptorRef := queryParams.Get("d")
 	var currentDescriptor *documents.ViewModel
 	if descriptorRef == "" {
@@ -68,16 +134,10 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	}
 	cc.Template.Funcs(template.FuncMap{
 		"isPanelVisible": func(panelName string) bool {
-			return slices.Contains(selectedPanelNames, panelName)
+			return !slices.Contains(unselectedPanelNames, panelName)
 		},
 		"panelZoomUrl": func(panel Panel) string {
 			return PanelSet{common.BitSet(panel)}.LinkToPanelState(r.URL)
-		},
-		"panelAddUrl": func(panel uint64) string {
-			return PanelSet{selectedPanels.With(common.BitSet(panel))}.LinkToPanelState(r.URL)
-		},
-		"panelRemoveUrl": func(panel Panel) string {
-			return PanelSet{selectedPanels.Without(common.BitSet(panel))}.LinkToPanelState(r.URL)
 		},
 	})
 	template.Must(cc.Template.Parse(taxonPage))

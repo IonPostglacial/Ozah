@@ -1,104 +1,93 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 {{ template "page_head" . }}
+
 <body class="hbox responsive-850">
     <nav class="vbox separated-right">
-        {{ template "main_toolbar" . }}
-        {{ template "treemenu" .MenuState }}
+        {{ template "main_toolbar" . }} {{ template "treemenu" .MenuState }}
     </nav>
     <div id="doc-content" class="vbox flex-fill">
         <div class="top-bar-height hbox vertical-align separated-bottom padded">
             {{ template "navbar" . }}
             <div class="spacer"></div>
-            <div class="btn-group" hx-boost="true">
-            {{ range .UnselectedPanels }}<a href="{{ panelAddUrl .Value }}" class="btn">{{ .Name }}</a>{{ end }}
-            </div>
+            <form method="POST" class="btn-group" hx-boost="true">
+                {{ range .UnselectedPanels }}<button type="submit" name="panel-add" value="{{ .Value }}">
+                    {{ .Name }}</button>{{ end }}
+            </form>
         </div>
         <main class="relative height-below-top-bar hbox responsive-1100 flex-fill separated-children">
             {{ if isPanelVisible "Properties" }}
-            <section class="vertical-scroll vbox flex-fill">
-                <header class="hbox vertical-align padded separated-bottom fixed-to-top">
-                    <h1>Properties</h1>
-                    <div class="spacer"></div>
-                    <div class="btn-group">
-                        <a class="btn" href="{{ panelZoomUrl 1 }}" hx-get="{{ panelZoomUrl 1 }}"
-                            hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML"
-                            hx-push-url="true">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                        </a><a class="btn" href="{{ panelRemoveUrl 1 }}" hx-get="{{ panelRemoveUrl 1 }}"
-                            hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML"
-                            hx-push-url="true">
-                            <i class="fa-solid fa-close"></i>
-                        </a>
-                    </div>
-                </header>
+            <div class="vertical-scroll vbox flex-fill">
+                <form method="POST" class="">
+                    <header class="hbox vertical-align padded separated-bottom fixed-to-top">
+                        <h1>Properties</h1>
+                        <div class="spacer"></div>
+                        <div class="btn-group">
+                            <button type="submit" name="panel-zoom" value="0">
+                                <i class="fa-solid fa-magnifying-glass"></i></button><button type="submit" name="panel-remove" value="0">
+                                <i class="fa-solid fa-close"></i>
+                            </button>
+                        </div>
+                    </header>
+                </form>
                 <details open class="separated-bottom">
                     <summary class="padded">Pictures</summary>
                     {{ template "picture_box" .PictureBoxModel }}
                 </details>
-                {{ template "taxon_form" .SelectedTaxon }}
-                {{ template "book_info" .BookInfoModel }}
-            </section>
-            {{ end }}
-            {{ if isPanelVisible "Descriptors" }}
-            <section class="vertical-scroll vbox flex-fill">
+                {{ template "taxon_form" .SelectedTaxon }} {{ template
+                "book_info" .BookInfoModel }}
+            </div>
+            {{ end }} {{ if isPanelVisible "Descriptors" }}
+            <form method="POST" class="vertical-scroll vbox flex-fill">
                 <header class="hbox vertical-align padded separated-bottom fixed-to-top">
                     <h1>Descriptors</h1>
                     <div class="spacer"></div>
                     <div class="btn-group">
-                        <a class="btn" href="{{ panelZoomUrl 2 }}" hx-get="{{ panelZoomUrl 2 }}"
-                            hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML"
-                            hx-push-url="true">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                        </a><a class="btn" href="{{ panelRemoveUrl 2 }}" hx-get="{{ panelRemoveUrl 2 }}"
-                            hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML"
-                            hx-push-url="true">
+                        <button type="submit" name="panel-zoom" value="1">
+                            <i class="fa-solid fa-magnifying-glass"></i></button><button type="submit" name="panel-remove" value="1">
                             <i class="fa-solid fa-close"></i>
-                        </a>
+                        </button>
                     </div>
                 </header>
                 <div class="vbox flex-fill">
                     <div class="vbox fixed-to-top separated-bottom padded">
                         <div class="hbox vertical-align relative">
-                            <input type="search" name="filter-descriptors" id="filter-descriptors" class="flex-fill" placeholder="filter descriptors" />
+                            <input type="search" name="filter-descriptors" id="filter-descriptors" class="flex-fill"
+                                placeholder="filter descriptors" />
                             <i class="search-icon fa-solid fa-search"></i>
                         </div>
-                        {{ if lt 0 (len .DescriptorsBreadCrumbsState.Branch) }}
+                        {{ if lt 0 (len .DescriptorsBreadCrumbsState.Branch)
+                        }}
                         <div class="hbox vertical-align relative" hx-boost="true">
                             <a href="/ds/{{ .DatasetName }}/taxons/{{ .SelectedTaxon.Ref }}" class="btn">
                                 <i class="fa-solid fa-home"></i>
                             </a>
-                            {{ template "breadcrumbs" .DescriptorsBreadCrumbsState }}
+                            {{ template "breadcrumbs"
+                            .DescriptorsBreadCrumbsState }}
                         </div>
                         {{ end }}
                     </div>
-                    {{ if .SelectedTaxon.Ref }}
-                        {{ template "icon_menu" .Descriptors }}
-                    {{ end }}
+                    {{ if .SelectedTaxon.Ref }} {{ template "icon_menu"
+                    .Descriptors }} {{ end }}
                 </div>
-            </section>
-            {{ end }}
-            {{ if isPanelVisible "Summary" }}
-            <section class="vertical-scroll vbox flex-fill">
+            </form>
+            {{ end }} {{ if isPanelVisible "Summary" }}
+            <form method="POST" class="vertical-scroll vbox flex-fill">
                 <header class="hbox vertical-align padded separated-bottom fixed-to-top">
                     <h1>Summary</h1>
                     <div class="spacer"></div>
                     <div class="btn-group">
-                        <a class="btn" href="{{ panelZoomUrl 4 }}" hx-get="{{ panelZoomUrl 4 }}"
-                            hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML"
-                            hx-push-url="true">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                        </a><a class="btn" href="{{ panelRemoveUrl 4 }}" hx-get="{{ panelRemoveUrl 4 }}"
-                            hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML"
-                            hx-push-url="true">
-                            <i class="fa-solid fa-close"></i>
-                        </a>
+                        <button type="submit" name="panel-zoom" value="2">
+                            <i class="fa-solid fa-magnifying-glass"></i><button type="submit" name="panel-remove" value="2">
+                                <i class="fa-solid fa-close"></i>
+                            </button>
                     </div>
                 </header>
                 {{ template "summary" .SummaryModel }}
-            </section>
+            </form>
             {{ end }}
         </main>
     </div>
 </body>
+
 </html>
