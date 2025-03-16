@@ -10,7 +10,6 @@ import (
 	"slices"
 
 	"nicolas.galipot.net/hazo/application"
-	"nicolas.galipot.net/hazo/server/action"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/iconmenu"
 	"nicolas.galipot.net/hazo/server/components/picturebox"
@@ -33,20 +32,8 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		err   error
 	)
 	ctx := context.Background()
-	if err = r.ParseForm(); err != nil {
-		return fmt.Errorf("invalid form arguments: %w", err)
-	}
-	actionHandlers := make([]action.Handler, 0, 8)
-	pa := panelActions{cc, cc.AppQueries()}
-	pa.Register(&actionHandlers)
-	ma := menuActions{cc, cc.AppQueries()}
-	ma.Register(&actionHandlers)
-	for _, actionHandler := range actionHandlers {
-		err := actionHandler(ctx, r)
-		if err != nil {
-			return err
-		}
-	}
+	cc.RegisterActions(NewPanelActions(cc))
+	cc.ExecuteActions(ctx, r)
 	ds, err := cc.User.GetDataset(dsName)
 	if err != nil {
 		return fmt.Errorf("couldn't get dataset '%s': %w", dsName, err)

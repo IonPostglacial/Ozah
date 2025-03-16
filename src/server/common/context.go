@@ -1,21 +1,29 @@
 package common
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"html/template"
+	"net/http"
 
+	"nicolas.galipot.net/hazo/server/action"
 	"nicolas.galipot.net/hazo/storage"
 	"nicolas.galipot.net/hazo/storage/appdb"
 	"nicolas.galipot.net/hazo/user"
 )
 
 type Context struct {
-	User       *user.T
-	Template   *template.Template
-	Config     *ServerConfig
-	appDb      *sql.DB
-	appQueries *appdb.Queries
+	User           *user.T
+	Template       *template.Template
+	Config         *ServerConfig
+	appDb          *sql.DB
+	appQueries     *appdb.Queries
+	actionRegistry *action.Registry
+}
+
+func NewContext(config *ServerConfig) *Context {
+	return &Context{Config: config, actionRegistry: action.NewRegistry()}
 }
 
 func (cc *Context) RegisterUser(login string) error {
@@ -25,6 +33,14 @@ func (cc *Context) RegisterUser(login string) error {
 	}
 	cc.User = u
 	return nil
+}
+
+func (cc *Context) RegisterActions(reg action.Registrable) {
+	cc.actionRegistry.Register(reg)
+}
+
+func (cc *Context) ExecuteActions(ctx context.Context, r *http.Request) error {
+	return cc.actionRegistry.ExecuteActions(ctx, r)
 }
 
 func (cc *Context) ConnectAppDb() error {

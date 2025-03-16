@@ -24,6 +24,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	dsName := r.PathValue("dsName")
 	docRef := r.PathValue("id")
 	ctx := context.Background()
+	cc.ExecuteActions(ctx, r)
 	ds, err := cc.User.GetDataset(dsName)
 	if err != nil {
 		return err

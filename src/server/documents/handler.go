@@ -17,6 +17,10 @@ import (
 func HandlerWrapper(docType string) func(handler common.Handler) common.Handler {
 	return func(handler common.Handler) common.Handler {
 		return func(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
+			if err := r.ParseForm(); err != nil {
+				return fmt.Errorf("invalid form arguments: %w", err)
+			}
+			cc.RegisterActions(NewMenuActions(cc))
 			dsName := r.PathValue("dsName")
 			docId := r.PathValue("id")
 			tmpl := components.NewTemplate()

@@ -21,7 +21,7 @@ func (handler Handler) Unwrap(config *ServerConfig) func(http.ResponseWriter, *h
 	return func(w http.ResponseWriter, r *http.Request) {
 		tmpl := template.New("error")
 		tmpl = template.Must(tmpl.Parse(errorPage))
-		err := handler(w, r, &Context{Config: config})
+		err := handler(w, r, NewContext(config))
 		if err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
