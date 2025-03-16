@@ -12,7 +12,6 @@ import (
 	"nicolas.galipot.net/hazo/server/components"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 	"nicolas.galipot.net/hazo/server/link"
-	"nicolas.galipot.net/hazo/storage/appdb"
 )
 
 func HandlerWrapper(docType string) func(handler common.Handler) common.Handler {
@@ -58,8 +57,8 @@ func HandlerWrapper(docType string) func(handler common.Handler) common.Handler 
 	}
 }
 
-func LoadMenuLanguages(ctx context.Context, cc *common.Context, queries *appdb.Queries) ([]treemenu.Lang, []string, error) {
-	langSelection, err := queries.GetLangSelectionForUser(ctx, cc.User.Login)
+func LoadMenuLanguages(ctx context.Context, cc *common.Context) ([]treemenu.Lang, []string, error) {
+	langSelection, err := cc.AppQueries().GetLangSelectionForUser(ctx, cc.User.Login)
 	if err != nil {
 		return nil, nil, fmt.Errorf("couldn't retrieve the list of languages: %w", err)
 	}

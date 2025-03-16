@@ -12,7 +12,6 @@ import (
 
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components"
-	"nicolas.galipot.net/hazo/storage"
 )
 
 const SessionCookieName = "session_token"
@@ -27,13 +26,9 @@ type Model struct {
 func HandlerWrapper(handler common.Handler) common.Handler {
 	return func(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		ctx := context.Background()
-		cdb, queries, err := storage.OpenAppDb()
-		if err != nil {
-			return err
-		}
 		token, err := r.Cookie(SessionCookieName)
 		if err == nil {
-			username, err := loginFromSessionToken(ctx, queries, token.Value)
+			username, err := loginFromSessionToken(ctx, cc.AppQueries(), token.Value)
 			if err != nil {
 				fmt.Printf("error logging: %s\n", err)
 				// TODO: handle case with error not login error
@@ -51,7 +46,7 @@ func HandlerWrapper(handler common.Handler) common.Handler {
 		}
 		username := r.Form.Get("login")
 		password := r.Form.Get("password")
-		cred, err := queries.GetCredentials(ctx, username)
+		cred, err := cc.AppQueries().GetCredentials(ctx, username)
 		if err == nil {
 			loginFound = true
 		}
@@ -64,7 +59,7 @@ func HandlerWrapper(handler common.Handler) common.Handler {
 			}
 		}
 		if authorized {
-			session, err := startSession(ctx, cdb, queries, username)
+			session, err := startSession(ctx, cc, username)
 			if err != nil {
 				log.Fatal(err)
 			}

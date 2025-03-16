@@ -3,12 +3,12 @@ package authentication
 import (
 	"context"
 	"crypto/rand"
-	"database/sql"
 	"fmt"
 	"math/big"
 	"strings"
 	"time"
 
+	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/storage/appdb"
 )
 
@@ -52,30 +52,26 @@ func generateToken() (string, error) {
 	return buf.String(), nil
 }
 
-func startSession(ctx context.Context, db *sql.DB, queries *appdb.Queries, login string) (*Session, error) {
+func startSession(ctx context.Context, cc *common.Context, login string) (*Session, error) {
 	sessionToken, err := generateToken()
 	if err != nil {
 		return nil, err
 	}
 	expiresAt := time.Now().Add(2 * time.Hour)
-	tx, err := db.Begin()
-	if err != nil {
-		return nil, err
-	}
-	defer tx.Rollback()
-	qtx := queries.WithTx(tx)
-	_, err = qtx.DeleteUserSessions(ctx, login)
-	if err != nil {
-		return nil, err
-	}
-	_, err = qtx.InsertSession(ctx, appdb.InsertSessionParams{
-		Token:      sessionToken,
-		Login:      login,
-		ExpiryDate: expiresAt.Format(dateFormat),
+	err = cc.AppQueriesTx(func(qtx *appdb.Queries) error {
+		_, err = qtx.DeleteUserSessions(ctx, login)
+		if err != nil {
+			return err
+		}
+		_, err = qtx.InsertSession(ctx, appdb.InsertSessionParams{
+			Token:      sessionToken,
+			Login:      login,
+			ExpiryDate: expiresAt.Format(dateFormat),
+		})
+		return err
 	})
 	if err != nil {
 		return nil, err
 	}
-	tx.Commit()
 	return &Session{Token: sessionToken, Expires: expiresAt}, nil
 }

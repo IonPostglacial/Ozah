@@ -14,6 +14,7 @@ import (
 
 	"embed"
 
+	"nicolas.galipot.net/hazo/server/appdb"
 	"nicolas.galipot.net/hazo/server/authentication"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components"
@@ -42,27 +43,34 @@ func New(config *common.ServerConfig) Server {
 	s.HandleFunc("/ds/{dsName}/taxons", common.Handler(taxons.Handler).
 		Wrap(authentication.HandlerWrapper).
 		Wrap(documents.HandlerWrapper("taxons")).
+		Wrap(appdb.Handler).
 		Unwrap(config))
 	s.HandleFunc("/ds/{dsName}/taxons/{id}", common.Handler(taxons.Handler).
 		Wrap(authentication.HandlerWrapper).
 		Wrap(documents.HandlerWrapper("taxons")).
+		Wrap(appdb.Handler).
 		Unwrap(config))
 	s.HandleFunc("/ds/{dsName}/characters", common.Handler(characters.Handler).
 		Wrap(authentication.HandlerWrapper).
 		Wrap(documents.HandlerWrapper("characters")).
+		Wrap(appdb.Handler).
 		Unwrap(config))
 	s.HandleFunc("/ds/{dsName}/characters/{id}", common.Handler(characters.Handler).
 		Wrap(authentication.HandlerWrapper).
 		Wrap(documents.HandlerWrapper("characters")).
+		Wrap(appdb.Handler).
 		Unwrap(config))
 	s.HandleFunc("/ds/{dsName}/identify", common.Handler(identification.Handler).
 		Wrap(authentication.HandlerWrapper).
+		Wrap(appdb.Handler).
 		Unwrap(config))
 	s.HandleFunc("/upload", common.Handler(uploadHandler).
 		Wrap(authentication.HandlerWrapper).
+		Wrap(appdb.Handler).
 		Unwrap(config))
 	s.HandleFunc("/", common.Handler(indexHandler).
 		Wrap(authentication.HandlerWrapper).
+		Wrap(appdb.Handler).
 		Unwrap(config))
 	s.HandleFunc("/components.js", common.Handler(components.JavascriptHandler).Unwrap(config))
 	s.HandleFunc("/components.css", common.Handler(components.CssHandler).Unwrap(config))

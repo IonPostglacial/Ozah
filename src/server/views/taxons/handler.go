@@ -33,17 +33,13 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		err   error
 	)
 	ctx := context.Background()
-	_, appQueries, err := storage.OpenAppDb()
-	if err != nil {
-		return fmt.Errorf("couldn't open global database: %w", err)
-	}
 	if err = r.ParseForm(); err != nil {
 		return fmt.Errorf("invalid form arguments: %w", err)
 	}
 	actionHandlers := make([]action.Handler, 0, 8)
-	pa := panelActions{cc, appQueries}
+	pa := panelActions{cc, cc.AppQueries()}
 	pa.Register(&actionHandlers)
-	ma := menuActions{cc, appQueries}
+	ma := menuActions{cc, cc.AppQueries()}
 	ma.Register(&actionHandlers)
 	for _, actionHandler := range actionHandlers {
 		err := actionHandler(ctx, r)
@@ -60,11 +56,11 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		return fmt.Errorf("couldn't open database of dataset '%s': %w", dsName, err)
 	}
 	queryParams := r.URL.Query()
-	menuLangs, menuSelectedLangNames, err := documents.LoadMenuLanguages(ctx, cc, appQueries)
+	menuLangs, menuSelectedLangNames, err := documents.LoadMenuLanguages(ctx, cc)
 	if err != nil {
-		return fmt.Errorf("loading taxon languages: %w")
+		return fmt.Errorf("loading taxon languages: %w", err)
 	}
-	unselectedPanelIds, err := appQueries.GetUserHiddenPanels(ctx, cc.User.Login)
+	unselectedPanelIds, err := cc.AppQueries().GetUserHiddenPanels(ctx, cc.User.Login)
 	if err != nil {
 		return fmt.Errorf("couldn't get hidden panels: %w", err)
 	}
