@@ -2,7 +2,6 @@ package documents
 
 import (
 	"context"
-	"fmt"
 
 	"nicolas.galipot.net/hazo/server/action"
 	"nicolas.galipot.net/hazo/server/common"
@@ -18,7 +17,6 @@ func NewMenuActions(cc *common.Context) *MenuActions {
 }
 
 func (h *MenuActions) addMenuLanguage(ctx context.Context, langRef string) error {
-	fmt.Printf("add menu language: %s, %s\n", h.cc.User.Login, langRef)
 	_, err := h.cc.AppQueries().InsertUserSelectedLanguage(ctx, appdb.InsertUserSelectedLanguageParams{
 		UserLogin: h.cc.User.Login,
 		LangRef:   langRef,
