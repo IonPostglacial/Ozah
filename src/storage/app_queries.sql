@@ -55,6 +55,9 @@ insert into
 values
     (?, ?);
 
+-- name: GetAllLangs :execresult
+select * from Lang;
+
 -- name: InsertUserSelectedLanguage :execresult
 insert into
     User_Selected_Lang (User_Login, Lang_Ref)
@@ -68,12 +71,19 @@ where
     and Lang_Ref = ?;
 
 -- name: GetUserSelectedLanguages :many
-select
-    Lang_Ref
-from
-    User_Selected_Lang
-where
-    User_Login = ?;
+select lang.* from Lang as lang
+inner join User_Selected_Lang as selectedLang
+on (lang.Ref = selectedLang.Lang_Ref)
+where     
+    selectedLang.User_Login = ?;
+
+-- name: GetLangSelectionForUser :many
+select 
+    Ref, Name, not Lang_Ref is null as Selected
+from Lang 
+left join User_Selected_Lang on Ref = Lang_Ref
+where 
+    Lang_Ref is null or User_Login = ?;
 
 -- name: InsertUserPanel :execresult
 insert into

@@ -1,7 +1,7 @@
 package taxons
 
 import (
-	"nicolas.galipot.net/hazo/server/common"
+	"nicolas.galipot.net/hazo/application"
 	"nicolas.galipot.net/hazo/server/components/breadcrumbs"
 	"nicolas.galipot.net/hazo/server/components/iconmenu"
 	"nicolas.galipot.net/hazo/server/components/picturebox"
@@ -34,5 +34,5 @@ type ViewModel struct {
 	SummaryModel                *summary.ViewModel
 	PictureBoxModel             *picturebox.ViewModel
 	BookInfoModel               []dsdb.GetTaxonBookInfoRow
-	UnselectedPanels            []common.UnselectedItem
+	UnselectedPanels            []application.UnselectedPanel
 }

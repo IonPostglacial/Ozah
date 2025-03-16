@@ -9,16 +9,15 @@
                 hx-select="#main-menu" hx-target="#main-menu" />
             <i class="search-icon fa-solid fa-search"></i>
         </form>
-        <div class="hbox vertical-align">
+        <form method="POST" class="hbox vertical-align">
             <div class="hbox vertical-align btn-group">
                 {{ range .Langs }}
-                <a href="{{ .Url }}" class="btn toggle {{ if .Selected }}primary{{ end }}"
-                    hx-get="{{ .Url }}"
-                    hx-push-url="true"
-                    hx-swap="outerHTML"
-                    hx-select="#tree-menu-container" hx-target="#tree-menu-container">
+                <button type="submit" 
+                    name="{{ if .Selected }}menu-lang-remove{{ else }}menu-lang-add{{ end }}" 
+                    value="{{ .Ref }}" 
+                    class="btn toggle {{ if .Selected }}primary{{ end }}">
                     {{ .Name }}
-                </a>
+                </button>
                 {{ end }}
             </div>
             <div class="spacer"></div>
@@ -26,9 +25,9 @@
                 <button><i class="fa-solid fa-plus"></i>
                 </button><button><i class="fa-solid fa-minus"></i></button>
             </div>
-        </div>
+        </form>
     </header>
-    <menu id="main-menu" hx-boost="true" class="text flex-fill tree-cols-{{ .ColumnsCount }}">
+    <menu id="main-menu" class="text flex-fill tree-cols-{{ .ColumnsCount }}">
     {{ range sortDocs .Root.Children }}
         {{ template "treemenu_entry" . }}
     {{ end }}

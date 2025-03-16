@@ -24,6 +24,10 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	dsName := r.PathValue("dsName")
 	docRef := r.PathValue("id")
 	ctx := context.Background()
+	_, appQueries, err := storage.OpenAppDb()
+	if err != nil {
+		return fmt.Errorf("couldn't open global database: %w", err)
+	}
 	ds, err := cc.User.GetDataset(dsName)
 	if err != nil {
 		return err
@@ -33,12 +37,12 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		return err
 	}
 	queryParams := r.URL.Query()
-	menuLangSet := treemenu.LangSetFromString(queryParams.Get("menuLangs"))
-	menuLangNames := []string{"FR", "EN", "CN"}
-	menuSelectedLangs := menuLangSet.MaskNames(menuLangNames)
-	menuLangs := menuLangSet.LangsFromNames(r.URL, menuLangNames)
+	menuLangs, menuSelectedLangNames, err := documents.LoadMenuLanguages(ctx, cc, appQueries)
+	if err != nil {
+		return fmt.Errorf("loading taxon languages: %w")
+	}
 	template.Must(cc.Template.Parse(charactersPage))
-	items, err := treemenu.LoadItemFromDb(ctx, queries, "c0", menuSelectedLangs, queryParams.Get("filterMenu"))
+	items, err := treemenu.LoadItemFromDb(ctx, queries, "c0", menuSelectedLangNames, queryParams.Get("filterMenu"))
 	if err != nil {
 		return err
 	}
@@ -87,7 +91,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		MenuState: &treemenu.ViewModel{
 			Selected:     docRef,
 			Langs:        menuLangs,
-			ColumnsCount: len(menuSelectedLangs),
+			ColumnsCount: len(menuSelectedLangNames),
 			Root:         items,
 		},
 		MenuViewModel:     views.NewViewMenuViewModel("Characters", dsName),

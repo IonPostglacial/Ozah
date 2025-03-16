@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"strconv"
 
 	"slices"
 
 	"nicolas.galipot.net/hazo/application"
+	"nicolas.galipot.net/hazo/server/action"
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/iconmenu"
 	"nicolas.galipot.net/hazo/server/components/picturebox"
@@ -20,7 +20,6 @@ import (
 	"nicolas.galipot.net/hazo/server/link"
 	"nicolas.galipot.net/hazo/server/views"
 	"nicolas.galipot.net/hazo/storage"
-	"nicolas.galipot.net/hazo/storage/appdb"
 )
 
 //go:embed taxons.html
@@ -41,49 +40,16 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err = r.ParseForm(); err != nil {
 		return fmt.Errorf("invalid form arguments: %w", err)
 	}
-	// TODO: mutualize code for the panel actions and extract this part out of here
-	if panelAdd := r.PostFormValue("panel-add"); panelAdd != "" {
-		fmt.Println("add panel")
-		panelId, err := strconv.Atoi(panelAdd)
+	actionHandlers := make([]action.Handler, 0, 8)
+	pa := panelActions{cc, appQueries}
+	pa.Register(&actionHandlers)
+	ma := menuActions{cc, appQueries}
+	ma.Register(&actionHandlers)
+	for _, actionHandler := range actionHandlers {
+		err := actionHandler(ctx, r)
 		if err != nil {
-			return fmt.Errorf("invalid argument to 'panel-add'")
+			return err
 		}
-		if _, err := appQueries.DeleteUserHiddenPanels(ctx, appdb.DeleteUserHiddenPanelsParams{
-			UserLogin: cc.User.Login,
-			PanelID:   int64(panelId),
-		}); err != nil {
-			return fmt.Errorf("could not execute 'panel-add': %w", err)
-		}
-	}
-	if panelRemove := r.PostFormValue("panel-remove"); panelRemove != "" {
-		fmt.Println("remove panel")
-		panelId, err := strconv.Atoi(panelRemove)
-		if err != nil {
-			return fmt.Errorf("invalid argument to 'panel-remove'")
-		}
-		if _, err := appQueries.InsertUserHiddenPanels(ctx, appdb.InsertUserHiddenPanelsParams{
-			UserLogin: cc.User.Login,
-			PanelID:   int64(panelId),
-		}); err != nil {
-			return fmt.Errorf("could not execute 'panel-remove': %w", err)
-		}
-	}
-	if panelZoom := r.PostFormValue("panel-zoom"); panelZoom != "" {
-		fmt.Println("zoom panel")
-		panelId, err := strconv.Atoi(panelZoom)
-		if err != nil {
-			return fmt.Errorf("invalid argument to 'panel-zoom'")
-		}
-		for id := range application.PanelNames {
-			appQueries.InsertUserHiddenPanels(ctx, appdb.InsertUserHiddenPanelsParams{
-				UserLogin: cc.User.Login,
-				PanelID:   int64(id),
-			})
-		}
-		appQueries.DeleteUserHiddenPanels(ctx, appdb.DeleteUserHiddenPanelsParams{
-			UserLogin: cc.User.Login,
-			PanelID:   int64(panelId),
-		})
 	}
 	ds, err := cc.User.GetDataset(dsName)
 	if err != nil {
@@ -94,20 +60,20 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		return fmt.Errorf("couldn't open database of dataset '%s': %w", dsName, err)
 	}
 	queryParams := r.URL.Query()
-	menuLangSet := treemenu.LangSetFromString(queryParams.Get("menuLangs"))
-	menuLangNames := []string{"S", "V", "CN"}
-	menuSelectedLangs := menuLangSet.MaskNames(menuLangNames)
-	menuLangs := menuLangSet.LangsFromNames(r.URL, menuLangNames)
+	menuLangs, menuSelectedLangNames, err := documents.LoadMenuLanguages(ctx, cc, appQueries)
+	if err != nil {
+		return fmt.Errorf("loading taxon languages: %w")
+	}
 	unselectedPanelIds, err := appQueries.GetUserHiddenPanels(ctx, cc.User.Login)
 	if err != nil {
 		return fmt.Errorf("couldn't get hidden panels: %w", err)
 	}
 	unselectedPanelNames := make([]string, len(unselectedPanelIds))
-	unselectedPanels := make([]common.UnselectedItem, len(unselectedPanelIds))
+	unselectedPanels := make([]application.UnselectedPanel, len(unselectedPanelIds))
 	for i, panel := range unselectedPanelIds {
 		name := application.PanelNames[panel]
 		unselectedPanelNames[i] = name
-		unselectedPanels[i] = common.UnselectedItem{
+		unselectedPanels[i] = application.UnselectedPanel{
 			Value: uint64(panel),
 			Name:  name,
 		}
@@ -136,13 +102,10 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		"isPanelVisible": func(panelName string) bool {
 			return !slices.Contains(unselectedPanelNames, panelName)
 		},
-		"panelZoomUrl": func(panel Panel) string {
-			return PanelSet{common.BitSet(panel)}.LinkToPanelState(r.URL)
-		},
 	})
 	template.Must(cc.Template.Parse(taxonPage))
 	template.Must(cc.Template.Parse(FormTemplate))
-	items, err := treemenu.LoadItemFromDb(ctx, queries, "t0", menuSelectedLangs, queryParams.Get("filterMenu"))
+	items, err := treemenu.LoadItemFromDb(ctx, queries, "t0", menuSelectedLangNames, queryParams.Get("filterMenu"))
 	if err != nil {
 		return err
 	}
@@ -189,7 +152,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		MenuState: &treemenu.ViewModel{
 			Selected:     taxon.Ref,
 			Langs:        menuLangs,
-			ColumnsCount: len(menuSelectedLangs),
+			ColumnsCount: len(menuSelectedLangNames),
 			Root:         items,
 		},
 		MenuViewModel:               views.NewViewMenuViewModel("Taxons", dsName),

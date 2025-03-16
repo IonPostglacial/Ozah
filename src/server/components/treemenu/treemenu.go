@@ -3,9 +3,7 @@ package treemenu
 import (
 	"context"
 	_ "embed"
-	"net/url"
 
-	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/storage"
 )
 
@@ -26,46 +24,12 @@ type Item struct {
 	Children []*Item
 }
 
-type LangSet struct {
-	common.BitSet
-}
-
 type Language uint64
-
-const (
-	Lang1 = Language(1 << iota)
-	Lang2
-	Lang3
-)
 
 type Lang struct {
 	Name     string
-	Url      string
+	Ref      string
 	Selected bool
-}
-
-func LangSetFromString(s string) LangSet {
-	return LangSet{common.BitSetFromString(s, common.BitSet(Lang1|Lang2|Lang3), common.BitSet(Lang1))}
-}
-
-func (lang LangSet) LangsFromNames(url *url.URL, names []string) []Lang {
-	langs := make([]Lang, len(names))
-	for i, name := range names {
-		value := common.BitSet(1 << i)
-		selected := lang.Contains(value)
-		newLangs := lang.Toggle(value)
-		query := url.Query()
-		query.Del("menuLangs")
-		query.Add("menuLangs", newLangs.String())
-		newUrl := *url
-		newUrl.RawQuery = query.Encode()
-		langs[i] = Lang{
-			Name:     name,
-			Url:      newUrl.String(),
-			Selected: selected,
-		}
-	}
-	return langs
 }
 
 func LoadItemFromDb(ctx context.Context, queries *storage.Queries, root string, langs []string, filter string) (*Item, error) {
@@ -77,7 +41,7 @@ func LoadItemFromDb(ctx context.Context, queries *storage.Queries, root string, 
 	previous := h
 	parent := h
 	breadcrumb := []*Item{}
-	for i := 0; i < len(docs); i++ {
+	for i := range docs {
 		doc := docs[i]
 		switch {
 		case doc.Path == previous.FullPath:

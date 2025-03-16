@@ -1,6 +1,7 @@
 package documents
 
 import (
+	"context"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"nicolas.galipot.net/hazo/server/components"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 	"nicolas.galipot.net/hazo/server/link"
+	"nicolas.galipot.net/hazo/storage/appdb"
 )
 
 func HandlerWrapper(docType string) func(handler common.Handler) common.Handler {
@@ -54,4 +56,26 @@ func HandlerWrapper(docType string) func(handler common.Handler) common.Handler 
 			return err
 		}
 	}
+}
+
+func LoadMenuLanguages(ctx context.Context, cc *common.Context, queries *appdb.Queries) ([]treemenu.Lang, []string, error) {
+	langSelection, err := queries.GetLangSelectionForUser(ctx, cc.User.Login)
+	if err != nil {
+		return nil, nil, fmt.Errorf("couldn't retrieve the list of languages: %w", err)
+	}
+	menuLangs := make([]treemenu.Lang, len(langSelection)+1)
+	menuSelectedLangRefs := make([]string, 1, len(langSelection)+1)
+	menuLangs[0] = treemenu.Lang{Name: "S", Selected: true}
+	menuSelectedLangRefs[0] = "S"
+	for i, lang := range langSelection {
+		menuLangs[i+1] = treemenu.Lang{
+			Ref:      lang.Ref,
+			Name:     lang.Name,
+			Selected: lang.Selected,
+		}
+		if lang.Selected {
+			menuSelectedLangRefs = append(menuSelectedLangRefs, lang.Ref)
+		}
+	}
+	return menuLangs, menuSelectedLangRefs, nil
 }

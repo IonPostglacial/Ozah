@@ -11,10 +11,13 @@ import (
 func Setup(args []string) error {
 	db, queries, err := storage.OpenAppDb()
 	if err != nil {
-		return fmt.Errorf("Couldn't open appdb: %w", err)
+		return fmt.Errorf("couldn't open appdb: %w", err)
 	}
 	ctx := context.Background()
 	_, err = db.Exec(storage.AppSchema)
+	if err != nil {
+		return fmt.Errorf("couldn't apply database schema during setup: %w", err)
+	}
 	langs := []appdb.InsertLangParams{
 		{Ref: "V", Name: "Vernacular"},
 		{Ref: "CN", Name: "Chinese"},
