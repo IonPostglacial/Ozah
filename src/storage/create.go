@@ -9,7 +9,7 @@ func Create(ds PrivateDataset) error {
 	}
 	_, err = dtb.Exec(DatasetSchema)
 	if err != nil {
-		return fmt.Errorf("creating database scheme failed: %w", err)
+		return fmt.Errorf("creating database scheme from '%s' failed: %w", DatasetSchema, err)
 	}
 	_, err = dtb.Exec(index)
 	if err != nil {

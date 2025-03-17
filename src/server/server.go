@@ -116,27 +116,33 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) e
 		}
 		defer os.RemoveAll(dir)
 		file, _ := io.ReadAll(auxiliar)
-		r, err := zip.NewReader(bytes.NewReader(file), int64(len(file)))
-		if err != nil {
-			return fmt.Errorf("reading zip failed: %w", err)
+		isZip := strings.HasSuffix(fileName, ".zip")
+		dbName := ""
+		if isZip {
+			r, err := zip.NewReader(bytes.NewReader(file), int64(len(file)))
+			if err != nil {
+				return fmt.Errorf("reading zip failed: %w", err)
+			}
+			for _, f := range r.File {
+				content, err := f.Open()
+				if err != nil {
+					return fmt.Errorf("reading file '%s' failed: %w", f.Name, err)
+				}
+				filePath := path.Join(dir, f.Name)
+				file, err := createFile(filePath)
+				if err != nil {
+					return fmt.Errorf("creating file '%s' from '%s', '%s' failed: %w", filePath, dir, f.Name, err)
+				}
+				defer file.Close()
+				_, err = io.Copy(file, content)
+				if err != nil {
+					return fmt.Errorf("copying file '%s' failed: %w", filePath, err)
+				}
+			}
+			dbName = strings.TrimSuffix(fileName, ".zip")
+		} else {
+			dbName = strings.TrimSuffix(fileName, ".hazo.json")
 		}
-		for _, f := range r.File {
-			content, err := f.Open()
-			if err != nil {
-				return fmt.Errorf("reading file '%s' failed: %w", f.Name, err)
-			}
-			filePath := path.Join(dir, f.Name)
-			file, err := createFile(filePath)
-			if err != nil {
-				return fmt.Errorf("creating file '%s' from '%s', '%s' failed: %w", filePath, dir, f.Name, err)
-			}
-			defer file.Close()
-			_, err = io.Copy(file, content)
-			if err != nil {
-				return fmt.Errorf("copying file '%s' failed: %w", filePath, err)
-			}
-		}
-		dbName := strings.TrimSuffix(fileName, ".zip")
 		dbPath, err := cc.User.GetDataset(dbName)
 		if err != nil {
 			return fmt.Errorf("uploading file '%s' failed while retrieving user dataset: %w", fileName, err)
@@ -145,9 +151,13 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) e
 		if err != nil {
 			return fmt.Errorf("creating database '%s' failed: %w", dbPath, err)
 		}
-		err = storage.ImportCsv(dir, dbPath)
+		if isZip {
+			err = storage.ImportCsv(dir, dbPath)
+		} else {
+			err = storage.ImportJson(file, dbPath)
+		}
 		if err != nil {
-			return fmt.Errorf("error importing zip '%s' to '%s' failed: %w", dir, dbPath, err)
+			return fmt.Errorf("error importing dataset '%s' to '%s' failed: %w", dir, dbPath, err)
 		}
 	}
 	w.Header().Add("Content-Type", "text/html")

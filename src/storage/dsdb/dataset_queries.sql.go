@@ -583,6 +583,72 @@ func (q *Queries) GetTaxonInfo(ctx context.Context, ref string) (GetTaxonInfoRow
 	return i, err
 }
 
+const insertBook = `-- name: InsertBook :execresult
+insert into
+    Book (Document_Ref, ISBN)
+values
+    (?, ?)
+`
+
+type InsertBookParams struct {
+	DocumentRef string
+	Isbn        sql.NullString
+}
+
+func (q *Queries) InsertBook(ctx context.Context, arg InsertBookParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertBook, arg.DocumentRef, arg.Isbn)
+}
+
+const insertCategoricalCharacter = `-- name: InsertCategoricalCharacter :execresult
+insert into
+    Categorical_Character (Document_Ref, Color)
+values
+    (?, ?)
+`
+
+type InsertCategoricalCharacterParams struct {
+	DocumentRef string
+	Color       sql.NullString
+}
+
+func (q *Queries) InsertCategoricalCharacter(ctx context.Context, arg InsertCategoricalCharacterParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertCategoricalCharacter, arg.DocumentRef, arg.Color)
+}
+
+const insertDescriptorVisibilityInapplicable = `-- name: InsertDescriptorVisibilityInapplicable :execresult
+insert into Descriptor_Visibility_Inapplicable (
+    Descriptor_Ref, 
+    Inapplicable_Descriptor_Ref)
+values
+    (?, ?)
+`
+
+type InsertDescriptorVisibilityInapplicableParams struct {
+	DescriptorRef             string
+	InapplicableDescriptorRef string
+}
+
+func (q *Queries) InsertDescriptorVisibilityInapplicable(ctx context.Context, arg InsertDescriptorVisibilityInapplicableParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertDescriptorVisibilityInapplicable, arg.DescriptorRef, arg.InapplicableDescriptorRef)
+}
+
+const insertDescriptorVisibilityRequirement = `-- name: InsertDescriptorVisibilityRequirement :execresult
+insert into Descriptor_Visibility_Requirement (
+    Descriptor_Ref, 
+    Required_Descriptor_Ref)
+values
+    (?, ?)
+`
+
+type InsertDescriptorVisibilityRequirementParams struct {
+	DescriptorRef         string
+	RequiredDescriptorRef string
+}
+
+func (q *Queries) InsertDescriptorVisibilityRequirement(ctx context.Context, arg InsertDescriptorVisibilityRequirementParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertDescriptorVisibilityRequirement, arg.DescriptorRef, arg.RequiredDescriptorRef)
+}
+
 const insertDocument = `-- name: InsertDocument :execresult
 insert into Document (Ref, Path, Doc_Order, Name, Details)
     values (?, ?, ?, ?, ?)
@@ -604,6 +670,345 @@ func (q *Queries) InsertDocument(ctx context.Context, arg InsertDocumentParams) 
 		arg.Name,
 		arg.Details,
 	)
+}
+
+const insertDocumentAttachment = `-- name: InsertDocumentAttachment :execresult
+insert into Document_Attachment (
+    Document_Ref, 
+    Attachment_Index, 
+    Source, 
+    Path)
+values
+    (?, ?, ?, ?)
+`
+
+type InsertDocumentAttachmentParams struct {
+	DocumentRef     string
+	AttachmentIndex int64
+	Source          string
+	Path            string
+}
+
+func (q *Queries) InsertDocumentAttachment(ctx context.Context, arg InsertDocumentAttachmentParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertDocumentAttachment,
+		arg.DocumentRef,
+		arg.AttachmentIndex,
+		arg.Source,
+		arg.Path,
+	)
+}
+
+const insertDocumentTranslation = `-- name: InsertDocumentTranslation :execresult
+insert into Document_Translation (
+    Document_Ref, 
+    Lang_Ref, 
+    Name, 
+    Details)
+values
+    (?, ?, ?, ?)
+`
+
+type InsertDocumentTranslationParams struct {
+	DocumentRef string
+	LangRef     string
+	Name        string
+	Details     sql.NullString
+}
+
+func (q *Queries) InsertDocumentTranslation(ctx context.Context, arg InsertDocumentTranslationParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertDocumentTranslation,
+		arg.DocumentRef,
+		arg.LangRef,
+		arg.Name,
+		arg.Details,
+	)
+}
+
+const insertGeographicalCharacter = `-- name: InsertGeographicalCharacter :execresult
+insert into Geographical_Character (
+    Document_Ref,
+    Map_Ref,
+	Color)
+values
+    (?, ?, ?)
+`
+
+type InsertGeographicalCharacterParams struct {
+	DocumentRef string
+	MapRef      string
+	Color       sql.NullString
+}
+
+func (q *Queries) InsertGeographicalCharacter(ctx context.Context, arg InsertGeographicalCharacterParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertGeographicalCharacter, arg.DocumentRef, arg.MapRef, arg.Color)
+}
+
+const insertGeographicalMap = `-- name: InsertGeographicalMap :execresult
+insert into Geographical_Map (
+    Document_Ref,
+    Place_Ref,
+    Map_File,
+    Map_File_Feature_Name) 
+values 
+    (?, ?, ?, ?)
+`
+
+type InsertGeographicalMapParams struct {
+	DocumentRef        string
+	PlaceRef           string
+	MapFile            string
+	MapFileFeatureName string
+}
+
+func (q *Queries) InsertGeographicalMap(ctx context.Context, arg InsertGeographicalMapParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertGeographicalMap,
+		arg.DocumentRef,
+		arg.PlaceRef,
+		arg.MapFile,
+		arg.MapFileFeatureName,
+	)
+}
+
+const insertGeographicalPlace = `-- name: InsertGeographicalPlace :execresult
+insert into Geographical_Place (
+    Document_Ref,
+    Latitude,
+    Longitude,
+    Scale)
+values
+    (?, ?, ?, ?)
+`
+
+type InsertGeographicalPlaceParams struct {
+	DocumentRef string
+	Latitude    float64
+	Longitude   float64
+	Scale       int64
+}
+
+func (q *Queries) InsertGeographicalPlace(ctx context.Context, arg InsertGeographicalPlaceParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertGeographicalPlace,
+		arg.DocumentRef,
+		arg.Latitude,
+		arg.Longitude,
+		arg.Scale,
+	)
+}
+
+const insertLang = `-- name: InsertLang :execresult
+insert into
+    Lang (Ref, Name)
+values
+    (?, ?)
+`
+
+type InsertLangParams struct {
+	Ref  string
+	Name string
+}
+
+func (q *Queries) InsertLang(ctx context.Context, arg InsertLangParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertLang, arg.Ref, arg.Name)
+}
+
+const insertMeasurementCharacter = `-- name: InsertMeasurementCharacter :execresult
+insert into
+    Measurement_Character (Document_Ref, Color, Unit_Ref)
+values
+    (?, ?, ?)
+`
+
+type InsertMeasurementCharacterParams struct {
+	DocumentRef string
+	Color       sql.NullString
+	UnitRef     sql.NullString
+}
+
+func (q *Queries) InsertMeasurementCharacter(ctx context.Context, arg InsertMeasurementCharacterParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertMeasurementCharacter, arg.DocumentRef, arg.Color, arg.UnitRef)
+}
+
+const insertPeriodicCharacter = `-- name: InsertPeriodicCharacter :execresult
+insert into Periodic_Character (
+    Document_Ref, 
+    Periodic_Category_Ref, 
+    Color)
+values 
+    (?, ?, ?)
+`
+
+type InsertPeriodicCharacterParams struct {
+	DocumentRef         string
+	PeriodicCategoryRef string
+	Color               sql.NullString
+}
+
+func (q *Queries) InsertPeriodicCharacter(ctx context.Context, arg InsertPeriodicCharacterParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertPeriodicCharacter, arg.DocumentRef, arg.PeriodicCategoryRef, arg.Color)
+}
+
+const insertState = `-- name: InsertState :execresult
+insert into
+    State (Document_Ref, Color)
+values
+    (?, ?)
+`
+
+type InsertStateParams struct {
+	DocumentRef string
+	Color       sql.NullString
+}
+
+func (q *Queries) InsertState(ctx context.Context, arg InsertStateParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertState, arg.DocumentRef, arg.Color)
+}
+
+const insertTaxon = `-- name: InsertTaxon :execresult
+insert into Taxon (
+    Document_Ref,
+    Author,
+    Website,
+	Meaning,
+    Herbarium_No,
+    Herbarium_Picture,
+    Fasc,
+    Page)
+values (?, ?, ?, ?, ?, ?, ?, ?)
+`
+
+type InsertTaxonParams struct {
+	DocumentRef      string
+	Author           string
+	Website          sql.NullString
+	Meaning          sql.NullString
+	HerbariumNo      sql.NullString
+	HerbariumPicture sql.NullString
+	Fasc             sql.NullInt64
+	Page             sql.NullInt64
+}
+
+func (q *Queries) InsertTaxon(ctx context.Context, arg InsertTaxonParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertTaxon,
+		arg.DocumentRef,
+		arg.Author,
+		arg.Website,
+		arg.Meaning,
+		arg.HerbariumNo,
+		arg.HerbariumPicture,
+		arg.Fasc,
+		arg.Page,
+	)
+}
+
+const insertTaxonBookInfo = `-- name: InsertTaxonBookInfo :execresult
+insert into Taxon_Book_Info (
+    Taxon_Ref,
+	Book_Ref,
+	Fasc,
+	Page,
+    Details) 
+values (?, ?, ?, ?, ?)
+`
+
+type InsertTaxonBookInfoParams struct {
+	TaxonRef string
+	BookRef  string
+	Fasc     sql.NullInt64
+	Page     sql.NullInt64
+	Details  sql.NullString
+}
+
+func (q *Queries) InsertTaxonBookInfo(ctx context.Context, arg InsertTaxonBookInfoParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertTaxonBookInfo,
+		arg.TaxonRef,
+		arg.BookRef,
+		arg.Fasc,
+		arg.Page,
+		arg.Details,
+	)
+}
+
+const insertTaxonDescription = `-- name: InsertTaxonDescription :execresult
+insert into Taxon_Description (
+    Taxon_Ref,
+	Description_Ref)
+values (?, ?)
+`
+
+type InsertTaxonDescriptionParams struct {
+	TaxonRef       string
+	DescriptionRef string
+}
+
+func (q *Queries) InsertTaxonDescription(ctx context.Context, arg InsertTaxonDescriptionParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertTaxonDescription, arg.TaxonRef, arg.DescriptionRef)
+}
+
+const insertTaxonMeasurement = `-- name: InsertTaxonMeasurement :execresult
+insert into Taxon_Measurement (
+    Taxon_Ref ,
+	Character_Ref,
+	Minimum,
+	Maximum) 
+values (?, ?, ?, ?)
+`
+
+type InsertTaxonMeasurementParams struct {
+	TaxonRef     string
+	CharacterRef string
+	Minimum      sql.NullFloat64
+	Maximum      sql.NullFloat64
+}
+
+func (q *Queries) InsertTaxonMeasurement(ctx context.Context, arg InsertTaxonMeasurementParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertTaxonMeasurement,
+		arg.TaxonRef,
+		arg.CharacterRef,
+		arg.Minimum,
+		arg.Maximum,
+	)
+}
+
+const insertTaxonSpecimenLocation = `-- name: InsertTaxonSpecimenLocation :execresult
+insert into Taxon_Specimen_Location (
+    Taxon_Ref,
+    Specimen_Index,
+    Latitude,
+    Longitude) 
+values (?, ?, ?, ?)
+`
+
+type InsertTaxonSpecimenLocationParams struct {
+	TaxonRef      string
+	SpecimenIndex int64
+	Latitude      float64
+	Longitude     float64
+}
+
+func (q *Queries) InsertTaxonSpecimenLocation(ctx context.Context, arg InsertTaxonSpecimenLocationParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertTaxonSpecimenLocation,
+		arg.TaxonRef,
+		arg.SpecimenIndex,
+		arg.Latitude,
+		arg.Longitude,
+	)
+}
+
+const insertUnit = `-- name: InsertUnit :execresult
+insert into
+    Unit (Ref, Base_Unit_Ref, To_Base_Unit_Factor)
+values
+    (?, ?, ?)
+`
+
+type InsertUnitParams struct {
+	Ref              string
+	BaseUnitRef      sql.NullString
+	ToBaseUnitFactor sql.NullFloat64
+}
+
+func (q *Queries) InsertUnit(ctx context.Context, arg InsertUnitParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertUnit, arg.Ref, arg.BaseUnitRef, arg.ToBaseUnitFactor)
 }
 
 const listLangs = `-- name: ListLangs :many

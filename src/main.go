@@ -24,8 +24,10 @@ func main() {
 		err = cmd.Init(os.Args[2:])
 	case "adduser":
 		err = cmd.AddUser(os.Args[2:])
-	case "import":
+	case "importcsv":
 		err = cmd.ImportCsv(os.Args[2:])
+	case "importjson":
+		err = cmd.ImportJson(os.Args[2:])
 	case "lsdoc":
 		err = cmd.LsDoc(os.Args[2:])
 	case "serve":

@@ -93,3 +93,150 @@ select doc.Ref, doc.Name, info.Fasc, info.Page, info.Details from Taxon_Book_Inf
 inner join Document doc on doc.Ref = info.Book_Ref
 where info.Taxon_Ref = ?
 order by doc.Name; 
+
+-- name: InsertLang :execresult
+insert into
+    Lang (Ref, Name)
+values
+    (?, ?);
+
+-- name: InsertDocumentTranslation :execresult
+insert into Document_Translation (
+    Document_Ref, 
+    Lang_Ref, 
+    Name, 
+    Details)
+values
+    (?, ?, ?, ?);
+
+
+-- name: InsertDocumentAttachment :execresult
+insert into Document_Attachment (
+    Document_Ref, 
+    Attachment_Index, 
+    Source, 
+    Path)
+values
+    (?, ?, ?, ?);
+
+
+-- name: InsertUnit :execresult
+insert into
+    Unit (Ref, Base_Unit_Ref, To_Base_Unit_Factor)
+values
+    (?, ?, ?);
+
+-- name: InsertBook :execresult
+insert into
+    Book (Document_Ref, ISBN)
+values
+    (?, ?);
+
+-- name: InsertState :execresult
+insert into
+    State (Document_Ref, Color)
+values
+    (?, ?);
+
+-- name: InsertCategoricalCharacter :execresult
+insert into
+    Categorical_Character (Document_Ref, Color)
+values
+    (?, ?);
+
+-- name: InsertMeasurementCharacter :execresult
+insert into
+    Measurement_Character (Document_Ref, Color, Unit_Ref)
+values
+    (?, ?, ?);
+
+-- name: InsertPeriodicCharacter :execresult
+insert into Periodic_Character (
+    Document_Ref, 
+    Periodic_Category_Ref, 
+    Color)
+values 
+    (?, ?, ?);
+
+-- name: InsertGeographicalPlace :execresult
+insert into Geographical_Place (
+    Document_Ref,
+    Latitude,
+    Longitude,
+    Scale)
+values
+    (?, ?, ?, ?);
+
+-- name: InsertGeographicalMap :execresult
+insert into Geographical_Map (
+    Document_Ref,
+    Place_Ref,
+    Map_File,
+    Map_File_Feature_Name) 
+values 
+    (?, ?, ?, ?);
+
+-- name: InsertGeographicalCharacter :execresult
+insert into Geographical_Character (
+    Document_Ref,
+    Map_Ref,
+	Color)
+values
+    (?, ?, ?);
+
+-- name: InsertDescriptorVisibilityRequirement :execresult
+insert into Descriptor_Visibility_Requirement (
+    Descriptor_Ref, 
+    Required_Descriptor_Ref)
+values
+    (?, ?);
+
+-- name: InsertDescriptorVisibilityInapplicable :execresult
+insert into Descriptor_Visibility_Inapplicable (
+    Descriptor_Ref, 
+    Inapplicable_Descriptor_Ref)
+values
+    (?, ?);
+
+-- name: InsertTaxon :execresult
+insert into Taxon (
+    Document_Ref,
+    Author,
+    Website,
+	Meaning,
+    Herbarium_No,
+    Herbarium_Picture,
+    Fasc,
+    Page)
+values (?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: InsertTaxonMeasurement :execresult
+insert into Taxon_Measurement (
+    Taxon_Ref ,
+	Character_Ref,
+	Minimum,
+	Maximum) 
+values (?, ?, ?, ?);
+
+-- name: InsertTaxonDescription :execresult
+insert into Taxon_Description (
+    Taxon_Ref,
+	Description_Ref)
+values (?, ?);
+
+-- name: InsertTaxonBookInfo :execresult
+insert into Taxon_Book_Info (
+    Taxon_Ref,
+	Book_Ref,
+	Fasc,
+	Page,
+    Details) 
+values (?, ?, ?, ?, ?);
+
+-- name: InsertTaxonSpecimenLocation :execresult
+insert into Taxon_Specimen_Location (
+    Taxon_Ref,
+    Specimen_Index,
+    Latitude,
+    Longitude) 
+values (?, ?, ?, ?);
