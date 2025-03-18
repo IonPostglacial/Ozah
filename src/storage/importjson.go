@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"nicolas.galipot.net/hazo/fileformats/hazojson"
@@ -17,9 +18,24 @@ const (
 	MADA_PLACE_ID = "_geo_mada"
 )
 
+func nullableString(s string) sql.NullString {
+	if s == "" {
+		return sql.NullString{Valid: true, String: ""}
+	}
+	return sql.NullString{Valid: true, String: s}
+}
+
+func parseI64(s string) sql.NullInt64 {
+	n, err := strconv.ParseInt(strings.TrimSpace(s), 10, 64)
+	if err != nil {
+		return sql.NullInt64{}
+	}
+	return sql.NullInt64{Valid: true, Int64: n}
+}
+
 func insertDocument(ctx context.Context, queries *dsdb.Queries, order int64, doc hazojson.EncodedDocument) error {
 	_, err := queries.InsertDocument(ctx, dsdb.InsertDocumentParams{
-		Ref: doc.Id(), Path: doc.Path(), DocOrder: order, Name: doc.Name(), Details: sql.NullString{Valid: true, String: doc.Description()},
+		Ref: doc.Id(), Path: doc.Path(), DocOrder: order, Name: doc.Name(), Details: nullableString(doc.Description()),
 	})
 	if err != nil {
 		return err
@@ -155,7 +171,7 @@ func insertStates(ctx context.Context, data hazojson.Dataset, q *dsdb.Queries) e
 	for i, state := range data.States {
 		insertDocument(ctx, q, int64(i), hazojson.StateAsDocument{State: state})
 		_, err := q.InsertState(ctx, dsdb.InsertStateParams{
-			DocumentRef: state.Id, Color: sql.NullString{Valid: true, String: state.Color},
+			DocumentRef: state.Id, Color: nullableString(state.Color),
 		})
 		if err != nil {
 			return err
@@ -196,25 +212,25 @@ func insertCharacters(ctx context.Context, data hazojson.Dataset, mapIdsByFilePa
 			switch character.Preset {
 			case hazojson.CharacterPresetMap:
 				_, err = q.InsertGeographicalCharacter(ctx, dsdb.InsertGeographicalCharacterParams{
-					DocumentRef: character.Id, MapRef: mapIdsByFilePath[character.MapFile], Color: sql.NullString{Valid: true, String: character.Color},
+					DocumentRef: character.Id, MapRef: mapIdsByFilePath[character.MapFile], Color: nullableString(character.Color),
 				})
 			case hazojson.CharacterPresetFlowering:
 				_, err = q.InsertPeriodicCharacter(ctx, dsdb.InsertPeriodicCharacterParams{
 					DocumentRef:         character.Id,
-					Color:               sql.NullString{Valid: true, String: character.Color},
+					Color:               nullableString(character.Color),
 					PeriodicCategoryRef: CALENDAR_ID,
 				})
 			default:
 				_, err = q.InsertCategoricalCharacter(ctx, dsdb.InsertCategoricalCharacterParams{
 					DocumentRef: character.Id,
-					Color:       sql.NullString{Valid: true, String: character.Color},
+					Color:       nullableString(character.Color),
 				})
 			}
 		case hazojson.CharacterTypeRange:
 			_, err = q.InsertMeasurementCharacter(ctx, dsdb.InsertMeasurementCharacterParams{
 				DocumentRef: character.Id,
-				Color:       sql.NullString{Valid: true, String: character.Color},
-				UnitRef:     sql.NullString{Valid: true, String: character.Unit},
+				Color:       nullableString(character.Color),
+				UnitRef:     nullableString(character.Unit),
 			})
 		}
 		if err != nil {
@@ -236,11 +252,12 @@ func insertTaxons(ctx context.Context, data hazojson.Dataset, q *dsdb.Queries) e
 		_, err = q.InsertTaxon(ctx, dsdb.InsertTaxonParams{
 			DocumentRef:      taxon.Id,
 			Author:           taxon.Author,
-			Website:          sql.NullString{Valid: true, String: taxon.Website},
-			Meaning:          sql.NullString{Valid: true, String: taxon.Meaning},
-			HerbariumNo:      sql.NullString{Valid: true, String: taxon.NoHerbier},
-			HerbariumPicture: sql.NullString{Valid: true, String: taxon.HerbariumPicture},
-			// TODO: parse Fasc & Page
+			Website:          nullableString(taxon.Website),
+			Meaning:          nullableString(taxon.Meaning),
+			HerbariumNo:      nullableString(taxon.NoHerbier),
+			HerbariumPicture: nullableString(taxon.HerbariumPicture),
+			Fasc:             parseI64(taxon.Fasc),
+			Page:             parseI64(taxon.Page),
 		})
 		if err != nil {
 			return err
@@ -271,8 +288,9 @@ func insertTaxons(ctx context.Context, data hazojson.Dataset, q *dsdb.Queries) e
 			_, err := q.InsertTaxonBookInfo(ctx, dsdb.InsertTaxonBookInfoParams{
 				TaxonRef: taxon.Id,
 				BookRef:  id,
-				Details:  sql.NullString{Valid: true, String: info.Detail},
-				// TODO: parse Fasc & Page
+				Details:  nullableString(info.Detail),
+				Fasc:     parseI64(info.Fasc),
+				Page:     parseI64(info.Page),
 			})
 			if err != nil {
 				return err
