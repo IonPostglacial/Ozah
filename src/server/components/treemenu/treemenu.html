@@ -27,7 +27,7 @@
             </div>
         </form>
     </header>
-    <menu id="main-menu" class="text flex-fill tree-cols-{{ .ColumnsCount }}">
+    <menu id="main-menu" class="text flex-fill tree-cols-{{ .ColumnsCount }}" hx-boost="true">
     {{ range sortDocs .Root.Children }}
         {{ template "treemenu_entry" . }}
     {{ end }}

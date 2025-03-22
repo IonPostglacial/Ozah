@@ -6,6 +6,7 @@ class HazoPopover extends HTMLElement {
 
 function onLoad() {
     document.body.addEventListener('click', function (e) {
+        console.log("click");
         const clickedPopover = e.target.closest("hazo-popover");
         let selectedCheckbox = null
         if (clickedPopover !== null) {

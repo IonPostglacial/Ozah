@@ -1,16 +1,23 @@
 :root {
-    --bg-color: #edeff0;
-    --widget-color: #f7f7f7;
-    --widget-pressed-color: #d5d1c9;
+    --bg-color: #e5ded9;
+    --text-color: #675d55;
+    --bg-color-primary: #575172;
+    --widget-color: #efebe4;
+    --widget-pressed-color: #9a968f;
     --widget-radius: 4px;
-    --widget-padding: 4px 8px;
-    --widget-border-color: #dddddd;
-    --separator-color: #dddddd;
+    --widget-padding-v: 4px;
+    --widget-padding-h: 8px;
+    --widget-border-color: #cec7bf;
+    --separator-color: #cec7bf;
     --widget-border-style: solid;
     --widget-border-pressed-style: solid;
     --widget-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
     --widget-border-width: 1px;
     --btn-min-height: 28px;
+}
+
+body {
+    color: var(--text-color);
 }
 
 input[type="text"],
@@ -27,7 +34,7 @@ textarea,
 .text-over-img,
 .fixed-to-top div,
 hazo-popover>label .popover-panel {
-    background-color: #edeff09c;
+    background-color: #e5ded9a3;
     backdrop-filter: blur(10px);
 }
 

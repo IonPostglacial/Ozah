@@ -17,7 +17,9 @@
     --text-color-warning: white;
     --separator-color: #999997;
     --widget-radius: 0px;
-    --widget-padding: 1px 4px;
+    --widget-padding-v: 1px;
+    --widget-padding-h: 4px;
+    --widget-padding: var(--widget-padding-v) var(--widget-padding-h);
     --widget-border-width: 2px;
     --widget-shadow: none;
     --widget-color: #d5d1c9;
@@ -135,8 +137,10 @@ input[type=submit],
 select,
 .breadcrumbs,
 #doc-content trix-toolbar .trix-button,
+input,
 .toggle>label {
     display: inline-block;
+    user-select: none;
     background-color: var(--widget-color);
     border-radius: var(--widget-radius);
     border-style: var(--widget-border-style);
@@ -204,7 +208,7 @@ select:active {
 .btn-group>input[type=submit],
 .btn-group>select,
 .btn-group>.breadcrumbs,
-.btn-group>.btn,
+.btn-group .btn,
 #doc-content trix-toolbar .trix-button-group .trix-button,
 .btn-group>.toggle>label {
     border-radius: 0;
@@ -216,6 +220,7 @@ select:active {
 .btn-group>select:first-child,
 .btn-group>.breadcrumbs:first-child,
 .btn-group>.btn:first-child,
+.btn-group>*:first-child .btn,
 #doc-content trix-toolbar .trix-button-group .trix-button:first-child,
 .btn-group>.toggle:first-child>label {
     border-start-start-radius: var(--widget-radius);
@@ -228,6 +233,7 @@ select:active {
 .btn-group>select:last-child,
 .btn-group>.breadcrumbs:last-child,
 .btn-group>.btn:last-child,
+.btn-group>*:last-child .btn,
 #doc-content trix-toolbar .trix-button-group .trix-button:last-child,
 .btn-group>.toggle:last-child>label {
     border-start-end-radius: var(--widget-radius);

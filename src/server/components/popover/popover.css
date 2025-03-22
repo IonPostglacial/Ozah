@@ -12,9 +12,13 @@ hazo-popover>label .popover-panel {
     transition-property: opacity, padding, visibility;
     transition: 0.15s ease-out;
     visibility: hidden;
-    padding: var(--widget-padding);
+    padding: var(--widget-padding-v) 0;
     --offset: -13px;
     left: 0;
+}
+
+hazo-popover>label .popover-panel a {
+    padding: var(--widget-padding);
 }
 
 hazo-popover>label>input[type="checkbox"] {
