@@ -1,0 +1,13 @@
+hazo-splitpane-gutter {
+    width: var(--widget-padding-h);
+    height: 100%;
+    background: var(--separator-color);
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: col-resize;
+}
+
+*:has(> hazo-splitpane-gutter) {
+    padding-left: var(--widget-padding-h);
+}

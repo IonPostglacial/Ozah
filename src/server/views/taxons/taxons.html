@@ -2,11 +2,11 @@
 <html lang="en">
 {{ template "page_head" . }}
 
-<body class="hbox responsive-850">
+<body class="hbox responsive-850 split-pane">
     <nav class="vbox separated-right">
         {{ template "main_toolbar" . }} {{ template "treemenu" .MenuState }}
     </nav>
-    <div id="doc-content" class="vbox flex-fill">
+    <div id="doc-content" class="vbox relative flex-fill">
         <div class="top-bar-height hbox vertical-align separated-bottom padded">
             {{ template "navbar" . }}
             <div class="spacer"></div>
@@ -15,9 +15,9 @@
                     {{ .Name }}</button>{{ end }}
             </form>
         </div>
-        <main class="relative height-below-top-bar hbox responsive-1100 flex-fill separated-children">
+        <main class="relative height-below-top-bar hbox responsive-1100 separated-children flex-fill">
             {{ if isPanelVisible "Properties" }}
-            <div class="vertical-scroll vbox flex-fill">
+            <div class="vertical-scroll vbox">
                 <form method="POST" class="">
                     <header class="hbox vertical-align padded separated-bottom fixed-to-top">
                         <h1>Properties</h1>
@@ -71,7 +71,7 @@
                 </div>
             </form>
             {{ end }} {{ if isPanelVisible "Summary" }}
-            <form method="POST" class="vertical-scroll vbox flex-fill">
+            <form method="POST" class="vertical-scroll vbox">
                 <header class="hbox vertical-align padded separated-bottom fixed-to-top">
                     <h1>Summary</h1>
                     <div class="spacer"></div>
@@ -86,6 +86,7 @@
             </form>
             {{ end }}
         </main>
+        <hazo-splitpane-gutter></hazo-splitpane-gutter>
     </div>
 </body>
 

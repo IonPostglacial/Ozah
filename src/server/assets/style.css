@@ -449,6 +449,13 @@ input[type="checkbox"]:checked.visibility-trigger~*>.rotate-90-if-checked-p {
     gap: 0.5ch;
 }
 
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5ch;
+    max-width: 90ch;
+}
+
 .padded {
     padding: 1px 3px;
 }
