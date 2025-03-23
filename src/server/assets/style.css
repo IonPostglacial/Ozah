@@ -139,17 +139,26 @@ select,
 #doc-content trix-toolbar .trix-button,
 input,
 .toggle>label {
-    display: inline-block;
-    user-select: none;
     background-color: var(--widget-color);
     border-radius: var(--widget-radius);
     border-style: var(--widget-border-style);
     border-color: var(--widget-border-color);
-    border-width: var(--widget-border-width);
     box-shadow: var(--widget-shadow);
     color: var(--text-color);
-    padding: var(--widget-padding);
+}
+
+button,
+input[type=submit],
+.btn,
+select,
+.breadcrumbs,
+#doc-content trix-toolbar .trix-button,
+.toggle>label {
+    display: inline-block;
+    user-select: none;
     cursor: pointer;
+    border-width: var(--widget-border-width);
+    padding: var(--widget-padding);
     min-width: 2ch;
     min-height: var(--btn-min-height);
 }
