@@ -7,10 +7,13 @@
             <h1>List of Datasets</h1>
         </div>
         <table>
+            <tr>
+                <th>Name</th>
+                <th>Last Modified</th>
+            </tr>
         {{ range .Datasets }}
             <tr>
-                <td>{{ .Name }}</td>
-                <td><a href="/ds/{{ .Name }}/taxons">open</a></td>
+                <td><a href="/ds/{{ .Name }}/taxons">{{ .Name }}</a></td>
                 <td>{{ .LastModified }}</td>
             </tr>
         {{ end }}
