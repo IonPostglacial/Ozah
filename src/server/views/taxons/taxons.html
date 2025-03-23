@@ -18,8 +18,8 @@
         <main class="relative height-below-top-bar hbox responsive-1100 separated-children flex-fill">
             {{ if isPanelVisible "Properties" }}
             <div class="vertical-scroll vbox">
-                <form method="POST" class="">
-                    <header class="hbox vertical-align padded separated-bottom fixed-to-top">
+                <form method="POST" class="fixed-to-top">
+                    <header class="hbox vertical-align padded separated-bottom">
                         <h1>Properties</h1>
                         <div class="spacer"></div>
                         <div class="btn-group">
@@ -34,11 +34,10 @@
                     <summary class="padded">Pictures</summary>
                     {{ template "picture_box" .PictureBoxModel }}
                 </details>
-                {{ template "taxon_form" .SelectedTaxon }} {{ template
-                "book_info" .BookInfoModel }}
+                {{ template "taxon_form" .SelectedTaxon }} {{ template "book_info" .BookInfoModel }}
             </div>
             {{ end }} {{ if isPanelVisible "Descriptors" }}
-            <form method="POST" class="vertical-scroll vbox flex-fill">
+            <form method="POST" class="vertical-scroll vbox flex-fill relative">
                 <header class="hbox vertical-align padded separated-bottom fixed-to-top">
                     <h1>Descriptors</h1>
                     <div class="spacer"></div>
@@ -56,8 +55,7 @@
                                 placeholder="filter descriptors" />
                             <i class="search-icon fa-solid fa-search"></i>
                         </div>
-                        {{ if lt 0 (len .DescriptorsBreadCrumbsState.Branch)
-                        }}
+                        {{ if lt 0 (len .DescriptorsBreadCrumbsState.Branch) }}
                         <div class="hbox vertical-align relative btn-group" hx-boost="true">
                             <a href="/ds/{{ .DatasetName }}/taxons/{{ .SelectedTaxon.Ref }}" class="btn">
                                 <i class="fa-solid fa-home"></i>
@@ -66,8 +64,9 @@
                         </div>
                         {{ end }}
                     </div>
-                    {{ if .SelectedTaxon.Ref }} {{ template "icon_menu"
-                    .Descriptors }} {{ end }}
+                    {{ if .SelectedTaxon.Ref }} 
+                        {{ template "icon_menu" .Descriptors }}
+                    {{ end }}
                 </div>
             </form>
             {{ end }} {{ if isPanelVisible "Summary" }}
