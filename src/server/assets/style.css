@@ -214,7 +214,7 @@ select:active {
 }
 
 .btn-group>button,
-.btn-group>input[type=submit],
+.btn-group>input,
 .btn-group>select,
 .btn-group>.breadcrumbs,
 .btn-group .btn,
@@ -225,7 +225,7 @@ select:active {
 }
 
 .btn-group>button:first-child,
-.btn-group>input[type=submit]:first-child,
+.btn-group>input:first-child,
 .btn-group>select:first-child,
 .btn-group>.breadcrumbs:first-child,
 .btn-group>.btn:first-child,
@@ -238,7 +238,7 @@ select:active {
 }
 
 .btn-group>button:last-child,
-.btn-group>input[type=submit]:last-child,
+.btn-group>input:last-child,
 .btn-group>select:last-child,
 .btn-group>.breadcrumbs:last-child,
 .btn-group>.btn:last-child,
@@ -268,9 +268,17 @@ input[type="search"],
 input[type="email"],
 input[type="password"],
 textarea,
+.text {
+    border: var(--widget-border-width) solid var(--widget-border-color);
+}
+
+input[type="text"],
+input[type="search"],
+input[type="email"],
+input[type="password"],
+textarea,
 .text,
 .indent {
-    border-radius: var(--widget-radius);
     padding: var(--widget-padding);
     background-color: white;
 }
@@ -281,7 +289,7 @@ input[type="email"]:focus,
 input[type="password"]:focus,
 textarea:focus {
     outline: none;
-    border: 2px solid var(--bg-color-primary);
+    border: var(--widget-border-width) solid var(--bg-color-primary);
 }
 
 input[type="search"]~.search-icon {
@@ -501,7 +509,7 @@ input[type="checkbox"]:checked.visibility-trigger~*>.rotate-90-if-checked-p {
 
 .breadcrumbs>*::after {
     font-family: "Font Awesome 6 Free";
-    display: inline-block;
+    font-size: 13px;
     content: "\f054";
     margin: 0 1ch;
     color: var(--text-color);

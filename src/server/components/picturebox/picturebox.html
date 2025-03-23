@@ -19,10 +19,12 @@
             </button><button><i class="fa-solid fa-arrow-right"></i></button>
         </div>
         <div class="padded nowrap">{{ .Index }} / {{ .Count }}</div>
-        <button><i class="fa-solid fa-upload"></i></button>
-        <input type="text" class="flex-fill" placeholder="add a picture" />
-        <button><i class="fa-solid fa-file-lines"></i></button>
-        <button class="primary"><i class="fa-solid fa-plus"></i></button>
+        <div class="btn-group hbox flex-fill">
+            <button><i class="fa-solid fa-upload"></i>
+            </button><input type="text" class="flex-fill" placeholder="add a picture" /><button>
+                <i class="fa-solid fa-file-lines"></i>
+            </button><button class="primary"><i class="fa-solid fa-plus"></i></button>
+        </div>
     </div>
 </div>
 {{ end }}

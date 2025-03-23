@@ -58,12 +58,11 @@
                         </div>
                         {{ if lt 0 (len .DescriptorsBreadCrumbsState.Branch)
                         }}
-                        <div class="hbox vertical-align relative" hx-boost="true">
+                        <div class="hbox vertical-align relative btn-group" hx-boost="true">
                             <a href="/ds/{{ .DatasetName }}/taxons/{{ .SelectedTaxon.Ref }}" class="btn">
                                 <i class="fa-solid fa-home"></i>
                             </a>
-                            {{ template "breadcrumbs"
-                            .DescriptorsBreadCrumbsState }}
+                            {{ template "breadcrumbs" .DescriptorsBreadCrumbsState }}
                         </div>
                         {{ end }}
                     </div>
