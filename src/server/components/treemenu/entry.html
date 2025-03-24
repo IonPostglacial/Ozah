@@ -1,5 +1,5 @@
 {{ define "treemenu_entry" }}
-<li {{ if eq (selectedDoc) .Id }} class="selected" {{ end }}>
+<li class="contents{{ if eq (selectedDoc) .Id }} selected{{ end }}">
     <input type="checkbox" name="open-item-{{ .Id }}" id="open-item-{{ .Id }}" class="display-none visibility-trigger">
     <label for="open-item-{{ .Id }}" class="indent hbox vertical-align clickable">
         <i class="fa-solid fa-chevron-right rotate-90-if-checked-p">&nbsp;</i>

@@ -13,15 +13,10 @@ class HazoSplitPanelGutter extends HTMLElement {
             
             let startX = e.x;
             const startWidth = leftPane.getBoundingClientRect().width;
-            
-            console.log("start x", startX);
-            console.log("start width", startWidth);
 
             function mousemove(e) {
                 const delta = e.x - startX;
-                console.log("delta", delta);
                 const width = startWidth + delta + "px";
-                console.log("new width", width);
                 leftPane.style.width = width;
             }
             

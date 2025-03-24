@@ -315,7 +315,7 @@ input[type="search"]~.search-icon {
     position: sticky;
     top: 0;
     background-color: var(--bg-color);
-    z-index: 1000;
+    z-index: 1;
 }
 
 .hbox,
@@ -380,16 +380,20 @@ input[type="search"]~.search-icon {
     min-width: 5ch;
 }
 
-
-
 .contents {
     display: contents;
 }
 
+
 .selected>a,
+.selected>button,
 a.selected {
     background-color: var(--bg-color-primary);
     color: var(--text-color-primary);
+}
+
+.selected>button {
+    border: none;
 }
 
 .indent {

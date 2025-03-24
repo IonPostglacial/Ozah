@@ -1,5 +1,5 @@
 {{ define "treemenu" }}
-<hazo-treemenu id="tree-menu-container" class="height-below-top-bar vbox vertical-scroll">
+<div id="tree-menu-container" class="height-below-top-bar vbox vertical-scroll">
     <header class="vbox padded separated-bottom fixed-to-top">
         <form class="hbox vertical-align relative">
             <input type="search" name="filterMenu" id="filter-menu" class="flex-fill" placeholder="filter taxons"
@@ -10,16 +10,7 @@
             <i class="search-icon fa-solid fa-search"></i>
         </form>
         <form method="POST" class="hbox vertical-align">
-            <div class="hbox vertical-align btn-group">
-                {{ range .Langs }}
-                <button type="submit" 
-                    name="{{ if .Selected }}menu-lang-remove{{ else }}menu-lang-add{{ end }}" 
-                    value="{{ .Ref }}" 
-                    class="btn toggle {{ if .Selected }}primary{{ end }}">
-                    {{ .Name }}
-                </button>
-                {{ end }}
-            </div>
+            {{ template "checklist_popover" .LangsCheckList }}
             <div class="spacer"></div>
             <div class="btn-group">
                 <button><i class="fa-solid fa-plus"></i>
@@ -27,10 +18,12 @@
             </div>
         </form>
     </header>
-    <menu id="main-menu" class="text flex-fill tree-cols-{{ .ColumnsCount }}" hx-boost="true">
-    {{ range sortDocs .Root.Children }}
-        {{ template "treemenu_entry" . }}
-    {{ end }}
-    </menu>
-</hazo-treemenu>
+    <hazo-treemenu>
+        <menu id="main-menu" class="text flex-fill tree-cols-{{ .ColumnsCount }}" hx-boost="true">
+        {{ range sortDocs .Root.Children }}
+            {{ template "treemenu_entry" . }}
+        {{ end }}
+        </menu>
+    </hazo-treemenu>
+</div>
 {{ end }}

@@ -9,6 +9,7 @@ import (
 
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/picturebox"
+	"nicolas.galipot.net/hazo/server/components/popover"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 	"nicolas.galipot.net/hazo/server/documents"
 	"nicolas.galipot.net/hazo/server/link"
@@ -86,8 +87,11 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		Debug:             cc.Config.Debug,
 		AvailableDatasets: datasets,
 		MenuState: &treemenu.ViewModel{
-			Selected:     docRef,
-			Langs:        menuLangs,
+			Selected: docRef,
+			LangsCheckList: popover.CheckListViewModel{
+				Label: "Languages",
+				Items: menuLangs,
+			},
 			ColumnsCount: len(menuSelectedLangNames),
 			Root:         items,
 		},

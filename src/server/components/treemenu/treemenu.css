@@ -8,11 +8,6 @@ hazo-treemenu>menu.text {
     padding-left: 6ch;
 }
 
-hazo-treemenu ul,
-hazo-treemenu li {
-    display: contents;
-}
-
 hazo-treemenu li:hover>a {
     background-color: var(--bg-color-primary);
     color: var(--text-color-primary);

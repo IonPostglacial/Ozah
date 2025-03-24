@@ -1,0 +1,19 @@
+{{ define "checklist_popover" }}
+<hazo-popover>
+    <label class="btn">
+        <input type="checkbox" />
+        <span>
+            <i class="fa fa-pull-right fa-caret-down"></i>{{ .Label }}
+        </span>
+        <div class="popover-panel">
+            <ul class="no-list-style">
+            {{ range .Items }}
+                <li class="hbox padded flex-fill{{ if .Checked }} selected{{ end }}">
+                    <button class="flex-fill" type="submit" name="{{ .ActionName }}" value="{{ .ActionValue }}">{{ .Label }}</button>
+                </li>
+            {{ end }}
+            </ul>
+        </div>
+    </label>
+</hazo-popover>
+{{ end }}

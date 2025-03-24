@@ -10,6 +10,7 @@ import (
 
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components"
+	"nicolas.galipot.net/hazo/server/components/popover"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 	"nicolas.galipot.net/hazo/server/link"
 )
@@ -61,23 +62,26 @@ func HandlerWrapper(docType string) func(handler common.Handler) common.Handler 
 	}
 }
 
-func LoadMenuLanguages(ctx context.Context, cc *common.Context) ([]treemenu.Lang, []string, error) {
+func LoadMenuLanguages(ctx context.Context, cc *common.Context) ([]popover.CheckListItem, []string, error) {
 	langSelection, err := cc.AppQueries().GetLangSelectionForUser(ctx, cc.User.Login)
 	if err != nil {
 		return nil, nil, fmt.Errorf("couldn't retrieve the list of languages: %w", err)
 	}
-	menuLangs := make([]treemenu.Lang, len(langSelection)+1)
+	menuLangs := make([]popover.CheckListItem, len(langSelection)+1)
 	menuSelectedLangRefs := make([]string, 1, len(langSelection)+1)
-	menuLangs[0] = treemenu.Lang{Name: "S", Selected: true}
+	menuLangs[0] = popover.CheckListItem{Label: "S", Checked: true, ActionName: "menu-lang-remove", ActionValue: "S"}
 	menuSelectedLangRefs[0] = "S"
 	for i, lang := range langSelection {
-		menuLangs[i+1] = treemenu.Lang{
-			Ref:      lang.Ref,
-			Name:     lang.Name,
-			Selected: lang.Selected,
-		}
+		actionName := "menu-lang-add"
 		if lang.Selected {
+			actionName = "menu-lang-remove"
 			menuSelectedLangRefs = append(menuSelectedLangRefs, lang.Ref)
+		}
+		menuLangs[i+1] = popover.CheckListItem{
+			Checked:     lang.Selected,
+			ActionName:  actionName,
+			ActionValue: lang.Ref,
+			Label:       lang.Name,
 		}
 	}
 	return menuLangs, menuSelectedLangRefs, nil

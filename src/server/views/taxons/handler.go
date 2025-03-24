@@ -13,6 +13,7 @@ import (
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components/iconmenu"
 	"nicolas.galipot.net/hazo/server/components/picturebox"
+	"nicolas.galipot.net/hazo/server/components/popover"
 	"nicolas.galipot.net/hazo/server/components/summary"
 	"nicolas.galipot.net/hazo/server/components/treemenu"
 	"nicolas.galipot.net/hazo/server/documents"
@@ -133,8 +134,11 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		AvailableDatasets: datasets,
 		SelectedTaxon:     taxon,
 		MenuState: &treemenu.ViewModel{
-			Selected:     taxon.Ref,
-			Langs:        menuLangs,
+			Selected: taxon.Ref,
+			LangsCheckList: popover.CheckListViewModel{
+				Label: "Languages",
+				Items: menuLangs,
+			},
 			ColumnsCount: len(menuSelectedLangNames),
 			Root:         items,
 		},
