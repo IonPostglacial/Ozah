@@ -136,7 +136,8 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		MenuState: &treemenu.ViewModel{
 			Selected: taxon.Ref,
 			LangsCheckList: popover.CheckListViewModel{
-				Label: "Languages",
+				Label: "",
+				Icon:  "fa-language",
 				Items: menuLangs,
 			},
 			ColumnsCount: len(menuSelectedLangNames),

@@ -3,6 +3,9 @@
     <label class="btn">
         <input type="checkbox" />
         <span>
+        {{ if .Icon }}
+            <i class="fa-solid {{ .Icon }}"></i>    
+        {{ end }}
             <i class="fa fa-pull-right fa-caret-down"></i>{{ .Label }}
         </span>
         <div class="popover-panel">

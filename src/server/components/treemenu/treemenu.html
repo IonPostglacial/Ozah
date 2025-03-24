@@ -1,22 +1,23 @@
 {{ define "treemenu" }}
 <div id="tree-menu-container" class="height-below-top-bar vbox vertical-scroll">
     <header class="vbox padded separated-bottom fixed-to-top">
-        <form class="hbox vertical-align relative">
-            <input type="search" name="filterMenu" id="filter-menu" class="flex-fill" placeholder="filter taxons"
-                hx-get=""
-                hx-trigger="keyup delay:500ms changed"
-                hx-swap="outerHTML"
-                hx-select="#main-menu" hx-target="#main-menu" />
-            <i class="search-icon fa-solid fa-search"></i>
-        </form>
-        <form method="POST" class="hbox vertical-align">
-            {{ template "checklist_popover" .LangsCheckList }}
-            <div class="spacer"></div>
-            <div class="btn-group">
-                <button><i class="fa-solid fa-plus"></i>
-                </button><button><i class="fa-solid fa-minus"></i></button>
-            </div>
-        </form>
+        <div class="hbox vertical-align">
+            <form class="hbox vertical-align relative">
+                <input type="search" name="filterMenu" id="filter-menu" class="flex-fill" placeholder="filter taxons"
+                    hx-get=""
+                    hx-trigger="keyup delay:500ms changed"
+                    hx-swap="outerHTML"
+                    hx-select="#main-menu" hx-target="#main-menu" />
+                <i class="search-icon fa-solid fa-search"></i>
+            </form>
+            <form method="POST" class="hbox">
+                {{ template "checklist_popover" .LangsCheckList }}
+                <div class="btn-group">
+                    <button><i class="fa-solid fa-plus"></i>
+                    </button><button><i class="fa-solid fa-minus"></i></button>
+                </div>
+            </form>
+        </div>
     </header>
     <hazo-treemenu>
         <menu id="main-menu" class="text flex-fill tree-cols-{{ .ColumnsCount }}" hx-boost="true">

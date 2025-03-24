@@ -9,5 +9,6 @@ type CheckListItem struct {
 
 type CheckListViewModel struct {
 	Label string
+	Icon  string
 	Items []CheckListItem
 }
