@@ -13,7 +13,7 @@ hazo-treemenu li:hover>a {
     color: var(--text-color-primary);
 }
 
-hazo-treemenu .tree-cols-1 {
+hazo-treemenu .tree-cols {
     --tree-column-number: 1;
 }
 
@@ -23,6 +23,26 @@ hazo-treemenu .tree-cols-2 {
 
 hazo-treemenu .tree-cols-3 {
     --tree-column-number: 3;
+}
+
+hazo-treemenu .tree-cols-4 {
+    --tree-column-number: 4;
+}
+
+hazo-treemenu .tree-cols-5 {
+    --tree-column-number: 5;
+}
+
+hazo-treemenu .tree-cols-6 {
+    --tree-column-number: 6;
+}
+
+hazo-treemenu .tree-cols-7 {
+    --tree-column-number: 7;
+}
+
+hazo-treemenu .tree-cols-8 {
+    --tree-column-number: 8;
 }
 
 hazo-treemenu li>* {
