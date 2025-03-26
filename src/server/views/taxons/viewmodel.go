@@ -25,6 +25,7 @@ type ViewModel struct {
 	DatasetName                 string
 	Debug                       bool
 	AvailableDatasets           *popover.ViewModel
+	LangsCheckList              popover.CheckListViewModel
 	MenuState                   *treemenu.ViewModel
 	SelectedTaxon               *FormViewModel
 	MenuViewModel               *popover.ViewModel

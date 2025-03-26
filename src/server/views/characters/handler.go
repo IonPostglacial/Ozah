@@ -86,12 +86,13 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		DatasetName:       dsName,
 		Debug:             cc.Config.Debug,
 		AvailableDatasets: datasets,
+		LangsCheckList: popover.CheckListViewModel{
+			Label: "",
+			Icon:  "fa-language",
+			Items: menuLangs,
+		},
 		MenuState: &treemenu.ViewModel{
-			Selected: docRef,
-			LangsCheckList: popover.CheckListViewModel{
-				Label: "Languages",
-				Items: menuLangs,
-			},
+			Selected:     docRef,
 			ColumnsCount: len(menuSelectedLangNames),
 			Root:         items,
 		},

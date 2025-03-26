@@ -132,14 +132,14 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		DatasetName:       dsName,
 		Debug:             cc.Config.Debug,
 		AvailableDatasets: datasets,
-		SelectedTaxon:     taxon,
+		LangsCheckList: popover.CheckListViewModel{
+			Label: "",
+			Icon:  "fa-language",
+			Items: menuLangs,
+		},
+		SelectedTaxon: taxon,
 		MenuState: &treemenu.ViewModel{
-			Selected: taxon.Ref,
-			LangsCheckList: popover.CheckListViewModel{
-				Label: "",
-				Icon:  "fa-language",
-				Items: menuLangs,
-			},
+			Selected:     taxon.Ref,
 			ColumnsCount: len(menuSelectedLangNames),
 			Root:         items,
 		},

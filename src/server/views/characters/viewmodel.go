@@ -13,6 +13,7 @@ type ViewModel struct {
 	DatasetName       string
 	Debug             bool
 	AvailableDatasets *popover.ViewModel
+	LangsCheckList    popover.CheckListViewModel
 	MenuState         *treemenu.ViewModel
 	MenuViewModel     *popover.ViewModel
 	BreadCrumbsState  *breadcrumbs.ViewModel

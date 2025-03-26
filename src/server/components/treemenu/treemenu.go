@@ -4,15 +4,13 @@ import (
 	"context"
 	_ "embed"
 
-	"nicolas.galipot.net/hazo/server/components/popover"
 	"nicolas.galipot.net/hazo/storage"
 )
 
 type ViewModel struct {
-	Selected       string
-	LangsCheckList popover.CheckListViewModel
-	ColumnsCount   int
-	Root           *Item
+	Selected     string
+	ColumnsCount int
+	Root         *Item
 }
 
 type Item struct {
