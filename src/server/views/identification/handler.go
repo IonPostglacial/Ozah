@@ -15,6 +15,8 @@ import (
 
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components"
+	"nicolas.galipot.net/hazo/server/components/popover"
+	"nicolas.galipot.net/hazo/server/documents"
 	"nicolas.galipot.net/hazo/server/link"
 	"nicolas.galipot.net/hazo/server/views"
 	"nicolas.galipot.net/hazo/storage"
@@ -52,6 +54,10 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	}
 	queryParams := r.URL.Query()
 	stateRefs := queryParams["s"]
+	menuLangs, _, err := documents.LoadMenuLanguages(ctx, cc)
+	if err != nil {
+		return fmt.Errorf("loading taxon languages: %w", err)
+	}
 	measurements := make(map[string]storage.SpecimenMeasurement, len(queryParams))
 	for k, values := range queryParams {
 		if strings.HasPrefix(k, "m-") {
@@ -143,9 +149,14 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	}
 	template.Must(cc.Template.Parse(identificationPage))
 	err = cc.Template.Execute(w, ViewModel{
-		PageTitle:             "Identification",
-		Debug:                 cc.Config.Debug,
-		AvailableDatasets:     datasets,
+		PageTitle:         "Identification",
+		Debug:             cc.Config.Debug,
+		AvailableDatasets: datasets,
+		LangsCheckList: popover.CheckListViewModel{
+			Label: "",
+			Icon:  "fa-language",
+			Items: menuLangs,
+		},
 		ViewMenuState:         views.NewViewMenuViewModel("Identify", dsName),
 		Taxa:                  identifiedTaxa,
 		Characters:            chars,

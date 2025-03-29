@@ -42,6 +42,7 @@ type MeasurementViewModel struct {
 type ViewModel struct {
 	PageTitle             string
 	Debug                 bool
+	LangsCheckList        popover.CheckListViewModel
 	AvailableDatasets     *popover.ViewModel
 	ViewMenuState         *popover.ViewModel
 	Taxa                  []TaxonViewModel
