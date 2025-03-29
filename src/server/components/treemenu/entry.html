@@ -5,6 +5,7 @@
         <i class="fa-solid fa-chevron-right rotate-90-if-checked-p">&nbsp;</i>
         <div class="min-width-5ch">{{ .Id }}</div>
     </label>
+    <div class="left-decorum">&nbsp</div>
     {{ $variable := documentUrl . }}
     <a href="{{ $variable }}" class="nowrap" hx-target="#doc-content" hx-select="#doc-content" hx-swap="outerHTML">{{ .Name }}</a>
     {{ range .NameTr }}

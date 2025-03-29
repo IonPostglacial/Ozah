@@ -270,6 +270,7 @@ input[type="password"],
 textarea,
 .text {
     border: var(--widget-border-width) solid var(--widget-border-color);
+    background-color: white;
 }
 
 input[type="text"],
@@ -280,7 +281,6 @@ textarea,
 .text,
 .indent {
     padding: var(--widget-padding);
-    background-color: white;
 }
 
 input[type="text"]:focus,
@@ -402,10 +402,6 @@ a.selected {
 
 .indented {
     padding-left: 3ch;
-}
-
-.indent div {
-    background-color: transparent;
 }
 
 input[type="checkbox"].visibility-trigger~.contents-if-checked {

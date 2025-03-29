@@ -1,6 +1,6 @@
 hazo-treemenu>menu {
     display: grid;
-    grid-template-columns: min-content repeat(var(--tree-column-number), auto);
+    grid-template-columns: min-content repeat(calc(1 + var(--tree-column-number)), auto);
     align-content: start;
 }
 
@@ -8,6 +8,22 @@ hazo-treemenu>menu.text {
     padding-left: 6ch;
 }
 
+hazo-treemenu .selected>a:last-of-type,
+hazo-treemenu li:hover > a:last-of-type {
+    border-radius: var(--widget-radius);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+hazo-treemenu .selected> .left-decorum,
+hazo-treemenu li:hover > .left-decorum {
+    border-radius: var(--widget-radius);
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+hazo-treemenu .selected> .left-decorum,
+hazo-treemenu li:hover > .left-decorum,
 hazo-treemenu li:hover>a {
     background-color: var(--bg-color-primary);
     color: var(--text-color-primary);
@@ -50,11 +66,20 @@ hazo-treemenu li>* {
     border-radius: 0;
 }
 
+hazo-treemenu li.selected>*,
+hazo-treemenu li:hover>* {
+    border-color: var(--bg-color-primary);
+}
+
 hazo-treemenu li>a {
     padding: 4px;
 }
 
 hazo-treemenu li>*:nth-child(2) {
+    border-left: none;
+}
+
+hazo-treemenu li>*:nth-child(3) {
     border-left: none;
 }
 
