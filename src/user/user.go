@@ -34,8 +34,12 @@ func Register(login string) (*T, error) {
 	}, nil
 }
 
+func getUserPrivateDatasetPath(privateDirectory, dsName string) string {
+	return path.Clean(path.Join(privateDirectory, fmt.Sprintf("%s.sq3", dsName)))
+}
+
 func (u *T) GetDataset(dsName string) (storage.PrivateDataset, error) {
-	dsPath := path.Clean(path.Join(u.privateDirectory, fmt.Sprintf("%s.sq3", dsName)))
+	dsPath := getUserPrivateDatasetPath(u.privateDirectory, dsName)
 	inUserDir, err := filepath.Match(path.Join(u.privateDirectory, "*.sq3"), dsPath)
 	if err != nil {
 		return storage.InvalidPrivateDataset, fmt.Errorf("could not find private dataset '%s': %w", dsName, err)
@@ -57,10 +61,61 @@ func (u *T) ListDatasets() ([]storage.Dataset, error) {
 		if err != nil {
 			return nil, fmt.Errorf("could not retrieve file information about '%s: %w'", path, err)
 		}
-		info.ModTime()
 		ds[i].Name = strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 		ds[i].Path = path
 		ds[i].LastModified = info.ModTime().Format("2006-01-02 15:04:05")
+	}
+	return ds, nil
+}
+
+func (u *T) GetReadableSharedDatasets() ([]storage.SharedDataset, error) {
+	_, queries, err := storage.OpenAppDb()
+	if err != nil {
+		return nil, fmt.Errorf("could not open the users database: %w", err)
+	}
+	ctx := context.Background()
+	datasets, err := queries.GetReadableDatasetSharedWithUser(ctx, u.Login)
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve shared datasets for user '%s': %w", u.Login, err)
+	}
+	ds := make([]storage.SharedDataset, len(datasets))
+	for i, d := range datasets {
+		path := getUserPrivateDatasetPath(d.PrivateDirectory, d.Name)
+		info, err := os.Stat(path)
+		if err != nil {
+			return nil, fmt.Errorf("could not retrieve file information about '%s: %w'", path, err)
+		}
+		ds[i].Dataset.Name = d.Name
+		ds[i].Dataset.Path = path
+		ds[i].Dataset.LastModified = info.ModTime().Format("2006-01-02 15:04:05")
+		ds[i].Creator = d.CreatorUserLogin
+		ds[i].Mode = "read"
+	}
+	return ds, nil
+}
+
+func (u *T) GetWritableSharedDatasets() ([]storage.SharedDataset, error) {
+	_, queries, err := storage.OpenAppDb()
+	if err != nil {
+		return nil, fmt.Errorf("could not open the users database: %w", err)
+	}
+	ctx := context.Background()
+	datasets, err := queries.GetWritableDatasetSharedWithUser(ctx, u.Login)
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve shared datasets for user '%s': %w", u.Login, err)
+	}
+	ds := make([]storage.SharedDataset, len(datasets))
+	for i, d := range datasets {
+		path := getUserPrivateDatasetPath(d.PrivateDirectory, d.Name)
+		info, err := os.Stat(path)
+		if err != nil {
+			return nil, fmt.Errorf("could not retrieve file information about '%s: %w'", path, err)
+		}
+		ds[i].Dataset.Name = d.Name
+		ds[i].Dataset.Path = path
+		ds[i].Dataset.LastModified = info.ModTime().Format("2006-01-02 15:04:05")
+		ds[i].Creator = d.CreatorUserLogin
+		ds[i].Mode = "write"
 	}
 	return ds, nil
 }

@@ -9,7 +9,7 @@ This repository currently contains the Server Side part of Hazo, the PWA will be
 
 The server side of Hazo is developed using Go, with very few dependencies to avoid bitrot. The dependencies we have should be easy to replace like the SQLite 3 driver, the crypto library and SQLC which is used to generate SQL Query boilerplate.
 
-To generate the queries, go to the src/db folder and use the following command:
+To generate the queries, go to the src/storage folder and use the following command:
 
 ```shell
 sqlc generate

@@ -6,6 +6,12 @@ type Dataset struct {
 	LastModified string
 }
 
+type SharedDataset struct {
+	Dataset
+	Creator string
+	Mode    string // "read" or "write"
+}
+
 type PrivateDataset string
 
 var InvalidPrivateDataset = PrivateDataset("\x00")

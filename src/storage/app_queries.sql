@@ -15,6 +15,128 @@ insert into
 values
     (?, ?, ?);
 
+-- name: UpdateCredentials :execresult
+update Credentials
+set
+    Encryption = ?,
+    Password = ?,
+    Last_Modified = ?;
+
+-- name: DeleteCredentials :execresult
+delete from Credentials
+where
+    Login = ?;
+
+-- name: GetDatasetSharing :many
+select
+    Ref,
+    Creator_User_Login,
+    Creation_Date,
+    Name,
+    Details
+from
+    Dataset_Sharing
+where
+    Creator_User_Login = ?;
+
+-- name: InsertDatasetSharing :execresult
+insert into
+    Dataset_Sharing (Ref, Creator_User_Login, Creation_Date, Name, Details)
+values
+    (?, ?, ?, ?, ?);
+
+-- name: UpdateDatasetSharing :execresult
+update Dataset_Sharing
+set
+    Name = ?,
+    Details = ?
+where
+    Ref = ?
+    and Creator_User_Login = ?;
+
+-- name: DeleteDatasetSharing :execresult
+delete from Dataset_Sharing
+where
+    Ref = ?
+    and Creator_User_Login = ?;
+
+-- name: GetDatasetSharingUsers :many
+select
+    User_Login,
+    Mode
+from
+    Dataset_Sharing_Users
+where
+    Dataset_Ref = ?
+    and Dataset_Creator_Login = ?;
+
+-- name: InsertDatasetSharingUser :execresult
+insert into
+    Dataset_Sharing_Users (Dataset_Ref, Dataset_Creator_Login, User_Login, Mode)
+values
+    (?, ?, ?, ?);
+
+-- name: UpdateDatasetSharingUser :execresult
+update Dataset_Sharing_Users
+set
+    Mode = ?
+where
+    Dataset_Ref = ?
+    and Dataset_Creator_Login = ?
+    and User_Login = ?;
+
+-- name: DeleteDatasetSharingUser :execresult
+delete from Dataset_Sharing_Users
+where
+    Dataset_Ref = ?
+    and User_Login = ?;
+
+-- name: GetDatasetSharingUser :one
+select
+    User_Login,
+    Mode
+from
+    Dataset_Sharing_Users
+where
+    Dataset_Ref = ?
+    and User_Login = ?;
+
+-- name: GetReadableDatasetSharedWithUser :many
+select
+    ds.Ref,
+    ds.Creator_User_Login,
+    ds.Creation_Date,
+    ds.Name,
+    ds.Details,
+    uc.Private_Directory
+from
+    Dataset_Sharing as ds
+inner join
+    Dataset_Sharing_Users as dsu on ds.Ref = dsu.Dataset_Ref
+inner join
+    User_Configuration as uc on ds.Creator_User_Login = uc.Login    
+where
+    dsu.User_Login = ?
+    and dsu.Mode = 'read';
+
+-- name: GetWritableDatasetSharedWithUser :many
+select
+    ds.Ref,
+    ds.Creator_User_Login,
+    ds.Creation_Date,
+    ds.Name,
+    ds.Details,
+    uc.Private_Directory
+from
+    Dataset_Sharing as ds
+inner join
+    Dataset_Sharing_Users as dsu on ds.Ref = dsu.Dataset_Ref
+inner join
+    User_Configuration as uc on ds.Creator_User_Login = uc.Login
+where
+    dsu.User_Login = ?
+    and dsu.Mode = 'write';
+
 -- name: GetSession :one
 select
     Login,

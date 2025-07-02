@@ -4,7 +4,7 @@
 <body class="single-content vbox">
     <div class="vbox flex-fill">
         <div class="hbox top-bar-height separated-bottom vertical-align padded">
-            <h1>List of Datasets</h1>
+            <h1>List of my Datasets</h1>
         </div>
         <table>
             <tr>
@@ -14,6 +14,25 @@
         {{ range .Datasets }}
             <tr>
                 <td><a href="/ds/{{ .Name }}/taxons">{{ .Name }}</a></td>
+                <td>{{ .LastModified }}</td>
+            </tr>
+        {{ end }}
+        </table>
+        <div class="hbox top-bar-height separated-bottom vertical-align padded">
+            <h1>Datasets shared with me</h1>
+        </div>
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Created By</th>
+                <th>Mode</th>
+                <th>Last Modified</th>
+            </tr>
+        {{ range .SharedWritableDatasets }}
+            <tr>
+                <td><a href="/edit-shared-by/{{ .Creator }}/{{ .Name }}/taxons">{{ .Name }}</a></td>
+                <td>{{ .Creator }}</td>
+                <td>{{ .Mode }}</td>
                 <td>{{ .LastModified }}</td>
             </tr>
         {{ end }}

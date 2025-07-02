@@ -4,7 +4,6 @@ import (
 	"archive/zip"
 	"bytes"
 	"fmt"
-	"html/template"
 	"io"
 	"net/http"
 	"os"
@@ -21,15 +20,13 @@ import (
 	"nicolas.galipot.net/hazo/server/documents"
 	"nicolas.galipot.net/hazo/server/views/characters"
 	"nicolas.galipot.net/hazo/server/views/identification"
+	"nicolas.galipot.net/hazo/server/views/index"
 	"nicolas.galipot.net/hazo/server/views/taxons"
 	"nicolas.galipot.net/hazo/storage"
 )
 
 //go:embed assets
 var assets embed.FS
-
-//go:embed index.html
-var indexPage string
 
 //go:embed debug.js
 var debugJS string
@@ -68,7 +65,7 @@ func New(config *common.ServerConfig) Server {
 		Wrap(authentication.HandlerWrapper).
 		Wrap(appdb.Handler).
 		Unwrap(config))
-	s.HandleFunc("/", common.Handler(indexHandler).
+	s.HandleFunc("/", common.Handler(index.Handler).
 		Wrap(authentication.HandlerWrapper).
 		Wrap(appdb.Handler).
 		Unwrap(config))
@@ -86,12 +83,6 @@ func New(config *common.ServerConfig) Server {
 		})
 	}
 	return Server{s}
-}
-
-type ViewModel struct {
-	PageTitle string
-	Datasets  []storage.Dataset
-	Debug     bool
 }
 
 func createFile(p string) (*os.File, error) {
@@ -162,24 +153,5 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) e
 	}
 	w.Header().Add("Content-Type", "text/html")
 	w.Write([]byte("<!DOCTYPE html><html><body><div class='upload-msg'>Upload successful!</div></body></html>"))
-	return nil
-}
-
-func indexHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
-	tmpl := components.NewTemplate()
-	tmpl = template.Must(tmpl.Parse(indexPage))
-	datasets, err := cc.User.ListDatasets()
-	if err != nil {
-		return fmt.Errorf("failed to list datasets in index handler: %w", err)
-	}
-	w.Header().Add("Content-Type", "text/html")
-	err = tmpl.Execute(w, ViewModel{
-		PageTitle: "Hazo Home",
-		Datasets:  datasets,
-		Debug:     cc.Config.Debug,
-	})
-	if err != nil {
-		return fmt.Errorf("template rendering of the index page failed: %w", err)
-	}
 	return nil
 }

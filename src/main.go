@@ -24,6 +24,8 @@ func main() {
 		err = cmd.Init(os.Args[2:])
 	case "adduser":
 		err = cmd.AddUser(os.Args[2:])
+	case "sharedb":
+		err = cmd.Sharedb(os.Args[2:])
 	case "importcsv":
 		err = cmd.ImportCsv(os.Args[2:])
 	case "importjson":
