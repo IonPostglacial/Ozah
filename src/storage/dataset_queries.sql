@@ -42,6 +42,11 @@ select * from Document doc
 where (doc.Path = ?)
 order by Path asc, Doc_Order asc;
 
+-- name: GetDocumentDirectChildrenRefs :many
+select Ref from Document doc 
+where (doc.Path = ?)
+order by Path asc, Doc_Order asc;
+
 -- name: GetTaxonInfo :one
 select t.*, doc.*, tr1.name name_v, tr2.name name_cn from Taxon t
 inner join Document doc on doc.Ref = t.Document_Ref
@@ -71,6 +76,12 @@ left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Re
 where descriptor.Taxon_Ref = ?
 order by doc.Path asc, doc.Doc_Order asc;
 
+-- name: GetTaxonStateDescriptors :many
+select doc.Ref, doc.Path from Taxon_Description descriptor
+inner join Document doc on doc.Ref = descriptor.Description_Ref
+where descriptor.Taxon_Ref = ?
+order by doc.Path asc, doc.Doc_Order asc;
+
 -- name: DistinctiveCharacters :many
 select ch.Ref, ch.Name, s.Ref State_ref, s.Name State_Name from Document ch
 inner join Document s on s.Path = (ch.Path || '.' || ch.Ref)
@@ -87,6 +98,26 @@ where (ch.Path || '.' || ch.Ref) in (
 select doc.Ref, doc.Name, mc.Unit_Ref from Measurement_Character mc
 inner join Document doc on doc.Ref = mc.Document_Ref
 order by doc.Name;
+
+-- name: GetMeasurementCharactersWithTranslations :many
+select doc.Ref, doc.Path, doc.Name, doc.Details, mc.Unit_Ref, tr1.name name_tr1, tr2.name name_tr2 from Measurement_Character mc
+inner join Document doc on doc.Ref = mc.Document_Ref
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "EN"
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
+order by doc.Name;
+
+-- name: GetCategoricalCharacters :many
+select doc.Ref, doc.Path, doc.Details, doc.Name, tr1.name name_tr1, tr2.name name_tr2, ch.Color from Categorical_Character ch
+inner join Document doc on doc.Ref = ch.Document_Ref
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "EN"
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
+order by doc.Name;
+
+-- name: GetCharacterStates :many
+select s.Document_Ref from State s
+inner join Document doc on doc.Ref = s.Document_Ref
+inner join Document ch on (ch.Path || '.' || ch.Ref) = doc.Path
+where ch.Ref = ?;
 
 -- name: GetTaxonBookInfo :many
 select doc.Ref, doc.Name, info.Fasc, info.Page, info.Details from Taxon_Book_Info info
@@ -132,11 +163,25 @@ insert into
 values
     (?, ?);
 
+-- name: GetBooks :many
+select doc.Ref, doc.Path, doc.Name, tr1.name name_tr1, tr2.name name_tr2, b.ISBN from Document doc
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "EN"
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
+inner join Book b on doc.Ref = b.Document_Ref
+order by doc.Path asc, doc.Doc_Order asc;
+
 -- name: InsertState :execresult
 insert into
     State (Document_Ref, Color)
 values
     (?, ?);
+
+-- name: GetAllStates :many
+select doc.Ref, doc.Path, doc.Name, doc.Details, tr1.name name_tr1, tr2.name name_tr2, s.Color from Document doc
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "EN"
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
+inner join State s on doc.Ref = s.Document_Ref
+order by doc.Path asc, doc.Doc_Order asc;
 
 -- name: InsertCategoricalCharacter :execresult
 insert into
@@ -209,6 +254,13 @@ insert into Taxon (
     Fasc,
     Page)
 values (?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: GetAllTaxonsWithTranslations :many
+select t.*, doc.*, tr1.name name_v, tr2.name name_cn from Taxon t
+inner join Document doc on doc.Ref = t.Document_Ref
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "V"
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
+order by doc.Path asc, doc.Doc_Order asc;
 
 -- name: InsertTaxonMeasurement :execresult
 insert into Taxon_Measurement (

@@ -5,6 +5,7 @@
         {{ template "popover" .AvailableDatasets }}
     </div>
     <div class="spacer"></div>
+    <a class="btn" download="{{ .DatasetName }}.json" title="export" href="../json"><i class="fa-solid fa-file-export"></i></a>
     {{ template "checklist_popover" .LangsCheckList }}
     <!-- 
     <div class="btn-group hbox vertical-align">

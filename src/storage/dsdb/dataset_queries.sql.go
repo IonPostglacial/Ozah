@@ -59,6 +59,167 @@ func (q *Queries) DistinctiveCharacters(ctx context.Context) ([]DistinctiveChara
 	return items, nil
 }
 
+const getAllStates = `-- name: GetAllStates :many
+select doc.Ref, doc.Path, doc.Name, doc.Details, tr1.name name_tr1, tr2.name name_tr2, s.Color from Document doc
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "EN"
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
+inner join State s on doc.Ref = s.Document_Ref
+order by doc.Path asc, doc.Doc_Order asc
+`
+
+type GetAllStatesRow struct {
+	Ref     string
+	Path    string
+	Name    string
+	Details sql.NullString
+	NameTr1 sql.NullString
+	NameTr2 sql.NullString
+	Color   sql.NullString
+}
+
+func (q *Queries) GetAllStates(ctx context.Context) ([]GetAllStatesRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllStates)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllStatesRow
+	for rows.Next() {
+		var i GetAllStatesRow
+		if err := rows.Scan(
+			&i.Ref,
+			&i.Path,
+			&i.Name,
+			&i.Details,
+			&i.NameTr1,
+			&i.NameTr2,
+			&i.Color,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAllTaxonsWithTranslations = `-- name: GetAllTaxonsWithTranslations :many
+select t.document_ref, t.author, t.website, t.meaning, t.herbarium_no, t.herbarium_picture, t.fasc, t.page, doc.ref, doc.path, doc.doc_order, doc.name, doc.details, tr1.name name_v, tr2.name name_cn from Taxon t
+inner join Document doc on doc.Ref = t.Document_Ref
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "V"
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
+order by doc.Path asc, doc.Doc_Order asc
+`
+
+type GetAllTaxonsWithTranslationsRow struct {
+	DocumentRef      string
+	Author           string
+	Website          sql.NullString
+	Meaning          sql.NullString
+	HerbariumNo      sql.NullString
+	HerbariumPicture sql.NullString
+	Fasc             sql.NullInt64
+	Page             sql.NullInt64
+	Ref              string
+	Path             string
+	DocOrder         int64
+	Name             string
+	Details          sql.NullString
+	NameV            sql.NullString
+	NameCn           sql.NullString
+}
+
+func (q *Queries) GetAllTaxonsWithTranslations(ctx context.Context) ([]GetAllTaxonsWithTranslationsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllTaxonsWithTranslations)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllTaxonsWithTranslationsRow
+	for rows.Next() {
+		var i GetAllTaxonsWithTranslationsRow
+		if err := rows.Scan(
+			&i.DocumentRef,
+			&i.Author,
+			&i.Website,
+			&i.Meaning,
+			&i.HerbariumNo,
+			&i.HerbariumPicture,
+			&i.Fasc,
+			&i.Page,
+			&i.Ref,
+			&i.Path,
+			&i.DocOrder,
+			&i.Name,
+			&i.Details,
+			&i.NameV,
+			&i.NameCn,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getBooks = `-- name: GetBooks :many
+select doc.Ref, doc.Path, doc.Name, tr1.name name_tr1, tr2.name name_tr2, b.ISBN from Document doc
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "EN"
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
+inner join Book b on doc.Ref = b.Document_Ref
+order by doc.Path asc, doc.Doc_Order asc
+`
+
+type GetBooksRow struct {
+	Ref     string
+	Path    string
+	Name    string
+	NameTr1 sql.NullString
+	NameTr2 sql.NullString
+	Isbn    sql.NullString
+}
+
+func (q *Queries) GetBooks(ctx context.Context) ([]GetBooksRow, error) {
+	rows, err := q.db.QueryContext(ctx, getBooks)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetBooksRow
+	for rows.Next() {
+		var i GetBooksRow
+		if err := rows.Scan(
+			&i.Ref,
+			&i.Path,
+			&i.Name,
+			&i.NameTr1,
+			&i.NameTr2,
+			&i.Isbn,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCatCharactersNameTr2 = `-- name: GetCatCharactersNameTr2 :many
 select doc.Ref, doc.Path, doc.Name, tr1.name name_tr1, tr2.name name_tr2, ch.Color from Document doc 
 left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = ?1
@@ -115,6 +276,85 @@ func (q *Queries) GetCatCharactersNameTr2(ctx context.Context, arg GetCatCharact
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCategoricalCharacters = `-- name: GetCategoricalCharacters :many
+select doc.Ref, doc.Path, doc.Details, doc.Name, tr1.name name_tr1, tr2.name name_tr2, ch.Color from Categorical_Character ch
+inner join Document doc on doc.Ref = ch.Document_Ref
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "EN"
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
+order by doc.Name
+`
+
+type GetCategoricalCharactersRow struct {
+	Ref     string
+	Path    string
+	Details sql.NullString
+	Name    string
+	NameTr1 sql.NullString
+	NameTr2 sql.NullString
+	Color   sql.NullString
+}
+
+func (q *Queries) GetCategoricalCharacters(ctx context.Context) ([]GetCategoricalCharactersRow, error) {
+	rows, err := q.db.QueryContext(ctx, getCategoricalCharacters)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetCategoricalCharactersRow
+	for rows.Next() {
+		var i GetCategoricalCharactersRow
+		if err := rows.Scan(
+			&i.Ref,
+			&i.Path,
+			&i.Details,
+			&i.Name,
+			&i.NameTr1,
+			&i.NameTr2,
+			&i.Color,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getCharacterStates = `-- name: GetCharacterStates :many
+select s.Document_Ref from State s
+inner join Document doc on doc.Ref = s.Document_Ref
+inner join Document ch on (ch.Path || '.' || ch.Ref) = doc.Path
+where ch.Ref = ?
+`
+
+func (q *Queries) GetCharacterStates(ctx context.Context, ref string) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, getCharacterStates, ref)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var document_ref string
+		if err := rows.Scan(&document_ref); err != nil {
+			return nil, err
+		}
+		items = append(items, document_ref)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err
@@ -262,6 +502,35 @@ func (q *Queries) GetDocumentDirectChildren(ctx context.Context, path string) ([
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getDocumentDirectChildrenRefs = `-- name: GetDocumentDirectChildrenRefs :many
+select Ref from Document doc 
+where (doc.Path = ?)
+order by Path asc, Doc_Order asc
+`
+
+func (q *Queries) GetDocumentDirectChildrenRefs(ctx context.Context, path string) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, getDocumentDirectChildrenRefs, path)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var ref string
+		if err := rows.Scan(&ref); err != nil {
+			return nil, err
+		}
+		items = append(items, ref)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err
@@ -441,6 +710,55 @@ func (q *Queries) GetMeasurementCharacters(ctx context.Context) ([]GetMeasuremen
 	return items, nil
 }
 
+const getMeasurementCharactersWithTranslations = `-- name: GetMeasurementCharactersWithTranslations :many
+select doc.Ref, doc.Path, doc.Name, doc.Details, mc.Unit_Ref, tr1.name name_tr1, tr2.name name_tr2 from Measurement_Character mc
+inner join Document doc on doc.Ref = mc.Document_Ref
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "EN"
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
+order by doc.Name
+`
+
+type GetMeasurementCharactersWithTranslationsRow struct {
+	Ref     string
+	Path    string
+	Name    string
+	Details sql.NullString
+	UnitRef sql.NullString
+	NameTr1 sql.NullString
+	NameTr2 sql.NullString
+}
+
+func (q *Queries) GetMeasurementCharactersWithTranslations(ctx context.Context) ([]GetMeasurementCharactersWithTranslationsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getMeasurementCharactersWithTranslations)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetMeasurementCharactersWithTranslationsRow
+	for rows.Next() {
+		var i GetMeasurementCharactersWithTranslationsRow
+		if err := rows.Scan(
+			&i.Ref,
+			&i.Path,
+			&i.Name,
+			&i.Details,
+			&i.UnitRef,
+			&i.NameTr1,
+			&i.NameTr2,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getSummaryDescriptors = `-- name: GetSummaryDescriptors :many
 select doc.Ref, doc.Path, doc.Name, tr1.name name_tr1, tr2.name name_tr2, s.Color from Taxon_Description descriptor
 inner join Document doc on doc.Ref = descriptor.Description_Ref
@@ -581,6 +899,41 @@ func (q *Queries) GetTaxonInfo(ctx context.Context, ref string) (GetTaxonInfoRow
 		&i.NameCn,
 	)
 	return i, err
+}
+
+const getTaxonStateDescriptors = `-- name: GetTaxonStateDescriptors :many
+select doc.Ref, doc.Path from Taxon_Description descriptor
+inner join Document doc on doc.Ref = descriptor.Description_Ref
+where descriptor.Taxon_Ref = ?
+order by doc.Path asc, doc.Doc_Order asc
+`
+
+type GetTaxonStateDescriptorsRow struct {
+	Ref  string
+	Path string
+}
+
+func (q *Queries) GetTaxonStateDescriptors(ctx context.Context, taxonRef string) ([]GetTaxonStateDescriptorsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getTaxonStateDescriptors, taxonRef)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetTaxonStateDescriptorsRow
+	for rows.Next() {
+		var i GetTaxonStateDescriptorsRow
+		if err := rows.Scan(&i.Ref, &i.Path); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const insertBook = `-- name: InsertBook :execresult
