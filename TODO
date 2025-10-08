@@ -1,15 +1,38 @@
+LIBRARY POLICY: Minimize external dependencies. Backend should use Go standard library and golang.org/x packages only.
+Frontend can use small, standalone libraries (JS/CSS files) that work without build tools/npm.
+
+FRONTEND POLICY: Progressive enhancement - app must work (potentially degraded) with JavaScript disabled.
+- htmx is our only JavaScript dependency (for AJAX requests, partial updates, hx-boost)
+- Use Go templates for pseudo-components (reusable template blocks)
+- Use custom elements (web components) for interactive features
+- Leverage modern CSS (grid, flexbox, :has(), container queries, etc.) for layout and interactivity
+- JavaScript should enhance, not enable - core functionality must work without it
+- Forms use POST/GET actions, buttons trigger server-side handlers via action system
+- JS/htmx adds polish: client-side validation, dynamic updates, animations, partial page updates, etc.
+
 # Import pictures
 Picture upload UI exists but backend functionality is incomplete.
 Need CLI command, form action endpoint (no JS), and API endpoint.
+Following the existing action pattern (see panelActions.go, action/handler.go).
+
+Backend:
 - [ ] Create CLI command to add picture to dataset with thumbnail generation (hazo addpicture -dataset <name> -entity <taxon|character|state> -ref <id> -file <path>)
-- [ ] Implement thumbnail generation library/function (small, medium, big sizes)
-- [ ] Store thumbnails in user's private directory with naming convention
-- [ ] Create form action endpoint POST /upload/picture for HTML form submission (no JS required)
-- [ ] Create API endpoint POST /api/pictures for programmatic uploads (cookie authentication)
-- [ ] Both endpoints should: validate file type, generate thumbnails, store in private directory, update database
+- [ ] Implement thumbnail generation using Go standard library (image, image/jpeg, image/png packages) - decode, resize, encode
+- [ ] Store thumbnails in user's private directory with naming convention (e.g., {entity}_{ref}_{size}.jpg)
+- [ ] Create pictureActions.go following panelActions.go pattern with uploadPicture action
+- [ ] Add action.NewActionWithFileUpload() helper in action/handler.go to handle multipart/form-data
+- [ ] Register picture actions in appropriate handler (taxons, characters) using cc.RegisterActions()
 - [ ] Create picture serving endpoint GET /pictures/{id}?size=small|medium|big
 - [ ] Implement access control: user can access own pictures + pictures from datasets shared with them
-- [ ] Wire up the upload button in picturebox component to the form action endpoint
+- [ ] Create API endpoint POST /api/pictures for programmatic uploads (cookie authentication) with JSON response
+
+Frontend (No JavaScript):
+- [ ] Update picturebox.html to wrap upload button in a form with method="POST" enctype="multipart/form-data"
+- [ ] Add hidden inputs for entity type and ref ID to the form
+- [ ] Change upload button to submit type with name="picture-upload" (matching action registration)
+- [ ] Add file input with name="picture-file" (styled with CSS if needed)
+- [ ] Form will POST to current page URL, action system will handle it via ExecuteActions()
+- [ ] After successful upload, page reload will show new picture (following existing pattern)
 
 # Picture Display with Thumbnails
 Pictures should use thumbnails of appropriate sizes, not full-size images.
@@ -45,10 +68,11 @@ Need admin interface for user management. Currently no admin capability exists.
 
 # Microsoft Account Authentication
 Support MS account login alongside local authentication.
-- [ ] Research/integrate Microsoft Authentication Library (MSAL)
+Note: Implement OAuth2 using Go stdlib (net/http, crypto) and golang.org/x packages if needed. Avoid MSAL.
+- [ ] Implement OAuth2 flow for Microsoft login using Go stdlib (net/http for requests, encoding/json for parsing)
+- [ ] Use golang.org/x/oauth2 if necessary (acceptable as x-repo), otherwise implement OAuth2 manually
 - [ ] Add MS_Account_Id column to Credentials table
 - [ ] Create MS_Account_Requests table for pending access requests
-- [ ] Implement OAuth2 flow for Microsoft login
 - [ ] Create "Login with Microsoft" button on login page
 - [ ] Store MS account ID when user authenticates
 - [ ] Create pending requests view for admins
@@ -82,8 +106,9 @@ Calendar data structure exists in imports but no display implementation.
 Display geographical characters/states as colored features on a map.
 Some characters and states are geographical in nature (e.g., distribution ranges, habitat regions).
 Need to display these as GeoJSON shapes/features on a map in taxon state edition/visualization views.
-- [ ] Research/choose or implement GIS library for displaying GeoJSON shapes (Leaflet, OpenLayers, etc.)
-- [ ] Add map library assets/dependencies
+Note: Frontend map library (Leaflet/OpenLayers) is acceptable as it's browser-side. Backend should use Go stdlib only.
+- [ ] Choose lightweight frontend map library for displaying GeoJSON shapes (Leaflet recommended - small, no build step)
+- [ ] Add map library assets (single JS/CSS files, no npm dependencies)
 - [ ] Create map component for geographical characters (Go viewmodel + HTML template/custom component)
 - [ ] Create SQL query to retrieve geographical character/state data (GeoJSON) for a taxon
 - [ ] Implement map rendering with colored features representing different geographical states
