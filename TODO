@@ -11,6 +11,66 @@ Need CLI command, form action endpoint (no JS), and API endpoint.
 - [ ] Implement access control: user can access own pictures + pictures from datasets shared with them
 - [ ] Wire up the upload button in picturebox component to the form action endpoint
 
+# Picture Display with Thumbnails
+Pictures should use thumbnails of appropriate sizes, not full-size images.
+- [ ] Update picture upload to automatically generate thumbnails (small, medium, big) on import
+- [ ] Modify picturebox component to request appropriate thumbnail size
+- [ ] Use small thumbnails for icon displays and grids
+- [ ] Use medium thumbnails for normal detail views
+- [ ] Use big thumbnails or original for zoomed/fullscreen view
+- [ ] Update picture serving endpoint to serve correct size based on request
+
+# Dataset Import API
+Currently dataset import exists via /upload form endpoint and CLI commands.
+Need proper API endpoints for programmatic access.
+- [ ] Create API endpoint POST /api/datasets/import for JSON dataset uploads (cookie authentication)
+- [ ] Create API endpoint POST /api/datasets/import/csv for CSV dataset uploads (cookie authentication)
+- [ ] Both API endpoints should return structured JSON responses with success/error details
+- [ ] Maintain existing /upload form endpoint for no-JS HTML form submission
+- [ ] Add API documentation for dataset import endpoints
+- [ ] Add validation and proper error responses for API calls
+
+# Administration Interface
+Need admin interface for user management. Currently no admin capability exists.
+- [ ] Add Is_Admin boolean column to Credentials table in app schema
+- [ ] Create migration to add Is_Admin column to existing databases
+- [ ] Update adduser command to support optional -admin flag
+- [ ] Create admin-only middleware to protect admin routes
+- [ ] Create admin interface route/handler (e.g., /admin)
+- [ ] Build admin user list view showing all users with admin status
+- [ ] Add "Add User" functionality in admin interface
+- [ ] Add "Delete User" functionality with confirmation
+- [ ] Add "Toggle Admin" functionality to grant/revoke admin privileges
+- [ ] Add visual indication of admin status in UI
+
+# Microsoft Account Authentication
+Support MS account login alongside local authentication.
+- [ ] Research/integrate Microsoft Authentication Library (MSAL)
+- [ ] Add MS_Account_Id column to Credentials table
+- [ ] Create MS_Account_Requests table for pending access requests
+- [ ] Implement OAuth2 flow for Microsoft login
+- [ ] Create "Login with Microsoft" button on login page
+- [ ] Store MS account ID when user authenticates
+- [ ] Create pending requests view for admins
+- [ ] Allow admins to approve/reject MS account access requests
+- [ ] Link approved MS accounts to existing or new user accounts
+- [ ] Handle MS account session management and token refresh
+
+# Dataset Editing Capabilities
+Currently can only import and visualize datasets, need ability to edit them.
+Note: INSERT operations already exist in queries.sql (created for import command) but should be moved to command.sql for consistency.
+- [ ] Create command.sql file for edit operations (UPDATE, DELETE for taxons, characters, states, etc.)
+- [ ] Move existing INSERT operations from queries.sql to command.sql (InsertDocument, InsertLang, InsertDocumentTranslation, InsertDocumentAttachment, InsertUnit, InsertBook, InsertState, InsertCategoricalCharacter, InsertMeasurementCharacter, InsertPeriodicCharacter, InsertGeographicalPlace, InsertTaxon, InsertTaxonDescription, InsertTaxonMeasurement, etc.)
+- [ ] Update sqlc.yaml configuration to include command.sql for code generation
+- [ ] Generate Go functions from command.sql using sqlc
+- [ ] Create edit mode UI for taxons (add/edit/delete taxons)
+- [ ] Create edit mode UI for characters (add/edit/delete characters)
+- [ ] Create edit mode UI for states (add/edit/delete states)
+- [ ] Create edit mode UI for measurements (add/edit/delete measurements)
+- [ ] Add save/cancel functionality with proper error handling
+- [ ] Implement validation for edited data
+- [ ] Add confirmation dialogs for destructive operations (delete)
+
 # Display Calendars
 Calendar data structure exists in imports but no display implementation.
 - [ ] Create SQL query to retrieve calendar/periodic data for a taxon
@@ -56,63 +116,3 @@ Descriptors panel doesn't show measurements.
 - [ ] Extend descriptors viewmodel to include measurement data
 - [ ] Update descriptors display to show measurement ranges with units
 - [ ] Add filtering capability for measurements in descriptor search
-
-# Dataset Import API
-Currently dataset import exists via /upload form endpoint and CLI commands.
-Need proper API endpoints for programmatic access.
-- [ ] Create API endpoint POST /api/datasets/import for JSON dataset uploads (cookie authentication)
-- [ ] Create API endpoint POST /api/datasets/import/csv for CSV dataset uploads (cookie authentication)
-- [ ] Both API endpoints should return structured JSON responses with success/error details
-- [ ] Maintain existing /upload form endpoint for no-JS HTML form submission
-- [ ] Add API documentation for dataset import endpoints
-- [ ] Add validation and proper error responses for API calls
-
-# Dataset Editing Capabilities
-Currently can only import and visualize datasets, need ability to edit them.
-Note: INSERT operations already exist in queries.sql (created for import command) but should be moved to command.sql for consistency.
-- [ ] Create command.sql file for edit operations (UPDATE, DELETE for taxons, characters, states, etc.)
-- [ ] Move existing INSERT operations from queries.sql to command.sql (InsertDocument, InsertLang, InsertDocumentTranslation, InsertDocumentAttachment, InsertUnit, InsertBook, InsertState, InsertCategoricalCharacter, InsertMeasurementCharacter, InsertPeriodicCharacter, InsertGeographicalPlace, InsertTaxon, InsertTaxonDescription, InsertTaxonMeasurement, etc.)
-- [ ] Update sqlc.yaml configuration to include command.sql for code generation
-- [ ] Generate Go functions from command.sql using sqlc
-- [ ] Create edit mode UI for taxons (add/edit/delete taxons)
-- [ ] Create edit mode UI for characters (add/edit/delete characters)
-- [ ] Create edit mode UI for states (add/edit/delete states)
-- [ ] Create edit mode UI for measurements (add/edit/delete measurements)
-- [ ] Add save/cancel functionality with proper error handling
-- [ ] Implement validation for edited data
-- [ ] Add confirmation dialogs for destructive operations (delete)
-
-# Picture Display with Thumbnails
-Pictures should use thumbnails of appropriate sizes, not full-size images.
-- [ ] Update picture upload to automatically generate thumbnails (small, medium, big) on import
-- [ ] Modify picturebox component to request appropriate thumbnail size
-- [ ] Use small thumbnails for icon displays and grids
-- [ ] Use medium thumbnails for normal detail views
-- [ ] Use big thumbnails or original for zoomed/fullscreen view
-- [ ] Update picture serving endpoint to serve correct size based on request
-
-# Administration Interface
-Need admin interface for user management. Currently no admin capability exists.
-- [ ] Add Is_Admin boolean column to Credentials table in app schema
-- [ ] Create migration to add Is_Admin column to existing databases
-- [ ] Update adduser command to support optional -admin flag
-- [ ] Create admin-only middleware to protect admin routes
-- [ ] Create admin interface route/handler (e.g., /admin)
-- [ ] Build admin user list view showing all users with admin status
-- [ ] Add "Add User" functionality in admin interface
-- [ ] Add "Delete User" functionality with confirmation
-- [ ] Add "Toggle Admin" functionality to grant/revoke admin privileges
-- [ ] Add visual indication of admin status in UI
-
-# Microsoft Account Authentication
-Support MS account login alongside local authentication.
-- [ ] Research/integrate Microsoft Authentication Library (MSAL)
-- [ ] Add MS_Account_Id column to Credentials table
-- [ ] Create MS_Account_Requests table for pending access requests
-- [ ] Implement OAuth2 flow for Microsoft login
-- [ ] Create "Login with Microsoft" button on login page
-- [ ] Store MS account ID when user authenticates
-- [ ] Create pending requests view for admins
-- [ ] Allow admins to approve/reject MS account access requests
-- [ ] Link approved MS accounts to existing or new user accounts
-- [ ] Handle MS account session management and token refresh
