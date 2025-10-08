@@ -1,11 +1,118 @@
-Import pictures
-Display Calendars
-Handle hiding / showing panes
-Handle resizing panes
-Display Maps
-Choose languages
-Add search to descriptors
-Display measurements in Summary
-Display measurements in Descriptors
-Display specific information in characters view
-Only display internal error in Debug Mode
+# Import pictures
+Picture upload UI exists but backend functionality is incomplete.
+Need CLI command, form action endpoint (no JS), and API endpoint.
+- [ ] Create CLI command to add picture to dataset with thumbnail generation (hazo addpicture -dataset <name> -entity <taxon|character|state> -ref <id> -file <path>)
+- [ ] Implement thumbnail generation library/function (small, medium, big sizes)
+- [ ] Store thumbnails in user's private directory with naming convention
+- [ ] Create form action endpoint POST /upload/picture for HTML form submission (no JS required)
+- [ ] Create API endpoint POST /api/pictures for programmatic uploads (cookie authentication)
+- [ ] Both endpoints should: validate file type, generate thumbnails, store in private directory, update database
+- [ ] Create picture serving endpoint GET /pictures/{id}?size=small|medium|big
+- [ ] Implement access control: user can access own pictures + pictures from datasets shared with them
+- [ ] Wire up the upload button in picturebox component to the form action endpoint
+
+# Display Calendars
+Calendar data structure exists in imports but no display implementation.
+- [ ] Create SQL query to retrieve calendar/periodic data for a taxon
+- [ ] Create calendar display component (Go viewmodel + HTML template)
+- [ ] Add calendar section to appropriate views (taxons/characters)
+- [ ] Style calendar display appropriately
+
+# Display Geographical Data (PRIORITY)
+Display geographical characters/states as colored features on a map.
+Some characters and states are geographical in nature (e.g., distribution ranges, habitat regions).
+Need to display these as GeoJSON shapes/features on a map in taxon state edition/visualization views.
+- [ ] Research/choose or implement GIS library for displaying GeoJSON shapes (Leaflet, OpenLayers, etc.)
+- [ ] Add map library assets/dependencies
+- [ ] Create map component for geographical characters (Go viewmodel + HTML template/custom component)
+- [ ] Create SQL query to retrieve geographical character/state data (GeoJSON) for a taxon
+- [ ] Implement map rendering with colored features representing different geographical states
+- [ ] Add map to character/state visualization views
+- [ ] Add map to character/state editing views with ability to modify GeoJSON shapes
+- [ ] Style geographical states with distinct colors on the map
+- [ ] Add legend showing which states correspond to which colored regions
+
+# Display Taxon Specimen Locations (Nice to Have)
+Display collection/observation locations of taxon specimens on a map.
+This is separate from geographical characters - these are point locations where specimens were found.
+- [ ] Extend database schema to store specimen location data (lat/lon coordinates)
+- [ ] Create SQL query to retrieve specimen locations for a taxon
+- [ ] Create specimen map component (can reuse map library from geographical data feature)
+- [ ] Display specimen locations as markers/points on map
+- [ ] Add popup/tooltip for each specimen showing collection details
+- [ ] Add specimen map view to taxon detail pages
+- [ ] Consider clustering for many specimens in same area
+
+# Display measurements in Summary
+Summary component exists but doesn't show measurements.
+- [ ] Create SQL query to retrieve taxon measurements (from Taxon_Measurement table)
+- [ ] Extend summary viewmodel to include measurements
+- [ ] Update summary.html template to display measurements (min/max ranges, units)
+- [ ] Style measurement display appropriately
+
+# Display measurements in Descriptors
+Descriptors panel doesn't show measurements.
+- [ ] Create/extend SQL query to retrieve measurements alongside categorical descriptors
+- [ ] Extend descriptors viewmodel to include measurement data
+- [ ] Update descriptors display to show measurement ranges with units
+- [ ] Add filtering capability for measurements in descriptor search
+
+# Dataset Import API
+Currently dataset import exists via /upload form endpoint and CLI commands.
+Need proper API endpoints for programmatic access.
+- [ ] Create API endpoint POST /api/datasets/import for JSON dataset uploads (cookie authentication)
+- [ ] Create API endpoint POST /api/datasets/import/csv for CSV dataset uploads (cookie authentication)
+- [ ] Both API endpoints should return structured JSON responses with success/error details
+- [ ] Maintain existing /upload form endpoint for no-JS HTML form submission
+- [ ] Add API documentation for dataset import endpoints
+- [ ] Add validation and proper error responses for API calls
+
+# Dataset Editing Capabilities
+Currently can only import and visualize datasets, need ability to edit them.
+Note: INSERT operations already exist in queries.sql (created for import command) but should be moved to command.sql for consistency.
+- [ ] Create command.sql file for edit operations (UPDATE, DELETE for taxons, characters, states, etc.)
+- [ ] Move existing INSERT operations from queries.sql to command.sql (InsertDocument, InsertLang, InsertDocumentTranslation, InsertDocumentAttachment, InsertUnit, InsertBook, InsertState, InsertCategoricalCharacter, InsertMeasurementCharacter, InsertPeriodicCharacter, InsertGeographicalPlace, InsertTaxon, InsertTaxonDescription, InsertTaxonMeasurement, etc.)
+- [ ] Update sqlc.yaml configuration to include command.sql for code generation
+- [ ] Generate Go functions from command.sql using sqlc
+- [ ] Create edit mode UI for taxons (add/edit/delete taxons)
+- [ ] Create edit mode UI for characters (add/edit/delete characters)
+- [ ] Create edit mode UI for states (add/edit/delete states)
+- [ ] Create edit mode UI for measurements (add/edit/delete measurements)
+- [ ] Add save/cancel functionality with proper error handling
+- [ ] Implement validation for edited data
+- [ ] Add confirmation dialogs for destructive operations (delete)
+
+# Picture Display with Thumbnails
+Pictures should use thumbnails of appropriate sizes, not full-size images.
+- [ ] Update picture upload to automatically generate thumbnails (small, medium, big) on import
+- [ ] Modify picturebox component to request appropriate thumbnail size
+- [ ] Use small thumbnails for icon displays and grids
+- [ ] Use medium thumbnails for normal detail views
+- [ ] Use big thumbnails or original for zoomed/fullscreen view
+- [ ] Update picture serving endpoint to serve correct size based on request
+
+# Administration Interface
+Need admin interface for user management. Currently no admin capability exists.
+- [ ] Add Is_Admin boolean column to Credentials table in app schema
+- [ ] Create migration to add Is_Admin column to existing databases
+- [ ] Update adduser command to support optional -admin flag
+- [ ] Create admin-only middleware to protect admin routes
+- [ ] Create admin interface route/handler (e.g., /admin)
+- [ ] Build admin user list view showing all users with admin status
+- [ ] Add "Add User" functionality in admin interface
+- [ ] Add "Delete User" functionality with confirmation
+- [ ] Add "Toggle Admin" functionality to grant/revoke admin privileges
+- [ ] Add visual indication of admin status in UI
+
+# Microsoft Account Authentication
+Support MS account login alongside local authentication.
+- [ ] Research/integrate Microsoft Authentication Library (MSAL)
+- [ ] Add MS_Account_Id column to Credentials table
+- [ ] Create MS_Account_Requests table for pending access requests
+- [ ] Implement OAuth2 flow for Microsoft login
+- [ ] Create "Login with Microsoft" button on login page
+- [ ] Store MS account ID when user authenticates
+- [ ] Create pending requests view for admins
+- [ ] Allow admins to approve/reject MS account access requests
+- [ ] Link approved MS accounts to existing or new user accounts
+- [ ] Handle MS account session management and token refresh
