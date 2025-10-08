@@ -23,15 +23,15 @@ Need proper API endpoints for programmatic access.
 # Dataset Export API
 Currently dataset export exists via CLI command (hazo exportjson) and /export form endpoint.
 Need proper API endpoints for programmatic access following the existing export patterns.
-- [ ] Create API endpoint GET /api/datasets/{name}/json for JSON dataset downloads (cookie authentication)
-- [ ] Reuse existing export/hazojson.go logic for dataset serialization
-- [ ] Return proper JSON content-type headers and structured error responses
-- [ ] Implement access control: users can only export datasets they own or have been shared with them
+- [x] Create API endpoint GET /api/datasets/{name}/json for JSON dataset downloads (cookie authentication)
+- [x] Reuse existing export/hazojson.go logic for dataset serialization
+- [x] Return proper JSON content-type headers and structured error responses
+- [x] Implement access control: users can only export datasets they own or have been shared with them
 - [ ] Support optional query parameters for export customization (e.g., ?include_pictures=true)
-- [ ] Add proper error handling for missing datasets or unauthorized access
-- [ ] Maintain existing /export form endpoint for browser downloads
+- [x] Add proper error handling for missing datasets or unauthorized access
+- [x] Maintain existing /export form endpoint for browser downloads
 - [ ] Add API documentation for dataset export endpoint
-- [ ] Consider adding CSV export API endpoint GET /api/datasets/{name}/csv for consistency
+- [x] Consider adding CSV export API endpoint GET /api/datasets/{name}/csv for consistency
 
 # Import pictures
 Picture upload UI exists but backend functionality is incomplete.

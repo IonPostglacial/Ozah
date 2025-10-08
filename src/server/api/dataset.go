@@ -148,3 +148,118 @@ func DatasetImportCsvHandler(w http.ResponseWriter, r *http.Request, cc *common.
 	writeSuccessResponse(w, dsName)
 	return nil
 }
+
+type DatasetExportResponse struct {
+	Success bool   `json:"success"`
+	Error   string `json:"error,omitempty"`
+}
+
+func DatasetExportJsonHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
+	if r.Method != http.MethodGet {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(DatasetExportResponse{
+			Success: false,
+			Error:   "Method not allowed. Use GET.",
+		})
+		return nil
+	}
+
+	dsName := r.PathValue("name")
+	if dsName == "" {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(DatasetExportResponse{
+			Success: false,
+			Error:   "Missing dataset name in URL path",
+		})
+		return nil
+	}
+
+	pds, err := cc.User.CanAccessDataset(dsName)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusForbidden)
+		json.NewEncoder(w).Encode(DatasetExportResponse{
+			Success: false,
+			Error:   fmt.Sprintf("Access denied: %v", err),
+		})
+		return nil
+	}
+
+	queries, err := dataset.OpenDb(pds)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(DatasetExportResponse{
+			Success: false,
+			Error:   fmt.Sprintf("Could not open dataset database: %v", err),
+		})
+		return nil
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s.hazo.json", dsName))
+	w.WriteHeader(http.StatusOK)
+
+	if err := dataset.ExportJson(dsName, queries, w); err != nil {
+		return fmt.Errorf("failed to export dataset '%s' as JSON: %w", dsName, err)
+	}
+
+	return nil
+}
+
+func DatasetExportCsvHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
+	if r.Method != http.MethodGet {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		json.NewEncoder(w).Encode(DatasetExportResponse{
+			Success: false,
+			Error:   "Method not allowed. Use GET.",
+		})
+		return nil
+	}
+
+	dsName := r.PathValue("name")
+	if dsName == "" {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(DatasetExportResponse{
+			Success: false,
+			Error:   "Missing dataset name in URL path",
+		})
+		return nil
+	}
+
+	pds, err := cc.User.CanAccessDataset(dsName)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusForbidden)
+		json.NewEncoder(w).Encode(DatasetExportResponse{
+			Success: false,
+			Error:   fmt.Sprintf("Access denied: %v", err),
+		})
+		return nil
+	}
+
+	queries, err := dataset.OpenDb(pds)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(DatasetExportResponse{
+			Success: false,
+			Error:   fmt.Sprintf("Could not open dataset database: %v", err),
+		})
+		return nil
+	}
+
+	w.Header().Set("Content-Type", "application/zip")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s.zip", dsName))
+	w.WriteHeader(http.StatusOK)
+
+	if err := dataset.ExportCsv(dsName, queries, w); err != nil {
+		return fmt.Errorf("failed to export dataset '%s' as CSV: %w", dsName, err)
+	}
+
+	return nil
+}

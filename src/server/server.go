@@ -79,6 +79,14 @@ func New(config *common.ServerConfig) Server {
 		Wrap(authentication.HandlerWrapper).
 		Wrap(appdb.Handler).
 		Unwrap(config))
+	s.HandleFunc("/api/datasets/{name}/json", common.Handler(api.DatasetExportJsonHandler).
+		Wrap(authentication.HandlerWrapper).
+		Wrap(appdb.Handler).
+		Unwrap(config))
+	s.HandleFunc("/api/datasets/{name}/csv", common.Handler(api.DatasetExportCsvHandler).
+		Wrap(authentication.HandlerWrapper).
+		Wrap(appdb.Handler).
+		Unwrap(config))
 	s.HandleFunc("/upload", common.Handler(uploadHandler).
 		Wrap(authentication.HandlerWrapper).
 		Wrap(appdb.Handler).

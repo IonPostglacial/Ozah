@@ -51,6 +51,49 @@ func (u *T) GetDataset(dsName string) (dataset.Private, error) {
 	return dataset.InvalidPrivate, ErrForbiddenAccess
 }
 
+func (u *T) CanAccessDataset(dsName string) (dataset.Private, error) {
+	dsPath := getUserPrivateDatasetPath(u.privateDirectory, dsName)
+	inUserDir, err := filepath.Match(path.Join(u.privateDirectory, "*.sq3"), dsPath)
+	if err != nil {
+		return dataset.InvalidPrivate, fmt.Errorf("could not find dataset '%s': %w", dsName, err)
+	}
+	if inUserDir {
+		if _, err := os.Stat(dsPath); err == nil {
+			return dataset.Private(dsPath), nil
+		}
+	}
+
+	_, queries, err := app.OpenDb()
+	if err != nil {
+		return dataset.InvalidPrivate, fmt.Errorf("could not open the users database: %w", err)
+	}
+	ctx := context.Background()
+
+	readableDatasets, err := queries.GetReadableDatasetSharedWithUser(ctx, u.Login)
+	if err != nil {
+		return dataset.InvalidPrivate, fmt.Errorf("could not retrieve shared datasets for user '%s': %w", u.Login, err)
+	}
+	for _, d := range readableDatasets {
+		if d.Name == dsName {
+			path := getUserPrivateDatasetPath(d.PrivateDirectory, d.Name)
+			return dataset.Private(path), nil
+		}
+	}
+
+	writableDatasets, err := queries.GetWritableDatasetSharedWithUser(ctx, u.Login)
+	if err != nil {
+		return dataset.InvalidPrivate, fmt.Errorf("could not retrieve shared datasets for user '%s': %w", u.Login, err)
+	}
+	for _, d := range writableDatasets {
+		if d.Name == dsName {
+			path := getUserPrivateDatasetPath(d.PrivateDirectory, d.Name)
+			return dataset.Private(path), nil
+		}
+	}
+
+	return dataset.InvalidPrivate, ErrForbiddenAccess
+}
+
 func (u *T) ListDatasets() ([]dataset.T, error) {
 	files, err := filepath.Glob(path.Join(u.privateDirectory, "*.sq3"))
 	if err != nil {
