@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"golang.org/x/crypto/bcrypt"
-	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/app"
 	"nicolas.galipot.net/hazo/storage/appdb"
 )
 
@@ -20,7 +20,7 @@ func AddUser(args []string) error {
 		return fmt.Errorf("could not create directory '%s': %w", folderPath, err)
 	}
 	ctx := context.Background()
-	_, queries, err := storage.OpenAppDb()
+	_, queries, err := app.OpenDb()
 	if err != nil {
 		return fmt.Errorf("could not open users database: %w", err)
 	}

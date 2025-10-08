@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/dataset"
 	"nicolas.galipot.net/hazo/storage/dsdb"
 )
 
@@ -34,7 +34,7 @@ type ViewModel struct {
 	Sections []Section
 }
 
-func LoadForTaxon(ctx context.Context, queries *storage.Queries, taxonRef string) (*ViewModel, error) {
+func LoadForTaxon(ctx context.Context, queries *dataset.Queries, taxonRef string) (*ViewModel, error) {
 	sd, err := queries.GetSummaryDescriptors(ctx, taxonRef)
 	if err != nil {
 		return nil, err
@@ -64,7 +64,7 @@ func LoadForTaxon(ctx context.Context, queries *storage.Queries, taxonRef string
 	}
 	descriptionsBySection := make(map[string][]Descriptor)
 	for _, ch := range characters {
-		fullPath := storage.FullPath(ch.Path, ch.Ref)
+		fullPath := dataset.FullPath(ch.Path, ch.Ref)
 		states := statesByPath[fullPath]
 		path := strings.Split(ch.Path, ".")
 		section := "c0"

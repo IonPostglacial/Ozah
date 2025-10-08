@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/dataset"
 )
 
 func ImportJson(args []string) error {
@@ -14,5 +14,5 @@ func ImportJson(args []string) error {
 	if err != nil {
 		return fmt.Errorf("error importing file '%s': %w", filePath, err)
 	}
-	return storage.ImportJson(data, storage.PrivateDataset(ds))
+	return dataset.ImportJson(data, dataset.Private(ds))
 }

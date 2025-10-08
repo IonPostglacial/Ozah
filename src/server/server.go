@@ -23,7 +23,7 @@ import (
 	"nicolas.galipot.net/hazo/server/views/identification"
 	"nicolas.galipot.net/hazo/server/views/index"
 	"nicolas.galipot.net/hazo/server/views/taxons"
-	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/dataset"
 )
 
 //go:embed assets
@@ -143,14 +143,14 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) e
 		if err != nil {
 			return fmt.Errorf("uploading file '%s' failed while retrieving user dataset: %w", fileName, err)
 		}
-		err = storage.Create(dbPath)
+		err = dataset.Create(dbPath)
 		if err != nil {
 			return fmt.Errorf("creating database '%s' failed: %w", dbPath, err)
 		}
 		if isZip {
-			err = storage.ImportCsv(dir, dbPath)
+			err = dataset.ImportCsv(dir, dbPath)
 		} else {
-			err = storage.ImportJson(file, dbPath)
+			err = dataset.ImportJson(file, dbPath)
 		}
 		if err != nil {
 			return fmt.Errorf("error importing dataset '%s' to '%s' failed: %w", dir, dbPath, err)

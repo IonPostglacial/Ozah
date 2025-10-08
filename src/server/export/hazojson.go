@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"nicolas.galipot.net/hazo/server/common"
-	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/dataset"
 )
 
 func JsonHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
@@ -17,11 +17,11 @@ func JsonHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) err
 	if err != nil {
 		return fmt.Errorf("could not get dataset '%s': %w", dsName, err)
 	}
-	queries, err := storage.OpenDsDb(pds)
+	queries, err := dataset.OpenDb(pds)
 	if err != nil {
 		return fmt.Errorf("could not open dataset database for '%s': %w", dsName, err)
 	}
-	err = storage.ExportJson(dsName, queries, w)
+	err = dataset.ExportJson(dsName, queries, w)
 	if err != nil {
 		return fmt.Errorf("failed to export dataset as Hazo JSON: %w", err)
 	}

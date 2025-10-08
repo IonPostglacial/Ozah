@@ -4,7 +4,7 @@ import (
 	"context"
 	_ "embed"
 
-	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/dataset"
 )
 
 type ViewModel struct {
@@ -31,7 +31,7 @@ type Lang struct {
 	Selected bool
 }
 
-func LoadItemFromDb(ctx context.Context, queries *storage.Queries, root string, langs []string, filter string) (*Item, error) {
+func LoadItemFromDb(ctx context.Context, queries *dataset.Queries, root string, langs []string, filter string) (*Item, error) {
 	docs, err := queries.GetDocumentHierarchy(ctx, root, langs, filter)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func LoadItemFromDb(ctx context.Context, queries *storage.Queries, root string, 
 				}
 			}
 		}
-		fullPath := storage.FullPath(doc.Path, doc.Ref)
+		fullPath := dataset.FullPath(doc.Path, doc.Ref)
 		nameTr := make([]string, len(doc.NameTr))
 		for i, name := range doc.NameTr {
 			nameTr[i] = name.String

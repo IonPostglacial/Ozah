@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/dataset"
 )
 
 func ExportJson(args []string) error {
 	filePath := args[0]
 	dsName := args[1]
-	ds := storage.PrivateDataset(dsName)
-	queries, err := storage.OpenDsDb(ds)
+	ds := dataset.Private(dsName)
+	queries, err := dataset.OpenDb(ds)
 	if err != nil {
 		return fmt.Errorf("could not open dataset database for '%s': %w", dsName, err)
 	}
@@ -20,7 +20,7 @@ func ExportJson(args []string) error {
 		return fmt.Errorf("could not create output file '%s': %w", filePath, err)
 	}
 	defer outputFile.Close()
-	err = storage.ExportJson(dsName, queries, outputFile)
+	err = dataset.ExportJson(dsName, queries, outputFile)
 	if err != nil {
 		return fmt.Errorf("could not export dataset '%s' to JSON: %w", dsName, err)
 	}

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"nicolas.galipot.net/hazo/server/documents"
-	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/dataset"
 
 	_ "embed"
 )
@@ -12,7 +12,7 @@ import (
 //go:embed form.html
 var FormTemplate string
 
-func LoadFormViewModelFromDb(ctx context.Context, queries *storage.Queries, id string) (*FormViewModel, error) {
+func LoadFormViewModelFromDb(ctx context.Context, queries *dataset.Queries, id string) (*FormViewModel, error) {
 	data, err := queries.GetTaxonInfo(ctx, id)
 	if err != nil {
 		return nil, err

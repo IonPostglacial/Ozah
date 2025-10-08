@@ -19,13 +19,13 @@ import (
 	"nicolas.galipot.net/hazo/server/documents"
 	"nicolas.galipot.net/hazo/server/link"
 	"nicolas.galipot.net/hazo/server/views"
-	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/dataset"
 )
 
 //go:embed identification.html
 var identificationPage string
 
-func LinkToIdentification(dsName string, stateRefs []string, measures map[string]storage.SpecimenMeasurement) string {
+func LinkToIdentification(dsName string, stateRefs []string, measures map[string]dataset.SpecimenMeasurement) string {
 	linkUrl := strings.Builder{}
 	urlQuery := url.Values{}
 	for _, ref := range stateRefs {
@@ -48,7 +48,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	queries, err := storage.OpenDsDb(ds)
+	queries, err := dataset.OpenDb(ds)
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return fmt.Errorf("loading taxon languages: %w", err)
 	}
-	measurements := make(map[string]storage.SpecimenMeasurement, len(queryParams))
+	measurements := make(map[string]dataset.SpecimenMeasurement, len(queryParams))
 	for k, values := range queryParams {
 		if strings.HasPrefix(k, "m-") {
 			for _, v := range values {
@@ -66,7 +66,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 				if err != nil {
 					return fmt.Errorf("wrong measurement query '%s': %w", k, err)
 				}
-				measurements[k[2:]] = storage.SpecimenMeasurement{
+				measurements[k[2:]] = dataset.SpecimenMeasurement{
 					CharacterRef: k[2:],
 					Value:        value,
 				}
@@ -87,11 +87,11 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 			Ref: state.Ref, Name: state.Name, Url: url,
 		}
 	}
-	ms := make([]storage.SpecimenMeasurement, 0, len(measurements))
+	ms := make([]dataset.SpecimenMeasurement, 0, len(measurements))
 	for _, v := range measurements {
 		ms = append(ms, v)
 	}
-	taxa, err := queries.IdentifyTaxa(ctx, storage.TaxonIdentificationParams{
+	taxa, err := queries.IdentifyTaxa(ctx, dataset.TaxonIdentificationParams{
 		Measurements: ms,
 		StateRefs:    stateRefs,
 	})

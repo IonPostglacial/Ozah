@@ -14,7 +14,7 @@ import (
 	"nicolas.galipot.net/hazo/server/documents"
 	"nicolas.galipot.net/hazo/server/link"
 	"nicolas.galipot.net/hazo/server/views"
-	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/dataset"
 	"nicolas.galipot.net/hazo/storage/dsdb"
 )
 
@@ -30,7 +30,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return err
 	}
-	queries, err := storage.OpenDsDb(ds)
+	queries, err := dataset.OpenDb(ds)
 	if err != nil {
 		return err
 	}

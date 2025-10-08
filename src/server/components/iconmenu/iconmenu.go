@@ -5,7 +5,7 @@ import (
 
 	"nicolas.galipot.net/hazo/server/documents"
 	"nicolas.galipot.net/hazo/server/link"
-	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/dataset"
 	"nicolas.galipot.net/hazo/storage/dsdb"
 )
 
@@ -19,9 +19,9 @@ type ViewModel struct {
 	IsSelected bool
 }
 
-func GetTaxonDescriptors(ctx context.Context, queries *storage.Queries, dsName string, taxonRef string, currentDescriptor *documents.ViewModel) ([]ViewModel, error) {
+func GetTaxonDescriptors(ctx context.Context, queries *dataset.Queries, dsName string, taxonRef string, currentDescriptor *documents.ViewModel) ([]ViewModel, error) {
 	rows, err := queries.GetDescriptors(ctx, dsdb.GetDescriptorsParams{
-		Path:     storage.FullPath(currentDescriptor.Path, currentDescriptor.Ref),
+		Path:     dataset.FullPath(currentDescriptor.Path, currentDescriptor.Ref),
 		TaxonRef: taxonRef,
 	})
 	if err != nil {

@@ -1,4 +1,4 @@
-package storage
+package dataset
 
 import (
 	"context"
@@ -311,10 +311,10 @@ func insertTaxons(ctx context.Context, data hazojson.Dataset, q *dsdb.Queries) e
 	return nil
 }
 
-func ImportJson(rawData []byte, ds PrivateDataset) error {
+func ImportJson(rawData []byte, ds Private) error {
 	data := hazojson.Dataset{}
 	json.Unmarshal(rawData, &data)
-	db, err := ConnectDsDb(ds)
+	db, err := ConnectDb(ds)
 	if err != nil {
 		return fmt.Errorf("importing file failed during db connection: %w", err)
 	}

@@ -8,7 +8,7 @@ import (
 
 	"nicolas.galipot.net/hazo/server/common"
 	"nicolas.galipot.net/hazo/server/components"
-	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/dataset"
 )
 
 //go:embed index.html
@@ -16,9 +16,9 @@ var indexPage string
 
 type ViewModel struct {
 	PageTitle              string
-	Datasets               []storage.Dataset
-	SharedReadableDatasets []storage.SharedDataset
-	SharedWritableDatasets []storage.SharedDataset
+	Datasets               []dataset.T
+	SharedReadableDatasets []dataset.Shared
+	SharedWritableDatasets []dataset.Shared
 	Debug                  bool
 }
 

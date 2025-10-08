@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/app"
 	"nicolas.galipot.net/hazo/storage/appdb"
 )
 
@@ -33,7 +33,7 @@ func Sharedb(args []string) error {
 		return ErrInvalidArgs
 	}
 	ctx := context.Background()
-	db, queries, err := storage.OpenAppDb()
+	db, queries, err := app.OpenDb()
 	if err != nil {
 		return fmt.Errorf("could not open users database: %w", err)
 	}

@@ -1,8 +1,8 @@
 package cmd
 
-import "nicolas.galipot.net/hazo/storage"
+import "nicolas.galipot.net/hazo/storage/dataset"
 
 func Init(args []string) error {
 	dbPath := args[0]
-	return storage.Create(storage.PrivateDataset(dbPath))
+	return dataset.Create(dataset.Private(dbPath))
 }

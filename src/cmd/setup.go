@@ -4,17 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/app"
 	"nicolas.galipot.net/hazo/storage/appdb"
 )
 
 func Setup(args []string) error {
-	db, queries, err := storage.OpenAppDb()
+	db, queries, err := app.OpenDb()
 	if err != nil {
 		return fmt.Errorf("couldn't open appdb: %w", err)
 	}
 	ctx := context.Background()
-	_, err = db.Exec(storage.AppSchema)
+	_, err = db.Exec(app.Schema)
 	if err != nil {
 		return fmt.Errorf("couldn't apply database schema during setup: %w", err)
 	}

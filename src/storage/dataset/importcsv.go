@@ -1,4 +1,4 @@
-package storage
+package dataset
 
 import (
 	"context"
@@ -23,7 +23,7 @@ var tableNames = []string{
 	"taxon", "taxon_book_info", "taxon_measurement", "taxon_description", "taxon_specimen_location",
 }
 
-func ImportCsv(csvPath string, ds PrivateDataset) error {
+func ImportCsv(csvPath string, ds Private) error {
 	for _, tableName := range tableNames {
 		err := importFile(csvPath, ds, tableName)
 		if err != nil {
@@ -33,7 +33,7 @@ func ImportCsv(csvPath string, ds PrivateDataset) error {
 	return nil
 }
 
-func importFile(csvPath string, ds PrivateDataset, tableName string) error {
+func importFile(csvPath string, ds Private, tableName string) error {
 	fileName := fmt.Sprintf("%s.csv", tableName)
 	filePath := path.Join(csvPath, fileName)
 	content, err := parseCsvFile(filePath)
@@ -43,7 +43,7 @@ func importFile(csvPath string, ds PrivateDataset, tableName string) error {
 	if content.rowCount == 0 {
 		return nil
 	}
-	db, err := ConnectDsDb(ds)
+	db, err := ConnectDb(ds)
 	if err != nil {
 		return fmt.Errorf("importing file '%s' failed during db connection: %w", filePath, err)
 	}

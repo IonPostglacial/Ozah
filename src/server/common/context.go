@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"nicolas.galipot.net/hazo/server/action"
-	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/app"
 	"nicolas.galipot.net/hazo/storage/appdb"
 	"nicolas.galipot.net/hazo/user"
 )
@@ -44,7 +44,7 @@ func (cc *Context) ExecuteActions(ctx context.Context, r *http.Request) error {
 }
 
 func (cc *Context) ConnectAppDb() error {
-	db, appQueries, err := storage.OpenAppDb()
+	db, appQueries, err := app.OpenDb()
 	if err != nil {
 		return fmt.Errorf("couldn't open global database: %w", err)
 	}

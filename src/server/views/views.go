@@ -9,7 +9,7 @@ import (
 	"nicolas.galipot.net/hazo/server/components/popover"
 	"nicolas.galipot.net/hazo/server/documents"
 	"nicolas.galipot.net/hazo/server/link"
-	"nicolas.galipot.net/hazo/storage"
+	"nicolas.galipot.net/hazo/storage/dataset"
 )
 
 func NewViewMenuViewModel(label, dsName string) *popover.ViewModel {
@@ -41,7 +41,7 @@ func NewDatasetMenuViewModel(cc *common.Context, label string) (*popover.ViewMod
 	}, nil
 }
 
-func GetDocumentBranch(ctx context.Context, queries *storage.Queries, doc *documents.ViewModel, dbName string, makeLink link.Maker) (*breadcrumbs.ViewModel, error) {
+func GetDocumentBranch(ctx context.Context, queries *dataset.Queries, doc *documents.ViewModel, dbName string, makeLink link.Maker) (*breadcrumbs.ViewModel, error) {
 	if doc == nil || doc.Path == "" {
 		return &breadcrumbs.ViewModel{}, nil
 	}
