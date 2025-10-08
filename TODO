@@ -10,6 +10,29 @@ FRONTEND POLICY: Progressive enhancement - app must work (potentially degraded) 
 - Forms use POST/GET actions, buttons trigger server-side handlers via action system
 - JS/htmx adds polish: client-side validation, dynamic updates, animations, partial page updates, etc.
 
+# Dataset Import API
+Currently dataset import exists via /upload form endpoint and CLI commands.
+Need proper API endpoints for programmatic access.
+- [x] Create API endpoint POST /api/datasets/json for JSON dataset uploads (cookie authentication)
+- [x] Create API endpoint POST /api/datasets/csv for CSV dataset uploads (cookie authentication)
+- [x] In case of error, instead of a file, both API endpoints should return structured JSON responses with success/error details
+- [x] Maintain existing /upload form endpoint for no-JS HTML form submission
+- [x] Add API documentation for dataset import endpoints
+- [x] Add validation and proper error responses for API calls
+
+# Dataset Export API
+Currently dataset export exists via CLI command (hazo exportjson) and /export form endpoint.
+Need proper API endpoints for programmatic access following the existing export patterns.
+- [ ] Create API endpoint GET /api/datasets/{name}/json for JSON dataset downloads (cookie authentication)
+- [ ] Reuse existing export/hazojson.go logic for dataset serialization
+- [ ] Return proper JSON content-type headers and structured error responses
+- [ ] Implement access control: users can only export datasets they own or have been shared with them
+- [ ] Support optional query parameters for export customization (e.g., ?include_pictures=true)
+- [ ] Add proper error handling for missing datasets or unauthorized access
+- [ ] Maintain existing /export form endpoint for browser downloads
+- [ ] Add API documentation for dataset export endpoint
+- [ ] Consider adding CSV export API endpoint GET /api/datasets/{name}/csv for consistency
+
 # Import pictures
 Picture upload UI exists but backend functionality is incomplete.
 Need CLI command, form action endpoint (no JS), and API endpoint.
@@ -53,16 +76,6 @@ Pictures should use thumbnails of appropriate sizes, not full-size images.
 - [ ] Use medium thumbnails for normal detail views
 - [ ] Use big thumbnails or original for zoomed/fullscreen view
 - [ ] Update picture serving endpoint to serve correct size based on request
-
-# Dataset Import API
-Currently dataset import exists via /upload form endpoint and CLI commands.
-Need proper API endpoints for programmatic access.
-- [ ] Create API endpoint POST /api/datasets/import for JSON dataset uploads (cookie authentication)
-- [ ] Create API endpoint POST /api/datasets/import/csv for CSV dataset uploads (cookie authentication)
-- [ ] Both API endpoints should return structured JSON responses with success/error details
-- [ ] Maintain existing /upload form endpoint for no-JS HTML form submission
-- [ ] Add API documentation for dataset import endpoints
-- [ ] Add validation and proper error responses for API calls
 
 # Administration Interface
 Need admin interface for user management. Currently no admin capability exists.

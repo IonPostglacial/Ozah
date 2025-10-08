@@ -1,13 +1,9 @@
 package server
 
 import (
-	"archive/zip"
-	"bytes"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"path"
 	"strings"
 	"time"
 
@@ -75,6 +71,14 @@ func New(config *common.ServerConfig) Server {
 		Wrap(authentication.HandlerWrapper).
 		Wrap(appdb.Handler).
 		Unwrap(config))
+	s.HandleFunc("/api/datasets/json", common.Handler(api.DatasetImportJsonHandler).
+		Wrap(authentication.HandlerWrapper).
+		Wrap(appdb.Handler).
+		Unwrap(config))
+	s.HandleFunc("/api/datasets/csv", common.Handler(api.DatasetImportCsvHandler).
+		Wrap(authentication.HandlerWrapper).
+		Wrap(appdb.Handler).
+		Unwrap(config))
 	s.HandleFunc("/upload", common.Handler(uploadHandler).
 		Wrap(authentication.HandlerWrapper).
 		Wrap(appdb.Handler).
@@ -99,13 +103,6 @@ func New(config *common.ServerConfig) Server {
 	return Server{s}
 }
 
-func createFile(p string) (*os.File, error) {
-	if err := os.MkdirAll(path.Dir(p), 0770); err != nil {
-		return nil, err
-	}
-	return os.Create(p)
-}
-
 func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	r.ParseMultipartForm(5000000) //5 MB in memory, the rest in disk
 	datas := r.MultipartForm
@@ -113,56 +110,30 @@ func uploadHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) e
 		if len(headers) != 1 {
 			return fmt.Errorf("wrong header length, expected 1 got %d", len(headers))
 		}
-		auxiliar, _ := headers[0].Open()
+		fileReader, _ := headers[0].Open()
 		fileName := headers[0].Filename
-		dir, err := os.MkdirTemp("tmp", fileName)
-		if err != nil {
-			return fmt.Errorf("failed to create temporary directory to upload file '%s': %w", fileName, err)
-		}
-		defer os.RemoveAll(dir)
-		file, _ := io.ReadAll(auxiliar)
+		fileData, _ := io.ReadAll(fileReader)
+
 		isZip := strings.HasSuffix(fileName, ".zip")
-		dbName := ""
+		var dbName string
 		if isZip {
-			r, err := zip.NewReader(bytes.NewReader(file), int64(len(file)))
-			if err != nil {
-				return fmt.Errorf("reading zip failed: %w", err)
-			}
-			for _, f := range r.File {
-				content, err := f.Open()
-				if err != nil {
-					return fmt.Errorf("reading file '%s' failed: %w", f.Name, err)
-				}
-				filePath := path.Join(dir, f.Name)
-				file, err := createFile(filePath)
-				if err != nil {
-					return fmt.Errorf("creating file '%s' from '%s', '%s' failed: %w", filePath, dir, f.Name, err)
-				}
-				defer file.Close()
-				_, err = io.Copy(file, content)
-				if err != nil {
-					return fmt.Errorf("copying file '%s' failed: %w", filePath, err)
-				}
-			}
 			dbName = strings.TrimSuffix(fileName, ".zip")
 		} else {
 			dbName = strings.TrimSuffix(fileName, ".hazo.json")
 		}
+
 		dbPath, err := cc.User.GetDataset(dbName)
 		if err != nil {
 			return fmt.Errorf("uploading file '%s' failed while retrieving user dataset: %w", fileName, err)
 		}
-		err = dataset.Create(dbPath)
-		if err != nil {
-			return fmt.Errorf("creating database '%s' failed: %w", dbPath, err)
-		}
+
 		if isZip {
-			err = dataset.ImportCsv(dir, dbPath)
+			err = dataset.ImportCsvDataset(dataset.Private(dbPath), fileData)
 		} else {
-			err = dataset.ImportJson(file, dbPath)
+			err = dataset.ImportJsonDataset(dataset.Private(dbPath), fileData)
 		}
 		if err != nil {
-			return fmt.Errorf("error importing dataset '%s' to '%s' failed: %w", dir, dbPath, err)
+			return fmt.Errorf("error importing dataset from '%s': %w", fileName, err)
 		}
 	}
 	w.Header().Add("Content-Type", "text/html")
