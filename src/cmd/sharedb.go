@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"flag"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,15 +21,35 @@ var (
 )
 
 func Sharedb(args []string) error {
-	creator := args[0]
-	mode := args[1]
-	datasetName := args[2]
-	sharedToUsers := args[3:]
-	if creator == "" || mode == "" || datasetName == "" {
+	fs := flag.NewFlagSet("sharedb", flag.ExitOnError)
+
+	var creator, mode, datasetName, users string
+	fs.StringVar(&creator, "creator", "", "Username of the dataset creator (required)")
+	fs.StringVar(&mode, "mode", "", "Access mode: 'read' or 'write' (required)")
+	fs.StringVar(&datasetName, "dataset", "", "Name of the dataset to share (required)")
+	fs.StringVar(&users, "users", "", "Comma-separated list of usernames to share the dataset with (required)")
+
+	fs.Usage = func() {
+		fmt.Fprintf(fs.Output(), "Usage: hazo sharedb -creator <user> -mode <read|write> -dataset <name> -users <user1,user2,...>\n\n")
+		fmt.Fprintf(fs.Output(), "Share a dataset with other users.\n\n")
+		fs.PrintDefaults()
+	}
+
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+
+	if creator == "" || mode == "" || datasetName == "" || users == "" {
+		fs.Usage()
 		return ErrInvalidArgs
 	}
 	if mode != "read" && mode != "write" {
 		return fmt.Errorf("invalid mode %s: %w", mode, ErrInvalidMode)
+	}
+
+	sharedToUsers := strings.Split(users, ",")
+	for i := range sharedToUsers {
+		sharedToUsers[i] = strings.TrimSpace(sharedToUsers[i])
 	}
 	if len(sharedToUsers) == 0 {
 		return ErrInvalidArgs

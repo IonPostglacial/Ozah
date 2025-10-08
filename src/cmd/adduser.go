@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"os"
 
@@ -13,9 +14,27 @@ import (
 const Cost = 11
 
 func AddUser(args []string) error {
-	login := args[0]
-	password := args[1]
-	folderPath := args[2]
+	fs := flag.NewFlagSet("adduser", flag.ExitOnError)
+
+	var login, password, folderPath string
+	fs.StringVar(&login, "login", "", "Username for the new user (required)")
+	fs.StringVar(&password, "password", "", "Password for the new user (will be hashed using bcrypt) (required)")
+	fs.StringVar(&folderPath, "folder", "", "Private directory path for the user's data (required)")
+
+	fs.Usage = func() {
+		fmt.Fprintf(fs.Output(), "Usage: hazo adduser -login <username> -password <password> -folder <path>\n\n")
+		fmt.Fprintf(fs.Output(), "Add a new user to the system.\n\n")
+		fs.PrintDefaults()
+	}
+
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+
+	if login == "" || password == "" || folderPath == "" {
+		fs.Usage()
+		return fmt.Errorf("all flags are required: -login, -password, -folder")
+	}
 	if err := os.MkdirAll(folderPath, os.ModePerm); err != nil {
 		return fmt.Errorf("could not create directory '%s': %w", folderPath, err)
 	}

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"flag"
 	"fmt"
 
 	"nicolas.galipot.net/hazo/storage/app"
@@ -9,6 +10,20 @@ import (
 )
 
 func Setup(args []string) error {
+	fs := flag.NewFlagSet("setup", flag.ExitOnError)
+	fs.Usage = func() {
+		fmt.Fprintf(fs.Output(), "Usage: hazo setup\n\n")
+		fmt.Fprintf(fs.Output(), "Initialize the application database with default configuration.\n\n")
+		fmt.Fprintf(fs.Output(), "This command creates the necessary tables and populates them with:\n")
+		fmt.Fprintf(fs.Output(), "  - Default languages (Vernacular, Chinese, English, French)\n")
+		fmt.Fprintf(fs.Output(), "  - Default user panels (Properties, Descriptors, Summary)\n\n")
+		fmt.Fprintf(fs.Output(), "Options:\n")
+		fs.PrintDefaults()
+	}
+
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
 	db, queries, err := app.OpenDb()
 	if err != nil {
 		return fmt.Errorf("couldn't open appdb: %w", err)

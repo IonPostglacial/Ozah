@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
@@ -8,8 +9,26 @@ import (
 )
 
 func ExportJson(args []string) error {
-	filePath := args[0]
-	dsName := args[1]
+	fs := flag.NewFlagSet("exportjson", flag.ExitOnError)
+
+	var filePath, dsName string
+	fs.StringVar(&filePath, "output", "", "Path where the JSON file will be created (required)")
+	fs.StringVar(&dsName, "dataset", "", "Name of the dataset to export (required)")
+
+	fs.Usage = func() {
+		fmt.Fprintf(fs.Output(), "Usage: hazo exportjson -output <file> -dataset <name>\n\n")
+		fmt.Fprintf(fs.Output(), "Export a dataset to JSON format.\n\n")
+		fs.PrintDefaults()
+	}
+
+	if err := fs.Parse(args); err != nil {
+		return err
+	}
+
+	if filePath == "" || dsName == "" {
+		fs.Usage()
+		return fmt.Errorf("all flags are required: -output, -dataset")
+	}
 	ds := dataset.Private(dsName)
 	queries, err := dataset.OpenDb(ds)
 	if err != nil {
