@@ -13,6 +13,7 @@ import (
 
 	"embed"
 
+	"nicolas.galipot.net/hazo/server/api"
 	"nicolas.galipot.net/hazo/server/appdb"
 	"nicolas.galipot.net/hazo/server/authentication"
 	"nicolas.galipot.net/hazo/server/common"
@@ -63,6 +64,14 @@ func New(config *common.ServerConfig) Server {
 		Wrap(appdb.Handler).
 		Unwrap(config))
 	s.HandleFunc("/ds/{dsName}/identify", common.Handler(identification.Handler).
+		Wrap(authentication.HandlerWrapper).
+		Wrap(appdb.Handler).
+		Unwrap(config))
+	s.HandleFunc("/ds/{dsName}/pictures/{docRef}/{index}", common.Handler(PictureHandler).
+		Wrap(authentication.HandlerWrapper).
+		Wrap(appdb.Handler).
+		Unwrap(config))
+	s.HandleFunc("/api/pictures", common.Handler(api.PictureUploadHandler).
 		Wrap(authentication.HandlerWrapper).
 		Wrap(appdb.Handler).
 		Unwrap(config))

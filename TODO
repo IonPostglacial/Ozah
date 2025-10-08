@@ -16,15 +16,26 @@ Need CLI command, form action endpoint (no JS), and API endpoint.
 Following the existing action pattern (see panelActions.go, action/handler.go).
 
 Backend:
-- [ ] Create CLI command to add picture to dataset with thumbnail generation (hazo addpicture -dataset <name> -entity <taxon|character|state> -ref <id> -file <path>)
-- [ ] Implement thumbnail generation using Go standard library (image, image/jpeg, image/png packages) - decode, resize, encode
-- [ ] Store thumbnails in user's private directory with naming convention (e.g., {entity}_{ref}_{size}.jpg)
-- [ ] Create pictureActions.go following panelActions.go pattern with uploadPicture action
-- [ ] Add action.NewActionWithFileUpload() helper in action/handler.go to handle multipart/form-data
-- [ ] Register picture actions in appropriate handler (taxons, characters) using cc.RegisterActions()
-- [ ] Create picture serving endpoint GET /pictures/{id}?size=small|medium|big
-- [ ] Implement access control: user can access own pictures + pictures from datasets shared with them
-- [ ] Create API endpoint POST /api/pictures for programmatic uploads (cookie authentication) with JSON response
+- [x] Implement thumbnail generation using Go standard library (image, image/jpeg, image/png packages) - decode, resize, encode
+- [x] Store thumbnails in user's private directory with naming convention (e.g., {docRef}_{index}_{size}.jpg)
+- [x] Create CLI command to add picture to dataset with thumbnail generation (hazo addpicture -dataset <name> -ref <id> -file <path> [-index <n>])
+- [x] Create pictureActions.go following panelActions.go pattern with uploadPicture action
+- [x] Add action.NewActionWithFileUpload() helper in action/handler.go to handle multipart/form-data
+- [x] Register picture actions in appropriate handler (taxons, characters) using cc.RegisterActions()
+- [x] Create picture serving endpoint GET /ds/{dsName}/pictures/{docRef}/{index}?size=small|medium|big
+- [x] Implement access control: user can access own pictures + pictures from datasets shared with them
+- [x] Create API endpoint POST /api/pictures for programmatic uploads (cookie authentication) with JSON response
+
+Bulk photo download/thumbnail generation:
+- [ ] Create CLI command to bulk download/process pictures for a dataset (hazo syncpictures -dataset <name>)
+- [ ] For each Document_Attachment record with a Source URL:
+  - If image file doesn't exist locally: download from Source URL with per-domain rate limiting
+  - If image exists locally but thumbnails are missing: generate thumbnails from local file
+  - If both exist: skip (idempotent operation)
+- [ ] Use asynchronous/concurrent downloads with worker pool pattern
+- [ ] Implement per-domain rate limiting to avoid overwhelming source servers (polite crawling)
+- [ ] Log progress and any download/generation failures
+- [ ] Support optional flags: -force (redownload/regenerate all), -dry-run (show what would be done)
 
 Frontend (No JavaScript):
 - [ ] Update picturebox.html to wrap upload button in a form with method="POST" enctype="multipart/form-data"

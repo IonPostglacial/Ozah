@@ -146,9 +146,20 @@ insert into Document_Attachment (
     Document_Ref, 
     Attachment_Index, 
     Source, 
-    Path)
+    Path,
+    Path_Small,
+    Path_Medium,
+    Path_Big)
 values
-    (?, ?, ?, ?);
+    (?, ?, ?, ?, ?, ?, ?);
+
+-- name: GetDocumentAttachmentByIndex :one
+select * from Document_Attachment 
+where Document_Ref = ? and Attachment_Index = ?;
+
+-- name: DeleteDocumentAttachment :exec
+delete from Document_Attachment 
+where Document_Ref = ? and Attachment_Index = ?;
 
 
 -- name: InsertUnit :execresult

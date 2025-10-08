@@ -97,6 +97,9 @@ create table Document_Attachment (
 	
     Source Text not null,
     Path Text not null default '',
+    Path_Small Text not null default '',
+    Path_Medium Text not null default '',
+    Path_Big Text not null default '',
 
     primary key (Document_Ref, Attachment_Index),
     foreign key (Document_Ref) references Document(Ref)

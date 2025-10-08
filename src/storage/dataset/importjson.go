@@ -62,6 +62,9 @@ func insertDocument(ctx context.Context, queries *dsdb.Queries, order int64, doc
 			AttachmentIndex: int64(i),
 			Source:          photo.Url,
 			Path:            photo.HubUrl,
+			PathSmall:       "",
+			PathMedium:      "",
+			PathBig:         "",
 		})
 		if err != nil {
 			return err

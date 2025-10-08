@@ -34,6 +34,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	)
 	ctx := context.Background()
 	cc.RegisterActions(NewPanelActions(cc))
+	cc.RegisterActions(NewPictureActions(cc, dsName, docRef))
 	cc.ExecuteActions(ctx, r)
 	ds, err := cc.User.GetDataset(dsName)
 	if err != nil {

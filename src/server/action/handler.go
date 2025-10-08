@@ -3,6 +3,7 @@ package action
 import (
 	"context"
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"strconv"
 )
@@ -28,6 +29,29 @@ func NewActionWithStringArgument(argName string, cb func(ctx context.Context, va
 			return cb(ctx, value)
 		}
 		return nil
+	}
+}
+
+func NewActionWithFileUpload(buttonName, fileFieldName string, cb func(ctx context.Context, file multipart.File, header *multipart.FileHeader) error) Action {
+	return func(ctx context.Context, r *http.Request) error {
+		if r.PostFormValue(buttonName) == "" {
+			return nil
+		}
+		if r.MultipartForm == nil {
+			if err := r.ParseMultipartForm(32 << 20); err != nil { // 32 MB max
+				return fmt.Errorf("could not parse multipart form: %w", err)
+			}
+		}
+		file, header, err := r.FormFile(fileFieldName)
+		if err != nil {
+			if err == http.ErrMissingFile {
+				return nil // No file provided, skip this action
+			}
+			return fmt.Errorf("could not get file from form: %w", err)
+		}
+		defer file.Close()
+
+		return cb(ctx, file, header)
 	}
 }
 

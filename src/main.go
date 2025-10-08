@@ -19,6 +19,7 @@ Available Commands:
   setup       Initialize the application database with default configuration
   init        Create a new dataset database
   adduser     Add a new user to the system
+  addpicture  Add a picture to a document with thumbnail generation
   sharedb     Share a dataset with other users
   serve       Start the web server
   importcsv   Import data from a CSV file into a dataset
@@ -52,6 +53,8 @@ func main() {
 		err = cmd.Init(os.Args[2:])
 	case "adduser":
 		err = cmd.AddUser(os.Args[2:])
+	case "addpicture":
+		err = cmd.AddPicture(os.Args[2:])
 	case "sharedb":
 		err = cmd.Sharedb(os.Args[2:])
 	case "importcsv":
