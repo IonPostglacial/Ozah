@@ -16,6 +16,7 @@ import (
 	"nicolas.galipot.net/hazo/server/components"
 	"nicolas.galipot.net/hazo/server/documents"
 	"nicolas.galipot.net/hazo/server/export"
+	"nicolas.galipot.net/hazo/server/views/admin"
 	"nicolas.galipot.net/hazo/server/views/characters"
 	"nicolas.galipot.net/hazo/server/views/identification"
 	"nicolas.galipot.net/hazo/server/views/index"
@@ -35,6 +36,11 @@ type Server struct {
 
 func New(config *common.ServerConfig) Server {
 	s := http.NewServeMux()
+	s.HandleFunc("/admin", common.Handler(admin.Handler).
+		Wrap(authentication.RequireCapability("user.manage")).
+		Wrap(authentication.HandlerWrapper).
+		Wrap(appdb.Handler).
+		Unwrap(config))
 	s.HandleFunc("/ds/{dsName}/json", common.Handler(export.JsonHandler).
 		Wrap(authentication.HandlerWrapper).
 		Wrap(appdb.Handler).

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+{{ template "page_head" . }}
+<body class="single-content vbox">
+    <div class="vbox flex-fill">
+        <div class="hbox top-bar-height separated-bottom vertical-align padded">
+            <h1>{{ .PageTitle }}</h1>
+            <div class="spacer"></div>
+            <a href="/"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+        </div>
+        
+        {{ if .Success }}
+        <div class="message-success padded">{{ .Success }}</div>
+        {{ end }}
+        
+        {{ if .Error }}
+        <div class="message-error padded">{{ .Error }}</div>
+        {{ end }}
+
+        <div class="separated-bottom padded">
+            <h2>Add New User</h2>
+            <details>
+                <summary>Create New User</summary>
+                <form method="POST" class="vbox padded bordered">
+                    <label for="login">Login:</label>
+                    <input type="text" id="login" name="login" required>
+                    
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                    
+                    <label for="folder">Private Directory:</label>
+                    <input type="text" id="folder" name="folder" required placeholder="/path/to/user/folder">
+                    
+                    <button type="submit" name="admin-add-user" value="1">Create User</button>
+                </form>
+            </details>
+        </div>
+
+        <div class="separated-bottom padded vertical-scroll">
+            <h2>User Management</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Login</th>
+                        <th>Created On</th>
+                        <th>Capabilities</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{ range $user := .Users }}
+                    <tr>
+                        <td><strong>{{ $user.Login }}</strong></td>
+                        <td>{{ $user.CreatedOn }}</td>
+                        <td>
+                            <div class="hbox">
+                            {{ if $user.Capabilities }}
+                                {{ range $user.Capabilities }}
+                                <hazo-capability-badge title="Granted by {{ .GrantedBy }} on {{ .GrantedDate }}">
+                                    {{ .Name }}
+                                    <form method="POST" class="inline" onsubmit="return confirm('Revoke capability {{ .Name }} from user {{ $user.Login }}?');">
+                                        <input type="hidden" name="revoke-login" value="{{ $user.Login }}">
+                                        <input type="hidden" name="revoke-capability" value="{{ .Name }}">
+                                        <button type="submit" name="admin-revoke-capability" value="1" title="Revoke"><i class="fa-solid fa-close"></i></button>
+                                    </form>
+                                </hazo-capability-badge>
+                                {{ end }}
+                            {{ else }}
+                                <em>No capabilities</em>
+                            {{ end }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <details>
+                                    <summary>Grant Capability</summary>
+                                    <form method="POST" class="vbox padded bordered">
+                                        <input type="hidden" name="grant-login" value="{{ $user.Login }}">
+                                        <select name="grant-capability" required>
+                                            <option value="">Select capability...</option>
+                                            {{ range $.AllCapabilities }}
+                                            <option value="{{ .Name }}">{{ .Name }} - {{ .Description }}</option>
+                                            {{ end }}
+                                        </select>
+                                        <button type="submit" name="admin-grant-capability" value="1">Grant</button>
+                                    </form>
+                                </details>
+                                <form method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete user {{ $user.Login }}? This action cannot be undone.');">
+                                    <input type="hidden" name="delete-login" value="{{ $user.Login }}">
+                                    <button type="submit" name="admin-delete-user" value="1" class="danger" title="Delete user {{ $user.Login }}"><i class="fa-solid fa-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {{ end }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

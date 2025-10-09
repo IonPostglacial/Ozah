@@ -127,6 +127,10 @@ th {
     display: none;
 }
 
+.inline {
+    display: inline;
+}
+
 .toggle>input[type="checkbox"] {
     display: none;
 }
@@ -192,6 +196,21 @@ select.warning {
     background-color: var(--bg-color-warning);
     border-color: var(--border-color-warning);
     color: var(--text-color-warning);
+}
+
+button.danger,
+input[type=submit].danger,
+.btn.danger,
+select.danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+button.danger:hover,
+input[type=submit].danger:hover,
+.btn.danger:hover,
+select.danger:hover {
+    background-color: #c82333;
 }
 
 button:active,
@@ -352,6 +371,20 @@ input[type="search"]~.search-icon {
     background-color: var(--error-msg-background-color);
     color: var(--error-msg-text-color);
     border-color: var(--error-msg-text-color);
+}
+
+.message-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    border-radius: var(--widget-radius);
+}
+
+.message-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: var(--widget-radius);
 }
 
 .bordered {

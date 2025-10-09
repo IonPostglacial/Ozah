@@ -93,12 +93,147 @@ func (q *Queries) DeleteUserSessions(ctx context.Context, login string) (sql.Res
 	return q.db.ExecContext(ctx, deleteUserSessions, login)
 }
 
+const getAllCapabilities = `-- name: GetAllCapabilities :many
+select
+    Name,
+    Description
+from
+    Capability
+order by
+    Name
+`
+
+func (q *Queries) GetAllCapabilities(ctx context.Context) ([]Capability, error) {
+	rows, err := q.db.QueryContext(ctx, getAllCapabilities)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Capability
+	for rows.Next() {
+		var i Capability
+		if err := rows.Scan(&i.Name, &i.Description); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getAllLangs = `-- name: GetAllLangs :execresult
 select ref, name from Lang
 `
 
 func (q *Queries) GetAllLangs(ctx context.Context) (sql.Result, error) {
 	return q.db.ExecContext(ctx, getAllLangs)
+}
+
+const getAllUsers = `-- name: GetAllUsers :many
+select
+    c.Login,
+    c.Created_On,
+    uc.Private_Directory
+from
+    Credentials as c
+inner join
+    User_Configuration as uc on c.Login = uc.User_Login
+`
+
+type GetAllUsersRow struct {
+	Login            string
+	CreatedOn        sql.NullString
+	PrivateDirectory string
+}
+
+func (q *Queries) GetAllUsers(ctx context.Context) ([]GetAllUsersRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllUsersRow
+	for rows.Next() {
+		var i GetAllUsersRow
+		if err := rows.Scan(&i.Login, &i.CreatedOn, &i.PrivateDirectory); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAllUsersWithCapabilities = `-- name: GetAllUsersWithCapabilities :many
+select
+    c.Login,
+    c.Created_On,
+    uc.Private_Directory,
+    ucp.Capability_Name,
+    cap.Description as Capability_Description,
+    ucp.Granted_Date,
+    ucp.Granted_By
+from
+    Credentials as c
+inner join
+    User_Configuration as uc on c.Login = uc.Login
+left join
+    User_Capability as ucp on c.Login = ucp.User_Login
+left join
+    Capability as cap on ucp.Capability_Name = cap.Name
+order by
+    c.Login, ucp.Capability_Name
+`
+
+type GetAllUsersWithCapabilitiesRow struct {
+	Login                 string
+	CreatedOn             sql.NullString
+	PrivateDirectory      string
+	CapabilityName        sql.NullString
+	CapabilityDescription sql.NullString
+	GrantedDate           sql.NullString
+	GrantedBy             sql.NullString
+}
+
+func (q *Queries) GetAllUsersWithCapabilities(ctx context.Context) ([]GetAllUsersWithCapabilitiesRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllUsersWithCapabilities)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllUsersWithCapabilitiesRow
+	for rows.Next() {
+		var i GetAllUsersWithCapabilitiesRow
+		if err := rows.Scan(
+			&i.Login,
+			&i.CreatedOn,
+			&i.PrivateDirectory,
+			&i.CapabilityName,
+			&i.CapabilityDescription,
+			&i.GrantedDate,
+			&i.GrantedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getCredentials = `-- name: GetCredentials :one

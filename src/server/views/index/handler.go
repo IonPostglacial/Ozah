@@ -20,6 +20,7 @@ type ViewModel struct {
 	SharedReadableDatasets []dataset.Shared
 	SharedWritableDatasets []dataset.Shared
 	Debug                  bool
+	CanManageUsers         bool
 }
 
 func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
@@ -37,6 +38,10 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to list datasets in index handler: %w", err)
 	}
+	canManageUsers, err := cc.User.HasCapability("user.manage")
+	if err != nil {
+		return fmt.Errorf("failed to check user capabilities: %w", err)
+	}
 	w.Header().Add("Content-Type", "text/html")
 	err = tmpl.Execute(w, ViewModel{
 		PageTitle:              "Hazo Home",
@@ -44,6 +49,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		SharedReadableDatasets: sharedReadableDatasets,
 		SharedWritableDatasets: sharedWritableDatasets,
 		Debug:                  cc.Config.Debug,
+		CanManageUsers:         canManageUsers,
 	})
 	if err != nil {
 		return fmt.Errorf("template rendering of the index page failed: %w", err)

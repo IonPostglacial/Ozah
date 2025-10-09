@@ -5,6 +5,11 @@
     <div class="vbox flex-fill">
         <div class="hbox top-bar-height separated-bottom vertical-align padded">
             <h1>List of my Datasets</h1>
+            {{ if .CanManageUsers }}
+            <div style="margin-left: auto;">
+                <a href="/admin" class="admin-link">Admin Panel</a>
+            </div>
+            {{ end }}
         </div>
         <table>
             <tr>

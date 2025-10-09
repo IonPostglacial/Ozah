@@ -281,3 +281,42 @@ from
 where
     User_Login = ?
     and Capability_Name = ?;
+
+-- name: GetAllUsers :many
+select
+    c.Login,
+    c.Created_On,
+    uc.Private_Directory
+from
+    Credentials as c
+inner join
+    User_Configuration as uc on c.Login = uc.User_Login;
+
+-- name: GetAllCapabilities :many
+select
+    Name,
+    Description
+from
+    Capability
+order by
+    Name;
+
+-- name: GetAllUsersWithCapabilities :many
+select
+    c.Login,
+    c.Created_On,
+    uc.Private_Directory,
+    ucp.Capability_Name,
+    cap.Description as Capability_Description,
+    ucp.Granted_Date,
+    ucp.Granted_By
+from
+    Credentials as c
+inner join
+    User_Configuration as uc on c.Login = uc.Login
+left join
+    User_Capability as ucp on c.Login = ucp.User_Login
+left join
+    Capability as cap on ucp.Capability_Name = cap.Name
+order by
+    c.Login, ucp.Capability_Name;

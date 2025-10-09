@@ -10,6 +10,37 @@ FRONTEND POLICY: Progressive enhancement - app must work (potentially degraded) 
 - Forms use POST/GET actions, buttons trigger server-side handlers via action system
 - JS/htmx adds polish: client-side validation, dynamic updates, animations, partial page updates, etc.
 
+ACTION SYSTEM: The action registry pattern is used for handling form submissions to avoid big switch statements.
+- Create an Actions struct (e.g., `MenuActions`, `PanelActions`, `AdminActions`) holding `cc *common.Context`
+- Implement action methods that check for their button name: `if r.PostFormValue("button-name") == "" { return nil }`
+- Register actions via `Register(reg *action.Registry)` method by calling `reg.AppendAction(action.Action(h.methodName))`
+- In handlers: call `cc.RegisterActions(NewMyActions(cc))` then `cc.ExecuteActions(ctx, r)`
+- HTML: use named submit buttons `<button type="submit" name="action-name" value="arg">` not hidden action fields
+- See `server/action/handler.go` for helpers: `NewActionWithIntArgument`, `NewActionWithStringArgument`, `NewActionWithFileUpload`
+
+HTML CONVENTIONS:
+- Use `{{ template "page_head" . }}` for consistent head section (includes all CSS/JS)
+- Use existing CSS classes: `.btn-group`, `.hbox`, `.vbox`, `.padded`, `.separated-bottom`, `.vertical-align`, etc.
+- For conceptual components: use custom elements with `hazo-` prefix (e.g., `<hazo-capability-badge>`, `<hazo-popover>`) rather than classes
+- For icons: use FontAwesome classes `<i class="fa-solid fa-icon-name"></i>` (e.g., `fa-plus`, `fa-close`, `fa-trash`, `fa-maximize`)
+- Avoid inline styles (`style="..."`); use CSS classes, custom element selectors, or add minimal `<style>` block using CSS variables
+- CSS variables to reuse: `--widget-radius`, `--widget-padding`, `--widget-border-width`, `--widget-border-color`, `--widget-bg-color`, `--bg-color-primary`, `--text-color-primary`
+- Forms: progressive enhancement - work without JS, use htmx for enhancements
+- Use semantic HTML: `<details>/<summary>` for collapsible sections, `<table>` with `<thead>`/`<tbody>` for data
+- See `server/views/taxons/taxons.html` for comprehensive layout examples and `server/components/` for custom element patterns
+
+COMPONENT SYSTEM: Custom elements should have their CSS/JS in the components folder for automatic aggregation.
+- Component files live in `server/components/{componentname}/` directory
+- CSS files: `{componentname}.css` - automatically aggregated into single CSS bundle via `components/init.go`
+- JS files: `{componentname}.js` - automatically aggregated and wrapped in IIFE via `components/init.go`
+- HTML templates: `{componentname}.html` - define Go template blocks with `{{ define "name" }}`
+- Go files: `{componentname}.go` - handler logic, template data structs
+- All `.css` and `.js` files in `server/components/*/` are embedded at build time and served as single files
+- Custom elements use `hazo-` prefix: `<hazo-popover>`, `<hazo-capability-badge>`, `<hazo-tree-menu>`
+- Style custom elements with element selectors, not classes: `hazo-popover { ... }` not `.popover { ... }`
+- Generic utility styles (e.g., `.inline`, `.message-error`, `.danger`) go in `server/assets/style.css`, not component CSS
+- See `server/components/init.go` for the aggregation mechanism and existing components for structure examples
+
 # Dataset Import API
 Currently dataset import exists via /upload form endpoint and CLI commands.
 Need proper API endpoints for programmatic access.
@@ -73,20 +104,23 @@ Need admin interface for user management. Using a capability-based permission sy
       - GrantUserCapability(login, capability, grantedBy)
       - RevokeUserCapability(login, capability)
       - ListUsersWithCapability(capability)
+      - GetAllUsers() - for admin interface
+      - GetAllCapabilities() - for dropdown selection
+      - GetAllUsersWithCapabilities() - joined query for efficient user/capability display
 - [x] Run sqlc generate to create Go code
 - [x] Update adduser command to support optional -capabilities flag (comma-separated list)
 - [x] Create capability middleware function to protect routes by required capability
 - [x] Create admin helper functions in user package to check capabilities
 
 ## Admin Interface
-- [ ] Create admin interface route/handler (e.g., /admin) protected by 'user.manage' capability (using the RequireCapability handlerwrapper)
-- [ ] Build admin user list view showing all users with their capabilities
-- [ ] Add "Add User" functionality in admin interface
-- [ ] Add "Delete User" functionality with confirmation
-- [ ] Add "Grant Capability" functionality with dropdown of available capabilities
-- [ ] Add "Revoke Capability" functionality 
-- [ ] Add visual indication of user capabilities in UI (badges/tags)
-- [ ] Show audit trail (who granted capabilities and when)
+- [x] Create admin interface route/handler (e.g., /admin) protected by 'user.manage' capability (using the RequireCapability handlerwrapper)
+- [x] Build admin user list view showing all users with their capabilities
+- [x] Add "Add User" functionality in admin interface
+- [x] Add "Delete User" functionality with confirmation
+- [x] Add "Grant Capability" functionality with dropdown of available capabilities
+- [x] Add "Revoke Capability" functionality 
+- [x] Add visual indication of user capabilities in UI (badges/tags)
+- [x] Show audit trail (who granted capabilities and when)
 
 # Microsoft Account Authentication
 Support MS account login alongside local authentication.

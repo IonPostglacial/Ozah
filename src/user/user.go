@@ -7,8 +7,11 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"golang.org/x/crypto/bcrypt"
 	"nicolas.galipot.net/hazo/storage/app"
+	"nicolas.galipot.net/hazo/storage/appdb"
 	"nicolas.galipot.net/hazo/storage/dataset"
 )
 
@@ -192,4 +195,71 @@ func (u *T) GetWritableSharedDatasets() ([]dataset.Shared, error) {
 		ds[i].Mode = "write"
 	}
 	return ds, nil
+}
+
+type CreateUserParams struct {
+	Login            string
+	Password         string
+	PrivateDirectory string
+	Capabilities     []string
+	GrantedBy        string
+}
+
+func Create(ctx context.Context, params CreateUserParams) error {
+	if params.Login == "" || params.Password == "" || params.PrivateDirectory == "" {
+		return fmt.Errorf("login, password, and private directory are required")
+	}
+
+	if err := os.MkdirAll(params.PrivateDirectory, os.ModePerm); err != nil {
+		return fmt.Errorf("could not create directory '%s': %w", params.PrivateDirectory, err)
+	}
+
+	_, queries, err := app.OpenDb()
+	if err != nil {
+		return fmt.Errorf("could not open users database: %w", err)
+	}
+
+	const bcryptCost = 11
+	hash, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcryptCost)
+	if err != nil {
+		return fmt.Errorf("could not hash password: %w", err)
+	}
+
+	_, err = queries.InsertCredentials(ctx, appdb.InsertCredentialsParams{
+		Login:      params.Login,
+		Encryption: "bcrypt",
+		Password:   string(hash),
+	})
+	if err != nil {
+		return fmt.Errorf("could not insert credentials of user '%s': %w", params.Login, err)
+	}
+
+	_, err = queries.InsertUserConfiguration(ctx, appdb.InsertUserConfigurationParams{
+		Login:            params.Login,
+		PrivateDirectory: params.PrivateDirectory,
+	})
+	if err != nil {
+		return fmt.Errorf("could not insert configuration of user '%s': %w", params.Login, err)
+	}
+
+	if len(params.Capabilities) > 0 {
+		grantedDate := time.Now().Format("2006-01-02 15:04:05")
+		grantedBy := params.GrantedBy
+		if grantedBy == "" {
+			grantedBy = params.Login
+		}
+		for _, cap := range params.Capabilities {
+			_, err = queries.GrantUserCapability(ctx, appdb.GrantUserCapabilityParams{
+				UserLogin:      params.Login,
+				CapabilityName: cap,
+				GrantedDate:    grantedDate,
+				GrantedBy:      grantedBy,
+			})
+			if err != nil {
+				return fmt.Errorf("could not grant capability '%s' to user '%s': %w", cap, params.Login, err)
+			}
+		}
+	}
+
+	return nil
 }
