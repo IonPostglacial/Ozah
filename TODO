@@ -75,11 +75,11 @@ Need admin interface for user management. Using a capability-based permission sy
       - ListUsersWithCapability(capability)
 - [x] Run sqlc generate to create Go code
 - [x] Update adduser command to support optional -capabilities flag (comma-separated list)
-- [ ] Create capability middleware function to protect routes by required capability
-- [ ] Create admin helper functions in user package to check capabilities
+- [x] Create capability middleware function to protect routes by required capability
+- [x] Create admin helper functions in user package to check capabilities
 
 ## Admin Interface
-- [ ] Create admin interface route/handler (e.g., /admin) protected by 'user.manage' capability
+- [ ] Create admin interface route/handler (e.g., /admin) protected by 'user.manage' capability (using the RequireCapability handlerwrapper)
 - [ ] Build admin user list view showing all users with their capabilities
 - [ ] Add "Add User" functionality in admin interface
 - [ ] Add "Delete User" functionality with confirmation

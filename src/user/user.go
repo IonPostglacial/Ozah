@@ -112,6 +112,36 @@ func (u *T) ListDatasets() ([]dataset.T, error) {
 	return ds, nil
 }
 
+func (u *T) GetCapabilities() ([]string, error) {
+	_, queries, err := app.OpenDb()
+	if err != nil {
+		return nil, fmt.Errorf("could not open the users database: %w", err)
+	}
+	ctx := context.Background()
+	capabilities, err := queries.GetUserCapabilities(ctx, u.Login)
+	if err != nil {
+		return nil, fmt.Errorf("could not retrieve capabilities for user '%s': %w", u.Login, err)
+	}
+	names := make([]string, len(capabilities))
+	for i, cap := range capabilities {
+		names[i] = cap.CapabilityName
+	}
+	return names, nil
+}
+
+func (u *T) HasCapability(capabilityName string) (bool, error) {
+	capabilities, err := u.GetCapabilities()
+	if err != nil {
+		return false, err
+	}
+	for _, cap := range capabilities {
+		if cap == capabilityName {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 func (u *T) GetReadableSharedDatasets() ([]dataset.Shared, error) {
 	_, queries, err := app.OpenDb()
 	if err != nil {

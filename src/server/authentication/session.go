@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"math/big"
+	"net/http"
 	"strings"
 	"time"
 
@@ -74,4 +75,24 @@ func startSession(ctx context.Context, cc *common.Context, login string) (*Sessi
 		return nil, err
 	}
 	return &Session{Token: sessionToken, Expires: expiresAt}, nil
+}
+
+func RequireCapability(capability string) common.HandlerWrapper {
+	return func(handler common.Handler) common.Handler {
+		return func(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
+			if cc.User == nil {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
+				return nil
+			}
+			hasCapability, err := cc.User.HasCapability(capability)
+			if err != nil {
+				return fmt.Errorf("error checking capability: %w", err)
+			}
+			if !hasCapability {
+				http.Error(w, "Forbidden: insufficient permissions", http.StatusForbidden)
+				return nil
+			}
+			return handler(w, r, cc)
+		}
+	}
 }
