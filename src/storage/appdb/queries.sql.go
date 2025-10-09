@@ -364,6 +364,55 @@ func (q *Queries) GetSession(ctx context.Context, token string) (GetSessionRow, 
 	return i, err
 }
 
+const getUserCapabilities = `-- name: GetUserCapabilities :many
+select
+    uc.Capability_Name,
+    c.Description,
+    uc.Granted_Date,
+    uc.Granted_By
+from
+    User_Capability as uc
+inner join
+    Capability as c on uc.Capability_Name = c.Name
+where
+    uc.User_Login = ?
+`
+
+type GetUserCapabilitiesRow struct {
+	CapabilityName string
+	Description    string
+	GrantedDate    string
+	GrantedBy      string
+}
+
+func (q *Queries) GetUserCapabilities(ctx context.Context, userLogin string) ([]GetUserCapabilitiesRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUserCapabilities, userLogin)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserCapabilitiesRow
+	for rows.Next() {
+		var i GetUserCapabilitiesRow
+		if err := rows.Scan(
+			&i.CapabilityName,
+			&i.Description,
+			&i.GrantedDate,
+			&i.GrantedBy,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserConfiguration = `-- name: GetUserConfiguration :one
 select
     login, private_directory
@@ -499,6 +548,67 @@ func (q *Queries) GetWritableDatasetSharedWithUser(ctx context.Context, userLogi
 		return nil, err
 	}
 	return items, nil
+}
+
+const grantUserCapability = `-- name: GrantUserCapability :execresult
+insert into
+    User_Capability (User_Login, Capability_Name, Granted_Date, Granted_By)
+values
+    (?, ?, ?, ?)
+`
+
+type GrantUserCapabilityParams struct {
+	UserLogin      string
+	CapabilityName string
+	GrantedDate    string
+	GrantedBy      string
+}
+
+func (q *Queries) GrantUserCapability(ctx context.Context, arg GrantUserCapabilityParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, grantUserCapability,
+		arg.UserLogin,
+		arg.CapabilityName,
+		arg.GrantedDate,
+		arg.GrantedBy,
+	)
+}
+
+const hasUserCapability = `-- name: HasUserCapability :one
+select
+    count(*) > 0 as Has_Capability
+from
+    User_Capability
+where
+    User_Login = ?
+    and Capability_Name = ?
+`
+
+type HasUserCapabilityParams struct {
+	UserLogin      string
+	CapabilityName string
+}
+
+func (q *Queries) HasUserCapability(ctx context.Context, arg HasUserCapabilityParams) (bool, error) {
+	row := q.db.QueryRowContext(ctx, hasUserCapability, arg.UserLogin, arg.CapabilityName)
+	var has_capability bool
+	err := row.Scan(&has_capability)
+	return has_capability, err
+}
+
+const insertCapability = `-- name: InsertCapability :execresult
+insert into
+    Capability (Name, Description)
+values
+    (?, ?)
+`
+
+type InsertCapabilityParams struct {
+	Name        string
+	Description string
+}
+
+func (q *Queries) InsertCapability(ctx context.Context, arg InsertCapabilityParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertCapability, arg.Name, arg.Description)
 }
 
 const insertCredentials = `-- name: InsertCredentials :execresult
@@ -661,6 +771,62 @@ type InsertUserSelectedLanguageParams struct {
 
 func (q *Queries) InsertUserSelectedLanguage(ctx context.Context, arg InsertUserSelectedLanguageParams) (sql.Result, error) {
 	return q.db.ExecContext(ctx, insertUserSelectedLanguage, arg.UserLogin, arg.LangRef)
+}
+
+const listUsersWithCapability = `-- name: ListUsersWithCapability :many
+select
+    uc.User_Login,
+    uc.Granted_Date,
+    uc.Granted_By
+from
+    User_Capability as uc
+where
+    uc.Capability_Name = ?
+`
+
+type ListUsersWithCapabilityRow struct {
+	UserLogin   string
+	GrantedDate string
+	GrantedBy   string
+}
+
+func (q *Queries) ListUsersWithCapability(ctx context.Context, capabilityName string) ([]ListUsersWithCapabilityRow, error) {
+	rows, err := q.db.QueryContext(ctx, listUsersWithCapability, capabilityName)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListUsersWithCapabilityRow
+	for rows.Next() {
+		var i ListUsersWithCapabilityRow
+		if err := rows.Scan(&i.UserLogin, &i.GrantedDate, &i.GrantedBy); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const revokeUserCapability = `-- name: RevokeUserCapability :execresult
+delete from User_Capability
+where
+    User_Login = ?
+    and Capability_Name = ?
+`
+
+type RevokeUserCapabilityParams struct {
+	UserLogin      string
+	CapabilityName string
+}
+
+func (q *Queries) RevokeUserCapability(ctx context.Context, arg RevokeUserCapabilityParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, revokeUserCapability, arg.UserLogin, arg.CapabilityName)
 }
 
 const updateCredentials = `-- name: UpdateCredentials :execresult

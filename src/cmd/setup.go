@@ -56,6 +56,17 @@ func Setup(args []string) error {
 			return fmt.Errorf("could not insert panel during setup: %w", err)
 		}
 	}
+	capabilities := []appdb.InsertCapabilityParams{
+		{Name: "user.manage", Description: "Create, modify, and delete user accounts"},
+		{Name: "system.configure", Description: "Modify system-wide configuration"},
+		{Name: "dataset.admin", Description: "Access and manage all datasets"},
+	}
+	for _, capability := range capabilities {
+		_, err = queries.InsertCapability(ctx, capability)
+		if err != nil {
+			return fmt.Errorf("could not insert capability during setup: %w", err)
+		}
+	}
 	if err != nil {
 		return fmt.Errorf("couldn't apply appdb schema: %w", err)
 	}

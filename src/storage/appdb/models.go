@@ -8,6 +8,11 @@ import (
 	"database/sql"
 )
 
+type Capability struct {
+	Name        string
+	Description string
+}
+
 type Credential struct {
 	Login        string
 	Encryption   string
@@ -45,6 +50,13 @@ type Session struct {
 	Token      string
 	Login      string
 	ExpiryDate string
+}
+
+type UserCapability struct {
+	UserLogin      string
+	CapabilityName string
+	GrantedDate    string
+	GrantedBy      string
 }
 
 type UserConfiguration struct {

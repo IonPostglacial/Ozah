@@ -231,3 +231,53 @@ from
     User_Hidden_Panel
 where
     User_Login = ?;
+
+-- name: InsertCapability :execresult
+insert into
+    Capability (Name, Description)
+values
+    (?, ?);
+
+-- name: GetUserCapabilities :many
+select
+    uc.Capability_Name,
+    c.Description,
+    uc.Granted_Date,
+    uc.Granted_By
+from
+    User_Capability as uc
+inner join
+    Capability as c on uc.Capability_Name = c.Name
+where
+    uc.User_Login = ?;
+
+-- name: GrantUserCapability :execresult
+insert into
+    User_Capability (User_Login, Capability_Name, Granted_Date, Granted_By)
+values
+    (?, ?, ?, ?);
+
+-- name: RevokeUserCapability :execresult
+delete from User_Capability
+where
+    User_Login = ?
+    and Capability_Name = ?;
+
+-- name: ListUsersWithCapability :many
+select
+    uc.User_Login,
+    uc.Granted_Date,
+    uc.Granted_By
+from
+    User_Capability as uc
+where
+    uc.Capability_Name = ?;
+
+-- name: HasUserCapability :one
+select
+    count(*) > 0 as Has_Capability
+from
+    User_Capability
+where
+    User_Login = ?
+    and Capability_Name = ?;

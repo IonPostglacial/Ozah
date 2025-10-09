@@ -49,6 +49,59 @@ Backend:
 - [x] Implement access control: user can access own pictures + pictures from datasets shared with them
 - [x] Create API endpoint POST /api/pictures for programmatic uploads (cookie authentication) with JSON response
 
+# Administration Interface - Capability System
+Need admin interface for user management. Using a capability-based permission system for flexibility and principle of least privilege.
+
+## Design
+- Capability-based permissions allow fine-grained control (e.g., user.manage, dataset.admin, system.configure)
+- Consistent with existing dataset sharing permission model
+- Each capability can be granted to specific users with audit trail
+- Easier to extend with new admin functions without schema changes
+
+## Schema Changes
+- [x] Create Capability table in app schema (Name primary key, Description)
+- [x] Create User_Capability table (User_Login, Capability_Name, Granted_Date, Granted_By)
+- [x] Pre-populate standard capabilities:
+      - 'user.manage': Create, modify, and delete user accounts
+      - 'system.configure': Modify system-wide configuration  
+      - 'dataset.admin': Access and manage all datasets
+- [x] Create migration to add capability tables to existing databases
+
+## Backend Implementation
+- [x] Update storage/app/queries.sql with capability management queries:
+      - GetUserCapabilities(login)
+      - GrantUserCapability(login, capability, grantedBy)
+      - RevokeUserCapability(login, capability)
+      - ListUsersWithCapability(capability)
+- [x] Run sqlc generate to create Go code
+- [x] Update adduser command to support optional -capabilities flag (comma-separated list)
+- [ ] Create capability middleware function to protect routes by required capability
+- [ ] Create admin helper functions in user package to check capabilities
+
+## Admin Interface
+- [ ] Create admin interface route/handler (e.g., /admin) protected by 'user.manage' capability
+- [ ] Build admin user list view showing all users with their capabilities
+- [ ] Add "Add User" functionality in admin interface
+- [ ] Add "Delete User" functionality with confirmation
+- [ ] Add "Grant Capability" functionality with dropdown of available capabilities
+- [ ] Add "Revoke Capability" functionality 
+- [ ] Add visual indication of user capabilities in UI (badges/tags)
+- [ ] Show audit trail (who granted capabilities and when)
+
+# Microsoft Account Authentication
+Support MS account login alongside local authentication.
+Note: Implement OAuth2 using Go stdlib (net/http, crypto) and golang.org/x packages if needed. Avoid MSAL.
+- [ ] Implement OAuth2 flow for Microsoft login using Go stdlib (net/http for requests, encoding/json for parsing)
+- [ ] Use golang.org/x/oauth2 if necessary (acceptable as x-repo), otherwise implement OAuth2 manually
+- [ ] Add MS_Account_Id column to Credentials table
+- [ ] Create MS_Account_Requests table for pending access requests
+- [ ] Create "Login with Microsoft" button on login page
+- [ ] Store MS account ID when user authenticates
+- [ ] Create pending requests view for admins
+- [ ] Allow admins to approve/reject MS account access requests
+- [ ] Link approved MS accounts to existing or new user accounts
+- [ ] Handle MS account session management and token refresh
+
 Bulk photo download/thumbnail generation:
 - [ ] Create CLI command to bulk download/process pictures for a dataset (hazo syncpictures -dataset <name>)
 - [ ] For each Document_Attachment record with a Source URL:
@@ -76,33 +129,6 @@ Pictures should use thumbnails of appropriate sizes, not full-size images.
 - [ ] Use medium thumbnails for normal detail views
 - [ ] Use big thumbnails or original for zoomed/fullscreen view
 - [ ] Update picture serving endpoint to serve correct size based on request
-
-# Administration Interface
-Need admin interface for user management. Currently no admin capability exists.
-- [ ] Add Is_Admin boolean column to Credentials table in app schema
-- [ ] Create migration to add Is_Admin column to existing databases
-- [ ] Update adduser command to support optional -admin flag
-- [ ] Create admin-only middleware to protect admin routes
-- [ ] Create admin interface route/handler (e.g., /admin)
-- [ ] Build admin user list view showing all users with admin status
-- [ ] Add "Add User" functionality in admin interface
-- [ ] Add "Delete User" functionality with confirmation
-- [ ] Add "Toggle Admin" functionality to grant/revoke admin privileges
-- [ ] Add visual indication of admin status in UI
-
-# Microsoft Account Authentication
-Support MS account login alongside local authentication.
-Note: Implement OAuth2 using Go stdlib (net/http, crypto) and golang.org/x packages if needed. Avoid MSAL.
-- [ ] Implement OAuth2 flow for Microsoft login using Go stdlib (net/http for requests, encoding/json for parsing)
-- [ ] Use golang.org/x/oauth2 if necessary (acceptable as x-repo), otherwise implement OAuth2 manually
-- [ ] Add MS_Account_Id column to Credentials table
-- [ ] Create MS_Account_Requests table for pending access requests
-- [ ] Create "Login with Microsoft" button on login page
-- [ ] Store MS account ID when user authenticates
-- [ ] Create pending requests view for admins
-- [ ] Allow admins to approve/reject MS account access requests
-- [ ] Link approved MS accounts to existing or new user accounts
-- [ ] Handle MS account session management and token refresh
 
 # Dataset Editing Capabilities
 Currently can only import and visualize datasets, need ability to edit them.

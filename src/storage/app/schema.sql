@@ -67,3 +67,21 @@ create table Session (
     foreign key (Login) references Credentials (Login)
 ) strict,
 without rowid;
+
+create table Capability (
+    Name Text primary key,
+    Description Text not null
+) strict,
+without rowid;
+
+create table User_Capability (
+    User_Login Text not null,
+    Capability_Name Text not null,
+    Granted_Date Text not null,
+    Granted_By Text not null,
+    primary key (User_Login, Capability_Name),
+    foreign key (User_Login) references Credentials (Login),
+    foreign key (Capability_Name) references Capability (Name),
+    foreign key (Granted_By) references Credentials (Login)
+) strict,
+without rowid;
