@@ -63,7 +63,7 @@ func ExportJson(dsName string, queries *Queries, w io.Writer) error {
 			Name:        dbState.Name,
 			NameEN:      dbState.NameTr1.String,
 			NameCN:      dbState.NameTr2.String,
-			Description: dbState.Details.String,
+			Description: dbState.Details,
 			Color:       dbState.Color.String,
 			Photos:      photos,
 		}
@@ -102,7 +102,7 @@ func ExportJson(dsName string, queries *Queries, w io.Writer) error {
 		character := &hazojson.Character{
 			Id:                    dbCharacter.Ref,
 			Path:                  strings.Split(dbCharacter.Path, "."),
-			Detail:                dbCharacter.Details.String,
+			Detail:                dbCharacter.Details,
 			Name:                  dbCharacter.Name,
 			NameEN:                dbCharacter.NameTr1.String,
 			NameCN:                dbCharacter.NameTr2.String,
@@ -124,7 +124,7 @@ func ExportJson(dsName string, queries *Queries, w io.Writer) error {
 		characters = append(characters, &hazojson.Character{
 			Id:                    dbMeasurementCharacter.Ref,
 			Path:                  strings.Split(dbMeasurementCharacter.Path, "."),
-			Detail:                dbMeasurementCharacter.Details.String,
+			Detail:                dbMeasurementCharacter.Details,
 			Name:                  dbMeasurementCharacter.Name,
 			NameEN:                dbMeasurementCharacter.NameTr1.String,
 			NameCN:                dbMeasurementCharacter.NameTr2.String,
@@ -181,7 +181,7 @@ func ExportJson(dsName string, queries *Queries, w io.Writer) error {
 			Name:              dbTaxon.Name,
 			NameEN:            dbTaxon.NameV.String,
 			NameCN:            dbTaxon.NameCn.String,
-			Detail:            dbTaxon.Details.String,
+			Detail:            dbTaxon.Details,
 			Photos:            photos,
 			Descriptions:      descriptors,
 			Children:          childrenRefs,

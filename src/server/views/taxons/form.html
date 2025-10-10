@@ -1,11 +1,13 @@
 {{ define "taxon_form" }}
 <details open class="separated-bottom">
     <summary class="padded">Properties</summary>
-    <form action="" class="form-grid vertical-align padded">
+    <form id="taxon-form" method="POST" class="form-grid vertical-align padded">
+        <input type="hidden" name="taxon-ref" value="{{ .Ref }}" />
         <label for="nameS">NS</label><input type="text" name="nameS" id="nameEn" value="{{ .Name }}" />
         <label for="author">Author</label><input type="text" name="author" id="author" value="{{ .Author }}" />
         <label for="nameCn">中文名</label><input type="text" name="nameCn" id="nameCn" value="{{ .NameCN }}" />
         <label for="nameV">NV</label><input type="text" name="nameV" id="nameV" value="{{ .NameV }}" />
+        <label for="website">Website</label><input type="text" name="website" id="website" value="{{ .Website }}" />
         <label for="description">Description</label>
         <div>
             <input id="description" value="{{ .Description }}" type="hidden" name="description">

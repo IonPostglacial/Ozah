@@ -1,7 +1,9 @@
 version: "2"
 sql:
   - engine: "sqlite"
-    queries: "dataset/queries.sql"
+    queries: 
+      - "dataset/queries.sql"
+      - "dataset/command.sql"
     schema: "dataset/schema.sql"
     gen:
       go:

@@ -9,6 +9,16 @@
     <div id="doc-content" class="vbox flex-fill">
         <div class="top-bar-height hbox vertical-align separated-bottom padded">
             {{ template "navbar" . }}
+            {{ if .SelectedCharacter }}
+            <div class="spacer"></div>
+            <div class="btn-group">
+                <button type="submit" form="character-form" name="character-save" value="1">
+                    <i class="fa-solid fa-save"></i> Save
+                </button><button type="submit" form="character-form" name="character-delete" value="{{ .SelectedCharacter.Ref }}" onclick="return confirm('Are you sure you want to delete this character?');" class="danger">
+                    <i class="fa-solid fa-trash"></i> Delete
+                </button>
+            </div>
+            {{ end }}
         </div>
         <main class="relative height-below-top-bar vbox responsive-1100 flex-fill separated-children">
             {{ if .SelectedCharacter }}

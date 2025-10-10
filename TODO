@@ -144,6 +144,21 @@ Implementation Notes:
 - Admins can approve requests by specifying login and private directory, or link to existing users
 - Environment variables required: MICROSOFT_CLIENT_ID, MICROSOFT_CLIENT_SECRET, MICROSOFT_REDIRECT_URI
 
+# Dataset Editing Capabilities
+Currently can only import and visualize datasets, need ability to edit them.
+Note: INSERT operations already exist in queries.sql (created for import command) but should be moved to command.sql for consistency.
+- [x] Create command.sql file for edit operations (UPDATE, DELETE for taxons, characters, states, etc.)
+- [x] Move existing INSERT operations from queries.sql to command.sql (InsertDocument, InsertLang, InsertDocumentTranslation, InsertDocumentAttachment, InsertUnit, InsertBook, InsertState, InsertCategoricalCharacter, InsertMeasurementCharacter, InsertPeriodicCharacter, InsertGeographicalPlace, InsertTaxon, InsertTaxonDescription, InsertTaxonMeasurement, etc.)
+- [x] Update sqlc.yaml configuration to include command.sql for code generation
+- [x] Generate Go functions from command.sql using sqlc
+- [x] Create edit mode UI for taxons (add/edit/delete taxons)
+- [x] Create edit mode UI for characters (add/edit/delete characters)
+- [x] Create edit mode UI for states (add/edit/delete states)
+- [x] Create edit mode UI for measurements (add/edit/delete measurements)
+- [x] Add save/cancel functionality with proper error handling
+- [x] Implement validation for edited data
+- [x] Add confirmation dialogs for destructive operations (delete)
+
 Bulk photo download/thumbnail generation:
 - [ ] Create CLI command to bulk download/process pictures for a dataset (hazo syncpictures -dataset <name>)
 - [ ] For each Document_Attachment record with a Source URL:
@@ -171,21 +186,6 @@ Pictures should use thumbnails of appropriate sizes, not full-size images.
 - [ ] Use medium thumbnails for normal detail views
 - [ ] Use big thumbnails or original for zoomed/fullscreen view
 - [ ] Update picture serving endpoint to serve correct size based on request
-
-# Dataset Editing Capabilities
-Currently can only import and visualize datasets, need ability to edit them.
-Note: INSERT operations already exist in queries.sql (created for import command) but should be moved to command.sql for consistency.
-- [ ] Create command.sql file for edit operations (UPDATE, DELETE for taxons, characters, states, etc.)
-- [ ] Move existing INSERT operations from queries.sql to command.sql (InsertDocument, InsertLang, InsertDocumentTranslation, InsertDocumentAttachment, InsertUnit, InsertBook, InsertState, InsertCategoricalCharacter, InsertMeasurementCharacter, InsertPeriodicCharacter, InsertGeographicalPlace, InsertTaxon, InsertTaxonDescription, InsertTaxonMeasurement, etc.)
-- [ ] Update sqlc.yaml configuration to include command.sql for code generation
-- [ ] Generate Go functions from command.sql using sqlc
-- [ ] Create edit mode UI for taxons (add/edit/delete taxons)
-- [ ] Create edit mode UI for characters (add/edit/delete characters)
-- [ ] Create edit mode UI for states (add/edit/delete states)
-- [ ] Create edit mode UI for measurements (add/edit/delete measurements)
-- [ ] Add save/cancel functionality with proper error handling
-- [ ] Implement validation for edited data
-- [ ] Add confirmation dialogs for destructive operations (delete)
 
 # Display Calendars
 Calendar data structure exists in imports but no display implementation.

@@ -8,6 +8,11 @@ import (
 	"nicolas.galipot.net/hazo/server/documents"
 )
 
+type CharacterViewModel struct {
+	documents.ViewModel
+	Color string
+}
+
 type ViewModel struct {
 	PageTitle         string
 	DatasetName       string
@@ -17,6 +22,6 @@ type ViewModel struct {
 	MenuState         *treemenu.ViewModel
 	MenuViewModel     *popover.ViewModel
 	BreadCrumbsState  *breadcrumbs.ViewModel
-	SelectedCharacter *documents.ViewModel
+	SelectedCharacter *CharacterViewModel
 	PictureBoxModel   *picturebox.ViewModel
 }

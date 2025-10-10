@@ -22,7 +22,7 @@ func LoadFormViewModelFromDb(ctx context.Context, queries *dataset.Queries, id s
 			Ref:         id,
 			Path:        data.Path,
 			Name:        data.Name,
-			Description: data.Details.String,
+			Description: data.Details,
 		},
 		NameV:   data.NameV.String,
 		NameCN:  data.NameCn.String,

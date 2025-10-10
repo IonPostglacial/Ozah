@@ -14,6 +14,15 @@
                 {{ range .UnselectedPanels }}<button type="submit" name="panel-add" value="{{ .Value }}">
                     {{ .Name }}</button>{{ end }}
             </form>
+            {{ if .SelectedTaxon }}
+            <div class="btn-group">
+                <button type="submit" form="taxon-form" name="taxon-save" value="1">
+                    <i class="fa-solid fa-save"></i> Save
+                </button><button type="submit" form="taxon-form" name="taxon-delete" value="{{ .SelectedTaxon.Ref }}" onclick="return confirm('Are you sure you want to delete this taxon?');" class="danger">
+                    <i class="fa-solid fa-trash"></i> Delete
+                </button>
+            </div>
+            {{ end }}
         </div>
         <main class="relative height-below-top-bar hbox responsive-1100 separated-children flex-fill">
             {{ if isPanelVisible "Properties" }}

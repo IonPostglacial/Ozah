@@ -41,6 +41,7 @@ type MeasurementViewModel struct {
 
 type ViewModel struct {
 	PageTitle             string
+	DatasetName           string
 	Debug                 bool
 	LangsCheckList        popover.CheckListViewModel
 	AvailableDatasets     *popover.ViewModel

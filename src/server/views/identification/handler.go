@@ -150,6 +150,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	template.Must(cc.Template.Parse(identificationPage))
 	err = cc.Template.Execute(w, ViewModel{
 		PageTitle:         "Identification",
+		DatasetName:       dsName,
 		Debug:             cc.Config.Debug,
 		AvailableDatasets: datasets,
 		LangsCheckList: popover.CheckListViewModel{

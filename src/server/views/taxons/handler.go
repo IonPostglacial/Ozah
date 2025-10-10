@@ -33,9 +33,6 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		err   error
 	)
 	ctx := context.Background()
-	cc.RegisterActions(NewPanelActions(cc))
-	cc.RegisterActions(NewPictureActions(cc, dsName, docRef))
-	cc.ExecuteActions(ctx, r)
 	ds, err := cc.User.GetDataset(dsName)
 	if err != nil {
 		return fmt.Errorf("couldn't get dataset '%s': %w", dsName, err)
@@ -44,6 +41,10 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 	if err != nil {
 		return fmt.Errorf("couldn't open database of dataset '%s': %w", dsName, err)
 	}
+	cc.RegisterActions(NewPanelActions(cc))
+	cc.RegisterActions(NewPictureActions(cc, dsName, docRef))
+	cc.RegisterActions(NewEditActions(cc, dsName, queries))
+	cc.ExecuteActions(ctx, r)
 	queryParams := r.URL.Query()
 	menuLangs, menuSelectedLangNames, err := documents.LoadMenuLanguages(ctx, cc)
 	if err != nil {

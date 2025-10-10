@@ -1,13 +1,14 @@
 {{ define "character_form" }}
 <details open class="separated-bottom">
     <summary class="padded">Properties</summary>
-    <form action="" class="form-2-col vertical-align padded">
+    <form id="character-form" method="POST" class="form-2-col vertical-align padded">
+        <input type="hidden" name="character-ref" value="{{ .Ref }}" />
+        <input type="hidden" name="character-type" value="categorical" />
         <label for="nameS">NS</label><input type="text" name="nameS" id="nameS" value="{{ .Name }}" />
         <label for="nameEn">EN</label><input type="text" name="nameEn" id="nameEn" value="{{ .NameEN }}" />
         <label for="nameCn">中文名</label><input type="text" name="nameCn" id="nameCn" value="{{ .NameCN }}" />
-        <label for="description">Description</label><textarea name="description" id="description" cols="30" rows="10">
-            {{ .Description }}
-        </textarea>
+        <label for="color">Color</label><input type="color" name="color" id="color" value="{{ .Color }}" />
+        <label for="description">Description</label><textarea name="description" id="description" cols="30" rows="10">{{ .Description }}</textarea>
     </form>
 </details>
 {{ end }}

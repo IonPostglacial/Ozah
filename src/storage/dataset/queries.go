@@ -173,7 +173,7 @@ func EscapeString(s string) string {
 	return string(escapeStringBackslash(buf, s))
 }
 
-const getDocumentsHierarchyQueryPrelude = `select doc.ref, doc.path, doc.doc_order, doc.name, doc.details`
+const getDocumentsHierarchyQueryPrelude = `select doc.ref, doc.path, doc.doc_order, doc.name, COALESCE(doc.details, '') as details`
 const getDocumentsHierarchyQueryIntro = ` from Document doc`
 const getDocumentsHierarchyTrQuery = `
 left join Document_Translation tr%[1]d on doc.Ref = tr%[1]d.Document_Ref and tr%[1]d.Lang_Ref = ?%[2]d`

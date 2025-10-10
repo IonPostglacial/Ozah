@@ -11,21 +11,6 @@ import (
 	"strings"
 )
 
-const deleteDocumentAttachment = `-- name: DeleteDocumentAttachment :exec
-delete from Document_Attachment 
-where Document_Ref = ? and Attachment_Index = ?
-`
-
-type DeleteDocumentAttachmentParams struct {
-	DocumentRef     string
-	AttachmentIndex int64
-}
-
-func (q *Queries) DeleteDocumentAttachment(ctx context.Context, arg DeleteDocumentAttachmentParams) error {
-	_, err := q.db.ExecContext(ctx, deleteDocumentAttachment, arg.DocumentRef, arg.AttachmentIndex)
-	return err
-}
-
 const distinctiveCharacters = `-- name: DistinctiveCharacters :many
 select ch.Ref, ch.Name, s.Ref State_ref, s.Name State_Name from Document ch
 inner join Document s on s.Path = (ch.Path || '.' || ch.Ref)
@@ -75,7 +60,7 @@ func (q *Queries) DistinctiveCharacters(ctx context.Context) ([]DistinctiveChara
 }
 
 const getAllStates = `-- name: GetAllStates :many
-select doc.Ref, doc.Path, doc.Name, doc.Details, tr1.name name_tr1, tr2.name name_tr2, s.Color from Document doc
+select doc.Ref, doc.Path, doc.Name, COALESCE(doc.Details, '') as Details, tr1.name name_tr1, tr2.name name_tr2, s.Color from Document doc
 left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "EN"
 left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
 inner join State s on doc.Ref = s.Document_Ref
@@ -86,7 +71,7 @@ type GetAllStatesRow struct {
 	Ref     string
 	Path    string
 	Name    string
-	Details sql.NullString
+	Details string
 	NameTr1 sql.NullString
 	NameTr2 sql.NullString
 	Color   sql.NullString
@@ -124,7 +109,7 @@ func (q *Queries) GetAllStates(ctx context.Context) ([]GetAllStatesRow, error) {
 }
 
 const getAllTaxonsWithTranslations = `-- name: GetAllTaxonsWithTranslations :many
-select t.document_ref, t.author, t.website, t.meaning, t.herbarium_no, t.herbarium_picture, t.fasc, t.page, doc.ref, doc.path, doc.doc_order, doc.name, doc.details, tr1.name name_v, tr2.name name_cn from Taxon t
+select t.document_ref, t.author, t.website, t.meaning, t.herbarium_no, t.herbarium_picture, t.fasc, t.page, doc.Ref, doc.Path, doc.Doc_Order, doc.Name, COALESCE(doc.Details, '') as Details, tr1.name name_v, tr2.name name_cn from Taxon t
 inner join Document doc on doc.Ref = t.Document_Ref
 left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "V"
 left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
@@ -144,7 +129,7 @@ type GetAllTaxonsWithTranslationsRow struct {
 	Path             string
 	DocOrder         int64
 	Name             string
-	Details          sql.NullString
+	Details          string
 	NameV            sql.NullString
 	NameCn           sql.NullString
 }
@@ -301,8 +286,41 @@ func (q *Queries) GetCatCharactersNameTr2(ctx context.Context, arg GetCatCharact
 	return items, nil
 }
 
+const getCategoricalCharacter = `-- name: GetCategoricalCharacter :one
+select doc.Ref, doc.Path, COALESCE(doc.Details, '') as Details, doc.Name, tr1.name name_tr1, tr2.name name_tr2, ch.Color from Categorical_Character ch
+inner join Document doc on doc.Ref = ch.Document_Ref
+left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "EN"
+left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
+where doc.Ref = ?
+`
+
+type GetCategoricalCharacterRow struct {
+	Ref     string
+	Path    string
+	Details string
+	Name    string
+	NameTr1 sql.NullString
+	NameTr2 sql.NullString
+	Color   sql.NullString
+}
+
+func (q *Queries) GetCategoricalCharacter(ctx context.Context, ref string) (GetCategoricalCharacterRow, error) {
+	row := q.db.QueryRowContext(ctx, getCategoricalCharacter, ref)
+	var i GetCategoricalCharacterRow
+	err := row.Scan(
+		&i.Ref,
+		&i.Path,
+		&i.Details,
+		&i.Name,
+		&i.NameTr1,
+		&i.NameTr2,
+		&i.Color,
+	)
+	return i, err
+}
+
 const getCategoricalCharacters = `-- name: GetCategoricalCharacters :many
-select doc.Ref, doc.Path, doc.Details, doc.Name, tr1.name name_tr1, tr2.name name_tr2, ch.Color from Categorical_Character ch
+select doc.Ref, doc.Path, COALESCE(doc.Details, '') as Details, doc.Name, tr1.name name_tr1, tr2.name name_tr2, ch.Color from Categorical_Character ch
 inner join Document doc on doc.Ref = ch.Document_Ref
 left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "EN"
 left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
@@ -312,7 +330,7 @@ order by doc.Name
 type GetCategoricalCharactersRow struct {
 	Ref     string
 	Path    string
-	Details sql.NullString
+	Details string
 	Name    string
 	NameTr1 sql.NullString
 	NameTr2 sql.NullString
@@ -382,7 +400,7 @@ func (q *Queries) GetCharacterStates(ctx context.Context, ref string) ([]string,
 
 const getDescriptors = `-- name: GetDescriptors :many
 select 
-    doc.Ref, doc.Path, doc.Name, doc.Details, 
+    doc.Ref, doc.Path, doc.Name, COALESCE(doc.Details, '') as Details, 
     att.Source, (descriptor.Taxon_Ref is null) Unselected, 
     tr1.name name_tr1, tr2.name name_tr2 
 from Document doc 
@@ -403,7 +421,7 @@ type GetDescriptorsRow struct {
 	Ref        string
 	Path       string
 	Name       string
-	Details    sql.NullString
+	Details    string
 	Source     sql.NullString
 	Unselected interface{}
 	NameTr1    sql.NullString
@@ -443,12 +461,20 @@ func (q *Queries) GetDescriptors(ctx context.Context, arg GetDescriptorsParams) 
 }
 
 const getDocument = `-- name: GetDocument :one
-select ref, path, doc_order, name, details from Document doc where (doc.Ref = ?)
+select Ref, Path, Doc_Order, Name, COALESCE(Details, '') as Details from Document doc where (doc.Ref = ?)
 `
 
-func (q *Queries) GetDocument(ctx context.Context, ref string) (Document, error) {
+type GetDocumentRow struct {
+	Ref      string
+	Path     string
+	DocOrder int64
+	Name     string
+	Details  string
+}
+
+func (q *Queries) GetDocument(ctx context.Context, ref string) (GetDocumentRow, error) {
 	row := q.db.QueryRowContext(ctx, getDocument, ref)
-	var i Document
+	var i GetDocumentRow
 	err := row.Scan(
 		&i.Ref,
 		&i.Path,
@@ -521,20 +547,28 @@ func (q *Queries) GetDocumentAttachments(ctx context.Context, documentRef string
 }
 
 const getDocumentDirectChildren = `-- name: GetDocumentDirectChildren :many
-select ref, path, doc_order, name, details from Document doc 
+select Ref, Path, Doc_Order, Name, COALESCE(Details, '') as Details from Document doc 
 where (doc.Path = ?)
 order by Path asc, Doc_Order asc
 `
 
-func (q *Queries) GetDocumentDirectChildren(ctx context.Context, path string) ([]Document, error) {
+type GetDocumentDirectChildrenRow struct {
+	Ref      string
+	Path     string
+	DocOrder int64
+	Name     string
+	Details  string
+}
+
+func (q *Queries) GetDocumentDirectChildren(ctx context.Context, path string) ([]GetDocumentDirectChildrenRow, error) {
 	rows, err := q.db.QueryContext(ctx, getDocumentDirectChildren, path)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Document
+	var items []GetDocumentDirectChildrenRow
 	for rows.Next() {
-		var i Document
+		var i GetDocumentDirectChildrenRow
 		if err := rows.Scan(
 			&i.Ref,
 			&i.Path,
@@ -585,7 +619,7 @@ func (q *Queries) GetDocumentDirectChildrenRefs(ctx context.Context, path string
 }
 
 const getDocumentTr2 = `-- name: GetDocumentTr2 :one
-select doc.ref, doc.path, doc.doc_order, doc.name, doc.details, tr1.name name_tr1, tr2.name name_tr2 from Document doc
+select doc.Ref, doc.Path, doc.Doc_Order, doc.Name, COALESCE(doc.Details, '') as Details, tr1.name name_tr1, tr2.name name_tr2 from Document doc
 left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = ?1
 left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = ?2
 where (doc.Ref = ?3)
@@ -602,7 +636,7 @@ type GetDocumentTr2Row struct {
 	Path     string
 	DocOrder int64
 	Name     string
-	Details  sql.NullString
+	Details  string
 	NameTr1  sql.NullString
 	NameTr2  sql.NullString
 }
@@ -754,7 +788,7 @@ func (q *Queries) GetMeasurementCharacters(ctx context.Context) ([]GetMeasuremen
 }
 
 const getMeasurementCharactersWithTranslations = `-- name: GetMeasurementCharactersWithTranslations :many
-select doc.Ref, doc.Path, doc.Name, doc.Details, mc.Unit_Ref, tr1.name name_tr1, tr2.name name_tr2 from Measurement_Character mc
+select doc.Ref, doc.Path, doc.Name, COALESCE(doc.Details, '') as Details, mc.Unit_Ref, tr1.name name_tr1, tr2.name name_tr2 from Measurement_Character mc
 inner join Document doc on doc.Ref = mc.Document_Ref
 left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "EN"
 left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
@@ -765,7 +799,7 @@ type GetMeasurementCharactersWithTranslationsRow struct {
 	Ref     string
 	Path    string
 	Name    string
-	Details sql.NullString
+	Details string
 	UnitRef sql.NullString
 	NameTr1 sql.NullString
 	NameTr2 sql.NullString
@@ -852,7 +886,7 @@ func (q *Queries) GetSummaryDescriptors(ctx context.Context, taxonRef string) ([
 }
 
 const getTaxonBookInfo = `-- name: GetTaxonBookInfo :many
-select doc.Ref, doc.Name, info.Fasc, info.Page, info.Details from Taxon_Book_Info info
+select doc.Ref, doc.Name, info.Fasc, info.Page, COALESCE(info.Details, '') as Details from Taxon_Book_Info info
 inner join Document doc on doc.Ref = info.Book_Ref
 where info.Taxon_Ref = ?
 order by doc.Name
@@ -863,7 +897,7 @@ type GetTaxonBookInfoRow struct {
 	Name    string
 	Fasc    sql.NullInt64
 	Page    sql.NullInt64
-	Details sql.NullString
+	Details string
 }
 
 func (q *Queries) GetTaxonBookInfo(ctx context.Context, taxonRef string) ([]GetTaxonBookInfoRow, error) {
@@ -896,7 +930,7 @@ func (q *Queries) GetTaxonBookInfo(ctx context.Context, taxonRef string) ([]GetT
 }
 
 const getTaxonInfo = `-- name: GetTaxonInfo :one
-select t.document_ref, t.author, t.website, t.meaning, t.herbarium_no, t.herbarium_picture, t.fasc, t.page, doc.ref, doc.path, doc.doc_order, doc.name, doc.details, tr1.name name_v, tr2.name name_cn from Taxon t
+select t.document_ref, t.author, t.website, t.meaning, t.herbarium_no, t.herbarium_picture, t.fasc, t.page, doc.Ref, doc.Path, doc.Doc_Order, doc.Name, COALESCE(doc.Details, '') as Details, tr1.name name_v, tr2.name name_cn from Taxon t
 inner join Document doc on doc.Ref = t.Document_Ref
 left join Document_Translation tr1 on doc.Ref = tr1.Document_Ref and tr1.Lang_Ref = "V"
 left join Document_Translation tr2 on doc.Ref = tr2.Document_Ref and tr2.Lang_Ref = "CN"
@@ -916,7 +950,7 @@ type GetTaxonInfoRow struct {
 	Path             string
 	DocOrder         int64
 	Name             string
-	Details          sql.NullString
+	Details          string
 	NameV            sql.NullString
 	NameCn           sql.NullString
 }
@@ -977,443 +1011,6 @@ func (q *Queries) GetTaxonStateDescriptors(ctx context.Context, taxonRef string)
 		return nil, err
 	}
 	return items, nil
-}
-
-const insertBook = `-- name: InsertBook :execresult
-insert into
-    Book (Document_Ref, ISBN)
-values
-    (?, ?)
-`
-
-type InsertBookParams struct {
-	DocumentRef string
-	Isbn        sql.NullString
-}
-
-func (q *Queries) InsertBook(ctx context.Context, arg InsertBookParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertBook, arg.DocumentRef, arg.Isbn)
-}
-
-const insertCategoricalCharacter = `-- name: InsertCategoricalCharacter :execresult
-insert into
-    Categorical_Character (Document_Ref, Color)
-values
-    (?, ?)
-`
-
-type InsertCategoricalCharacterParams struct {
-	DocumentRef string
-	Color       sql.NullString
-}
-
-func (q *Queries) InsertCategoricalCharacter(ctx context.Context, arg InsertCategoricalCharacterParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertCategoricalCharacter, arg.DocumentRef, arg.Color)
-}
-
-const insertDescriptorVisibilityInapplicable = `-- name: InsertDescriptorVisibilityInapplicable :execresult
-insert into Descriptor_Visibility_Inapplicable (
-    Descriptor_Ref, 
-    Inapplicable_Descriptor_Ref)
-values
-    (?, ?)
-`
-
-type InsertDescriptorVisibilityInapplicableParams struct {
-	DescriptorRef             string
-	InapplicableDescriptorRef string
-}
-
-func (q *Queries) InsertDescriptorVisibilityInapplicable(ctx context.Context, arg InsertDescriptorVisibilityInapplicableParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertDescriptorVisibilityInapplicable, arg.DescriptorRef, arg.InapplicableDescriptorRef)
-}
-
-const insertDescriptorVisibilityRequirement = `-- name: InsertDescriptorVisibilityRequirement :execresult
-insert into Descriptor_Visibility_Requirement (
-    Descriptor_Ref, 
-    Required_Descriptor_Ref)
-values
-    (?, ?)
-`
-
-type InsertDescriptorVisibilityRequirementParams struct {
-	DescriptorRef         string
-	RequiredDescriptorRef string
-}
-
-func (q *Queries) InsertDescriptorVisibilityRequirement(ctx context.Context, arg InsertDescriptorVisibilityRequirementParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertDescriptorVisibilityRequirement, arg.DescriptorRef, arg.RequiredDescriptorRef)
-}
-
-const insertDocument = `-- name: InsertDocument :execresult
-insert into Document (Ref, Path, Doc_Order, Name, Details)
-    values (?, ?, ?, ?, ?)
-`
-
-type InsertDocumentParams struct {
-	Ref      string
-	Path     string
-	DocOrder int64
-	Name     string
-	Details  sql.NullString
-}
-
-func (q *Queries) InsertDocument(ctx context.Context, arg InsertDocumentParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertDocument,
-		arg.Ref,
-		arg.Path,
-		arg.DocOrder,
-		arg.Name,
-		arg.Details,
-	)
-}
-
-const insertDocumentAttachment = `-- name: InsertDocumentAttachment :execresult
-insert into Document_Attachment (
-    Document_Ref, 
-    Attachment_Index, 
-    Source, 
-    Path,
-    Path_Small,
-    Path_Medium,
-    Path_Big)
-values
-    (?, ?, ?, ?, ?, ?, ?)
-`
-
-type InsertDocumentAttachmentParams struct {
-	DocumentRef     string
-	AttachmentIndex int64
-	Source          string
-	Path            string
-	PathSmall       string
-	PathMedium      string
-	PathBig         string
-}
-
-func (q *Queries) InsertDocumentAttachment(ctx context.Context, arg InsertDocumentAttachmentParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertDocumentAttachment,
-		arg.DocumentRef,
-		arg.AttachmentIndex,
-		arg.Source,
-		arg.Path,
-		arg.PathSmall,
-		arg.PathMedium,
-		arg.PathBig,
-	)
-}
-
-const insertDocumentTranslation = `-- name: InsertDocumentTranslation :execresult
-insert into Document_Translation (
-    Document_Ref, 
-    Lang_Ref, 
-    Name, 
-    Details)
-values
-    (?, ?, ?, ?)
-`
-
-type InsertDocumentTranslationParams struct {
-	DocumentRef string
-	LangRef     string
-	Name        string
-	Details     sql.NullString
-}
-
-func (q *Queries) InsertDocumentTranslation(ctx context.Context, arg InsertDocumentTranslationParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertDocumentTranslation,
-		arg.DocumentRef,
-		arg.LangRef,
-		arg.Name,
-		arg.Details,
-	)
-}
-
-const insertGeographicalCharacter = `-- name: InsertGeographicalCharacter :execresult
-insert into Geographical_Character (
-    Document_Ref,
-    Map_Ref,
-	Color)
-values
-    (?, ?, ?)
-`
-
-type InsertGeographicalCharacterParams struct {
-	DocumentRef string
-	MapRef      string
-	Color       sql.NullString
-}
-
-func (q *Queries) InsertGeographicalCharacter(ctx context.Context, arg InsertGeographicalCharacterParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertGeographicalCharacter, arg.DocumentRef, arg.MapRef, arg.Color)
-}
-
-const insertGeographicalMap = `-- name: InsertGeographicalMap :execresult
-insert into Geographical_Map (
-    Document_Ref,
-    Place_Ref,
-    Map_File,
-    Map_File_Feature_Name) 
-values 
-    (?, ?, ?, ?)
-`
-
-type InsertGeographicalMapParams struct {
-	DocumentRef        string
-	PlaceRef           string
-	MapFile            string
-	MapFileFeatureName string
-}
-
-func (q *Queries) InsertGeographicalMap(ctx context.Context, arg InsertGeographicalMapParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertGeographicalMap,
-		arg.DocumentRef,
-		arg.PlaceRef,
-		arg.MapFile,
-		arg.MapFileFeatureName,
-	)
-}
-
-const insertGeographicalPlace = `-- name: InsertGeographicalPlace :execresult
-insert into Geographical_Place (
-    Document_Ref,
-    Latitude,
-    Longitude,
-    Scale)
-values
-    (?, ?, ?, ?)
-`
-
-type InsertGeographicalPlaceParams struct {
-	DocumentRef string
-	Latitude    float64
-	Longitude   float64
-	Scale       int64
-}
-
-func (q *Queries) InsertGeographicalPlace(ctx context.Context, arg InsertGeographicalPlaceParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertGeographicalPlace,
-		arg.DocumentRef,
-		arg.Latitude,
-		arg.Longitude,
-		arg.Scale,
-	)
-}
-
-const insertLang = `-- name: InsertLang :execresult
-insert into
-    Lang (Ref, Name)
-values
-    (?, ?)
-`
-
-type InsertLangParams struct {
-	Ref  string
-	Name string
-}
-
-func (q *Queries) InsertLang(ctx context.Context, arg InsertLangParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertLang, arg.Ref, arg.Name)
-}
-
-const insertMeasurementCharacter = `-- name: InsertMeasurementCharacter :execresult
-insert into
-    Measurement_Character (Document_Ref, Color, Unit_Ref)
-values
-    (?, ?, ?)
-`
-
-type InsertMeasurementCharacterParams struct {
-	DocumentRef string
-	Color       sql.NullString
-	UnitRef     sql.NullString
-}
-
-func (q *Queries) InsertMeasurementCharacter(ctx context.Context, arg InsertMeasurementCharacterParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertMeasurementCharacter, arg.DocumentRef, arg.Color, arg.UnitRef)
-}
-
-const insertPeriodicCharacter = `-- name: InsertPeriodicCharacter :execresult
-insert into Periodic_Character (
-    Document_Ref, 
-    Periodic_Category_Ref, 
-    Color)
-values 
-    (?, ?, ?)
-`
-
-type InsertPeriodicCharacterParams struct {
-	DocumentRef         string
-	PeriodicCategoryRef string
-	Color               sql.NullString
-}
-
-func (q *Queries) InsertPeriodicCharacter(ctx context.Context, arg InsertPeriodicCharacterParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertPeriodicCharacter, arg.DocumentRef, arg.PeriodicCategoryRef, arg.Color)
-}
-
-const insertState = `-- name: InsertState :execresult
-insert into
-    State (Document_Ref, Color)
-values
-    (?, ?)
-`
-
-type InsertStateParams struct {
-	DocumentRef string
-	Color       sql.NullString
-}
-
-func (q *Queries) InsertState(ctx context.Context, arg InsertStateParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertState, arg.DocumentRef, arg.Color)
-}
-
-const insertTaxon = `-- name: InsertTaxon :execresult
-insert into Taxon (
-    Document_Ref,
-    Author,
-    Website,
-	Meaning,
-    Herbarium_No,
-    Herbarium_Picture,
-    Fasc,
-    Page)
-values (?, ?, ?, ?, ?, ?, ?, ?)
-`
-
-type InsertTaxonParams struct {
-	DocumentRef      string
-	Author           string
-	Website          sql.NullString
-	Meaning          sql.NullString
-	HerbariumNo      sql.NullString
-	HerbariumPicture sql.NullString
-	Fasc             sql.NullInt64
-	Page             sql.NullInt64
-}
-
-func (q *Queries) InsertTaxon(ctx context.Context, arg InsertTaxonParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertTaxon,
-		arg.DocumentRef,
-		arg.Author,
-		arg.Website,
-		arg.Meaning,
-		arg.HerbariumNo,
-		arg.HerbariumPicture,
-		arg.Fasc,
-		arg.Page,
-	)
-}
-
-const insertTaxonBookInfo = `-- name: InsertTaxonBookInfo :execresult
-insert into Taxon_Book_Info (
-    Taxon_Ref,
-	Book_Ref,
-	Fasc,
-	Page,
-    Details) 
-values (?, ?, ?, ?, ?)
-`
-
-type InsertTaxonBookInfoParams struct {
-	TaxonRef string
-	BookRef  string
-	Fasc     sql.NullInt64
-	Page     sql.NullInt64
-	Details  sql.NullString
-}
-
-func (q *Queries) InsertTaxonBookInfo(ctx context.Context, arg InsertTaxonBookInfoParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertTaxonBookInfo,
-		arg.TaxonRef,
-		arg.BookRef,
-		arg.Fasc,
-		arg.Page,
-		arg.Details,
-	)
-}
-
-const insertTaxonDescription = `-- name: InsertTaxonDescription :execresult
-insert into Taxon_Description (
-    Taxon_Ref,
-	Description_Ref)
-values (?, ?)
-`
-
-type InsertTaxonDescriptionParams struct {
-	TaxonRef       string
-	DescriptionRef string
-}
-
-func (q *Queries) InsertTaxonDescription(ctx context.Context, arg InsertTaxonDescriptionParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertTaxonDescription, arg.TaxonRef, arg.DescriptionRef)
-}
-
-const insertTaxonMeasurement = `-- name: InsertTaxonMeasurement :execresult
-insert into Taxon_Measurement (
-    Taxon_Ref ,
-	Character_Ref,
-	Minimum,
-	Maximum) 
-values (?, ?, ?, ?)
-`
-
-type InsertTaxonMeasurementParams struct {
-	TaxonRef     string
-	CharacterRef string
-	Minimum      sql.NullFloat64
-	Maximum      sql.NullFloat64
-}
-
-func (q *Queries) InsertTaxonMeasurement(ctx context.Context, arg InsertTaxonMeasurementParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertTaxonMeasurement,
-		arg.TaxonRef,
-		arg.CharacterRef,
-		arg.Minimum,
-		arg.Maximum,
-	)
-}
-
-const insertTaxonSpecimenLocation = `-- name: InsertTaxonSpecimenLocation :execresult
-insert into Taxon_Specimen_Location (
-    Taxon_Ref,
-    Specimen_Index,
-    Latitude,
-    Longitude) 
-values (?, ?, ?, ?)
-`
-
-type InsertTaxonSpecimenLocationParams struct {
-	TaxonRef      string
-	SpecimenIndex int64
-	Latitude      float64
-	Longitude     float64
-}
-
-func (q *Queries) InsertTaxonSpecimenLocation(ctx context.Context, arg InsertTaxonSpecimenLocationParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertTaxonSpecimenLocation,
-		arg.TaxonRef,
-		arg.SpecimenIndex,
-		arg.Latitude,
-		arg.Longitude,
-	)
-}
-
-const insertUnit = `-- name: InsertUnit :execresult
-insert into
-    Unit (Ref, Base_Unit_Ref, To_Base_Unit_Factor)
-values
-    (?, ?, ?)
-`
-
-type InsertUnitParams struct {
-	Ref              string
-	BaseUnitRef      sql.NullString
-	ToBaseUnitFactor sql.NullFloat64
-}
-
-func (q *Queries) InsertUnit(ctx context.Context, arg InsertUnitParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertUnit, arg.Ref, arg.BaseUnitRef, arg.ToBaseUnitFactor)
 }
 
 const listLangs = `-- name: ListLangs :many
