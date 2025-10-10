@@ -3,7 +3,8 @@ create table Credentials (
     Encryption Text not null,
     Password Text not null,
     Created_On Text,
-    Last_Modified Text
+    Last_Modified Text,
+    MS_Account_Id Text unique
 ) strict,
 without rowid;
 
@@ -83,5 +84,19 @@ create table User_Capability (
     foreign key (User_Login) references Credentials (Login),
     foreign key (Capability_Name) references Capability (Name),
     foreign key (Granted_By) references Credentials (Login)
+) strict,
+without rowid;
+
+create table MS_Account_Request (
+    MS_Account_Id Text primary key,
+    Email Text not null,
+    Full_Name Text not null,
+    Requested_Date Text not null,
+    Processed_Date Text,
+    Processed_By Text,
+    Status Text not null check(Status in ('pending', 'approved', 'rejected')),
+    Linked_Login Text,
+    foreign key (Processed_By) references Credentials (Login),
+    foreign key (Linked_Login) references Credentials (Login)
 ) strict,
 without rowid;

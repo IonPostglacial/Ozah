@@ -19,6 +19,7 @@ type Credential struct {
 	Password     string
 	CreatedOn    sql.NullString
 	LastModified sql.NullString
+	MsAccountID  sql.NullString
 }
 
 type DatasetSharing struct {
@@ -39,6 +40,17 @@ type DatasetSharingUser struct {
 type Lang struct {
 	Ref  string
 	Name string
+}
+
+type MsAccountRequest struct {
+	MsAccountID   string
+	Email         string
+	FullName      string
+	RequestedDate string
+	ProcessedDate sql.NullString
+	ProcessedBy   sql.NullString
+	Status        string
+	LinkedLogin   sql.NullString
 }
 
 type Panel struct {

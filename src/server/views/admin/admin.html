@@ -17,6 +17,52 @@
         <div class="message-error padded">{{ .Error }}</div>
         {{ end }}
 
+        {{ if .MSRequests }}
+        <div class="separated-bottom padded">
+            <h2>Pending Microsoft Account Requests</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th>Full Name</th>
+                        <th>Requested Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {{ range .MSRequests }}
+                    <tr>
+                        <td>{{ .Email }}</td>
+                        <td>{{ .FullName }}</td>
+                        <td>{{ .RequestedDate }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <details>
+                                    <summary class="primary">Approve</summary>
+                                    <form method="POST" class="vbox padded bordered">
+                                        <input type="hidden" name="approve-ms-account-id" value="{{ .MSAccountId }}">
+                                        <input type="hidden" name="approve-email" value="{{ .Email }}">
+                                        <label for="approve-login-{{ .MSAccountId }}">Login:</label>
+                                        <input type="text" id="approve-login-{{ .MSAccountId }}" name="approve-login" required>
+                                        <label for="approve-folder-{{ .MSAccountId }}">Private Directory:</label>
+                                        <input type="text" id="approve-folder-{{ .MSAccountId }}" name="approve-folder" required placeholder="/path/to/user/folder">
+                                        <button type="submit" name="admin-approve-ms-request" value="1" class="primary">Approve</button>
+                                    </form>
+                                </details>
+                                <form method="POST" class="inline" onsubmit="return confirm('Are you sure you want to reject the request from {{ .Email }}?');">
+                                    <input type="hidden" name="reject-ms-account-id" value="{{ .MSAccountId }}">
+                                    <input type="hidden" name="reject-email" value="{{ .Email }}">
+                                    <button type="submit" name="admin-reject-ms-request" value="1" class="danger" title="Reject request"><i class="fa-solid fa-close"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {{ end }}
+                </tbody>
+            </table>
+        </div>
+        {{ end }}
+
         <div class="separated-bottom padded">
             <h2>Add New User</h2>
             <details>

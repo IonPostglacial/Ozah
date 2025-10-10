@@ -157,6 +157,11 @@ delete from Session
 where
     Login = ?;
 
+-- name: DeleteSession :execresult
+delete from Session
+where
+    Token = ?;
+
 -- name: GetUserConfiguration :one
 select
     *
@@ -320,3 +325,93 @@ left join
     Capability as cap on ucp.Capability_Name = cap.Name
 order by
     c.Login, ucp.Capability_Name;
+
+
+-- name: GetCredentialsByMSAccountId :one
+select
+    Login,
+    Encryption,
+    Password,
+    Created_On,
+    Last_Modified,
+    MS_Account_Id
+from
+    Credentials
+where
+    MS_Account_Id = ?;
+
+-- name: LinkMSAccountToCredentials :execresult
+update Credentials
+set
+    MS_Account_Id = ?,
+    Last_Modified = ?
+where
+    Login = ?;
+
+-- name: CreateMSAccountRequest :execresult
+insert into
+    MS_Account_Request (MS_Account_Id, Email, Full_Name, Requested_Date, Status)
+values
+    (?, ?, ?, ?, 'pending');
+
+-- name: GetMSAccountRequest :one
+select
+    MS_Account_Id,
+    Email,
+    Full_Name,
+    Requested_Date,
+    Processed_Date,
+    Processed_By,
+    Status,
+    Linked_Login
+from
+    MS_Account_Request
+where
+    MS_Account_Id = ?;
+
+-- name: GetAllPendingMSAccountRequests :many
+select
+    MS_Account_Id,
+    Email,
+    Full_Name,
+    Requested_Date
+from
+    MS_Account_Request
+where
+    Status = 'pending'
+order by
+    Requested_Date desc;
+
+-- name: GetAllMSAccountRequests :many
+select
+    MS_Account_Id,
+    Email,
+    Full_Name,
+    Requested_Date,
+    Processed_Date,
+    Processed_By,
+    Status,
+    Linked_Login
+from
+    MS_Account_Request
+order by
+    Requested_Date desc;
+
+-- name: ApproveMSAccountRequest :execresult
+update MS_Account_Request
+set
+    Status = 'approved',
+    Processed_Date = ?,
+    Processed_By = ?,
+    Linked_Login = ?
+where
+    MS_Account_Id = ?;
+
+-- name: RejectMSAccountRequest :execresult
+update MS_Account_Request
+set
+    Status = 'rejected',
+    Processed_Date = ?,
+    Processed_By = ?
+where
+    MS_Account_Id = ?;

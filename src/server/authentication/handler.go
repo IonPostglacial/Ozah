@@ -51,11 +51,14 @@ func HandlerWrapper(handler common.Handler) common.Handler {
 			loginFound = true
 		}
 		authorized := false
+		isMSAccount := false
 		if loginFound {
 			switch cred.Encryption {
 			case "bcrypt":
 				err := bcrypt.CompareHashAndPassword([]byte(cred.Password), []byte(password))
 				authorized = (err == nil)
+			case "ms-oauth":
+				isMSAccount = true
 			}
 		}
 		if authorized {
@@ -79,7 +82,14 @@ func HandlerWrapper(handler common.Handler) common.Handler {
 			template.Must(tmpl.Parse(loginTemplate))
 			w.Header().Add("Content-Type", "text/html")
 			w.WriteHeader(http.StatusUnauthorized)
-			if loginFound {
+			if isMSAccount {
+				err := tmpl.Execute(w, &Model{
+					ErrorMessage: fmt.Sprintf("Account '%s' uses Microsoft authentication. Please use the 'Sign in with Microsoft' button.", username),
+				})
+				if err != nil {
+					return err
+				}
+			} else if loginFound {
 				err := tmpl.Execute(w, &Model{
 					ErrorMessage: fmt.Sprintf("Sorry '%s': wrong password", username),
 				})
@@ -101,4 +111,38 @@ func HandlerWrapper(handler common.Handler) common.Handler {
 		}
 		return nil
 	}
+}
+
+func MSLoginHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
+	config := LoadMSConfig()
+	HandleMSLogin(w, r, config)
+	return nil
+}
+
+func MSCallbackHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
+	config := LoadMSConfig()
+	HandleMSCallback(w, r, config, cc.AppQueries())
+	return nil
+}
+
+func LogoutHandler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
+	ctx := context.Background()
+
+	token, err := r.Cookie(SessionCookieName)
+	if err == nil {
+		cc.AppQueries().DeleteSession(ctx, token.Value)
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     SessionCookieName,
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   r.TLS != nil,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	http.Redirect(w, r, "/", http.StatusFound)
+	return nil
 }

@@ -2,3 +2,4 @@ src/private
 *.sq3
 *.db
 src/tmp
+.env

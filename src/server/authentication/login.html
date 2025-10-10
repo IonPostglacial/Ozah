@@ -12,12 +12,18 @@
         <input type="password" name="password" id="password" placeholder="password">
     </form>
 
-    <article class="padded">
+    <article class="padded vbox horizontal-align">
         {{ if .ErrorMessage }}
         <p class="error-colors padded bordered">{{ .ErrorMessage }}</p>
         {{ end }}
     
         <input type="submit" form="login-form" value="Login"/>
+        
+        <p class="separated-top separated-bottom">or</p>
+        
+        <a href="/auth/microsoft/login" class="btn">
+            <i class="fa-solid fa-building"></i> Login with Microsoft
+        </a>
     </article>
 </body>
 </html>

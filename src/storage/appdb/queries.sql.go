@@ -10,6 +10,56 @@ import (
 	"database/sql"
 )
 
+const approveMSAccountRequest = `-- name: ApproveMSAccountRequest :execresult
+update MS_Account_Request
+set
+    Status = 'approved',
+    Processed_Date = ?,
+    Processed_By = ?,
+    Linked_Login = ?
+where
+    MS_Account_Id = ?
+`
+
+type ApproveMSAccountRequestParams struct {
+	ProcessedDate sql.NullString
+	ProcessedBy   sql.NullString
+	LinkedLogin   sql.NullString
+	MsAccountID   string
+}
+
+func (q *Queries) ApproveMSAccountRequest(ctx context.Context, arg ApproveMSAccountRequestParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, approveMSAccountRequest,
+		arg.ProcessedDate,
+		arg.ProcessedBy,
+		arg.LinkedLogin,
+		arg.MsAccountID,
+	)
+}
+
+const createMSAccountRequest = `-- name: CreateMSAccountRequest :execresult
+insert into
+    MS_Account_Request (MS_Account_Id, Email, Full_Name, Requested_Date, Status)
+values
+    (?, ?, ?, ?, 'pending')
+`
+
+type CreateMSAccountRequestParams struct {
+	MsAccountID   string
+	Email         string
+	FullName      string
+	RequestedDate string
+}
+
+func (q *Queries) CreateMSAccountRequest(ctx context.Context, arg CreateMSAccountRequestParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, createMSAccountRequest,
+		arg.MsAccountID,
+		arg.Email,
+		arg.FullName,
+		arg.RequestedDate,
+	)
+}
+
 const deleteCredentials = `-- name: DeleteCredentials :execresult
 delete from Credentials
 where
@@ -50,6 +100,16 @@ type DeleteDatasetSharingUserParams struct {
 
 func (q *Queries) DeleteDatasetSharingUser(ctx context.Context, arg DeleteDatasetSharingUserParams) (sql.Result, error) {
 	return q.db.ExecContext(ctx, deleteDatasetSharingUser, arg.DatasetRef, arg.UserLogin)
+}
+
+const deleteSession = `-- name: DeleteSession :execresult
+delete from Session
+where
+    Token = ?
+`
+
+func (q *Queries) DeleteSession(ctx context.Context, token string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, deleteSession, token)
 }
 
 const deleteUserHiddenPanels = `-- name: DeleteUserHiddenPanels :execresult
@@ -132,6 +192,103 @@ select ref, name from Lang
 
 func (q *Queries) GetAllLangs(ctx context.Context) (sql.Result, error) {
 	return q.db.ExecContext(ctx, getAllLangs)
+}
+
+const getAllMSAccountRequests = `-- name: GetAllMSAccountRequests :many
+select
+    MS_Account_Id,
+    Email,
+    Full_Name,
+    Requested_Date,
+    Processed_Date,
+    Processed_By,
+    Status,
+    Linked_Login
+from
+    MS_Account_Request
+order by
+    Requested_Date desc
+`
+
+func (q *Queries) GetAllMSAccountRequests(ctx context.Context) ([]MsAccountRequest, error) {
+	rows, err := q.db.QueryContext(ctx, getAllMSAccountRequests)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []MsAccountRequest
+	for rows.Next() {
+		var i MsAccountRequest
+		if err := rows.Scan(
+			&i.MsAccountID,
+			&i.Email,
+			&i.FullName,
+			&i.RequestedDate,
+			&i.ProcessedDate,
+			&i.ProcessedBy,
+			&i.Status,
+			&i.LinkedLogin,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAllPendingMSAccountRequests = `-- name: GetAllPendingMSAccountRequests :many
+select
+    MS_Account_Id,
+    Email,
+    Full_Name,
+    Requested_Date
+from
+    MS_Account_Request
+where
+    Status = 'pending'
+order by
+    Requested_Date desc
+`
+
+type GetAllPendingMSAccountRequestsRow struct {
+	MsAccountID   string
+	Email         string
+	FullName      string
+	RequestedDate string
+}
+
+func (q *Queries) GetAllPendingMSAccountRequests(ctx context.Context) ([]GetAllPendingMSAccountRequestsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllPendingMSAccountRequests)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllPendingMSAccountRequestsRow
+	for rows.Next() {
+		var i GetAllPendingMSAccountRequestsRow
+		if err := rows.Scan(
+			&i.MsAccountID,
+			&i.Email,
+			&i.FullName,
+			&i.RequestedDate,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
@@ -263,6 +420,34 @@ func (q *Queries) GetCredentials(ctx context.Context, login string) (GetCredenti
 		&i.Password,
 		&i.CreatedOn,
 		&i.LastModified,
+	)
+	return i, err
+}
+
+const getCredentialsByMSAccountId = `-- name: GetCredentialsByMSAccountId :one
+select
+    Login,
+    Encryption,
+    Password,
+    Created_On,
+    Last_Modified,
+    MS_Account_Id
+from
+    Credentials
+where
+    MS_Account_Id = ?
+`
+
+func (q *Queries) GetCredentialsByMSAccountId(ctx context.Context, msAccountID sql.NullString) (Credential, error) {
+	row := q.db.QueryRowContext(ctx, getCredentialsByMSAccountId, msAccountID)
+	var i Credential
+	err := row.Scan(
+		&i.Login,
+		&i.Encryption,
+		&i.Password,
+		&i.CreatedOn,
+		&i.LastModified,
+		&i.MsAccountID,
 	)
 	return i, err
 }
@@ -417,6 +602,38 @@ func (q *Queries) GetLangSelectionForUser(ctx context.Context, userLogin string)
 		return nil, err
 	}
 	return items, nil
+}
+
+const getMSAccountRequest = `-- name: GetMSAccountRequest :one
+select
+    MS_Account_Id,
+    Email,
+    Full_Name,
+    Requested_Date,
+    Processed_Date,
+    Processed_By,
+    Status,
+    Linked_Login
+from
+    MS_Account_Request
+where
+    MS_Account_Id = ?
+`
+
+func (q *Queries) GetMSAccountRequest(ctx context.Context, msAccountID string) (MsAccountRequest, error) {
+	row := q.db.QueryRowContext(ctx, getMSAccountRequest, msAccountID)
+	var i MsAccountRequest
+	err := row.Scan(
+		&i.MsAccountID,
+		&i.Email,
+		&i.FullName,
+		&i.RequestedDate,
+		&i.ProcessedDate,
+		&i.ProcessedBy,
+		&i.Status,
+		&i.LinkedLogin,
+	)
+	return i, err
 }
 
 const getReadableDatasetSharedWithUser = `-- name: GetReadableDatasetSharedWithUser :many
@@ -908,6 +1125,25 @@ func (q *Queries) InsertUserSelectedLanguage(ctx context.Context, arg InsertUser
 	return q.db.ExecContext(ctx, insertUserSelectedLanguage, arg.UserLogin, arg.LangRef)
 }
 
+const linkMSAccountToCredentials = `-- name: LinkMSAccountToCredentials :execresult
+update Credentials
+set
+    MS_Account_Id = ?,
+    Last_Modified = ?
+where
+    Login = ?
+`
+
+type LinkMSAccountToCredentialsParams struct {
+	MsAccountID  sql.NullString
+	LastModified sql.NullString
+	Login        string
+}
+
+func (q *Queries) LinkMSAccountToCredentials(ctx context.Context, arg LinkMSAccountToCredentialsParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, linkMSAccountToCredentials, arg.MsAccountID, arg.LastModified, arg.Login)
+}
+
 const listUsersWithCapability = `-- name: ListUsersWithCapability :many
 select
     uc.User_Login,
@@ -946,6 +1182,26 @@ func (q *Queries) ListUsersWithCapability(ctx context.Context, capabilityName st
 		return nil, err
 	}
 	return items, nil
+}
+
+const rejectMSAccountRequest = `-- name: RejectMSAccountRequest :execresult
+update MS_Account_Request
+set
+    Status = 'rejected',
+    Processed_Date = ?,
+    Processed_By = ?
+where
+    MS_Account_Id = ?
+`
+
+type RejectMSAccountRequestParams struct {
+	ProcessedDate sql.NullString
+	ProcessedBy   sql.NullString
+	MsAccountID   string
+}
+
+func (q *Queries) RejectMSAccountRequest(ctx context.Context, arg RejectMSAccountRequestParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, rejectMSAccountRequest, arg.ProcessedDate, arg.ProcessedBy, arg.MsAccountID)
 }
 
 const revokeUserCapability = `-- name: RevokeUserCapability :execresult

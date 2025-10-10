@@ -125,16 +125,24 @@ Need admin interface for user management. Using a capability-based permission sy
 # Microsoft Account Authentication
 Support MS account login alongside local authentication.
 Note: Implement OAuth2 using Go stdlib (net/http, crypto) and golang.org/x packages if needed. Avoid MSAL.
-- [ ] Implement OAuth2 flow for Microsoft login using Go stdlib (net/http for requests, encoding/json for parsing)
-- [ ] Use golang.org/x/oauth2 if necessary (acceptable as x-repo), otherwise implement OAuth2 manually
-- [ ] Add MS_Account_Id column to Credentials table
-- [ ] Create MS_Account_Requests table for pending access requests
-- [ ] Create "Login with Microsoft" button on login page
-- [ ] Store MS account ID when user authenticates
-- [ ] Create pending requests view for admins
-- [ ] Allow admins to approve/reject MS account access requests
-- [ ] Link approved MS accounts to existing or new user accounts
-- [ ] Handle MS account session management and token refresh
+- [x] Implement OAuth2 flow for Microsoft login using Go stdlib (net/http for requests, encoding/json for parsing)
+- [x] Implemented OAuth2 manually using standard library only (no external dependencies)
+- [x] Add MS_Account_Id column to Credentials table
+- [x] Create MS_Account_Request table for pending access requests
+- [x] Create "Login with Microsoft" button on login page
+- [x] Store MS account ID when user authenticates
+- [x] Create pending requests view for admins (integrated into /admin interface)
+- [x] Allow admins to approve/reject MS account access requests
+- [x] Link approved MS accounts to existing or new user accounts
+- [x] Handle MS account session management (sessions created after OAuth callback)
+- [ ] Handle MS account token refresh (not implemented - sessions use standard 2-hour expiry)
+
+Implementation Notes:
+- OAuth2 flow implemented in server/authentication/microsoft.go using only Go standard library
+- Added /auth/microsoft/login and /auth/microsoft/callback routes
+- MS account requests shown in admin panel for users with 'user.manage' capability
+- Admins can approve requests by specifying login and private directory, or link to existing users
+- Environment variables required: MICROSOFT_CLIENT_ID, MICROSOFT_CLIENT_SECRET, MICROSOFT_REDIRECT_URI
 
 Bulk photo download/thumbnail generation:
 - [ ] Create CLI command to bulk download/process pictures for a dataset (hazo syncpictures -dataset <name>)

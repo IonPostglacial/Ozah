@@ -197,6 +197,13 @@ func (u *T) GetWritableSharedDatasets() ([]dataset.Shared, error) {
 	return ds, nil
 }
 
+func CreateDirectory(path string) error {
+	if err := os.MkdirAll(path, os.ModePerm); err != nil {
+		return fmt.Errorf("could not create directory '%s': %w", path, err)
+	}
+	return nil
+}
+
 type CreateUserParams struct {
 	Login            string
 	Password         string
@@ -210,8 +217,8 @@ func Create(ctx context.Context, params CreateUserParams) error {
 		return fmt.Errorf("login, password, and private directory are required")
 	}
 
-	if err := os.MkdirAll(params.PrivateDirectory, os.ModePerm); err != nil {
-		return fmt.Errorf("could not create directory '%s': %w", params.PrivateDirectory, err)
+	if err := CreateDirectory(params.PrivateDirectory); err != nil {
+		return err
 	}
 
 	_, queries, err := app.OpenDb()

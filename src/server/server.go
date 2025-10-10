@@ -36,6 +36,15 @@ type Server struct {
 
 func New(config *common.ServerConfig) Server {
 	s := http.NewServeMux()
+	s.HandleFunc("/auth/microsoft/login", common.Handler(authentication.MSLoginHandler).
+		Wrap(appdb.Handler).
+		Unwrap(config))
+	s.HandleFunc("/auth/microsoft/callback", common.Handler(authentication.MSCallbackHandler).
+		Wrap(appdb.Handler).
+		Unwrap(config))
+	s.HandleFunc("/logout", common.Handler(authentication.LogoutHandler).
+		Wrap(appdb.Handler).
+		Unwrap(config))
 	s.HandleFunc("/admin", common.Handler(admin.Handler).
 		Wrap(authentication.RequireCapability("user.manage")).
 		Wrap(authentication.HandlerWrapper).

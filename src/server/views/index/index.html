@@ -5,11 +5,12 @@
     <div class="vbox flex-fill">
         <div class="hbox top-bar-height separated-bottom vertical-align padded">
             <h1>List of my Datasets</h1>
-            {{ if .CanManageUsers }}
-            <div style="margin-left: auto;">
-                <a href="/admin" class="admin-link">Admin Panel</a>
+            <div style="margin-left: auto;" class="hbox">
+                {{ if .CanManageUsers }}
+                <a href="/admin" class="admin-link padded">Admin Panel</a>
+                {{ end }}
+                <a href="/logout" class="admin-link padded">Log Out</a>
             </div>
-            {{ end }}
         </div>
         <table>
             <tr>

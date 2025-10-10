@@ -29,10 +29,18 @@ type CapabilityInfo struct {
 	GrantedBy   string
 }
 
+type MSAccountRequest struct {
+	MSAccountId   string
+	Email         string
+	FullName      string
+	RequestedDate string
+}
+
 type ViewModel struct {
 	PageTitle       string
 	Users           []UserWithCapabilities
 	AllCapabilities []appdb.Capability
+	MSRequests      []MSAccountRequest
 	Debug           bool
 	Error           string
 	Success         string
@@ -58,6 +66,10 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 				r.PostFormValue("revoke-capability"), r.PostFormValue("revoke-login"))
 		} else if r.PostFormValue("admin-delete-user") != "" {
 			successMsg = fmt.Sprintf("Successfully deleted user '%s'", r.PostFormValue("delete-login"))
+		} else if r.PostFormValue("admin-approve-ms-request") != "" {
+			successMsg = fmt.Sprintf("Successfully approved Microsoft account request for '%s'", r.PostFormValue("approve-email"))
+		} else if r.PostFormValue("admin-reject-ms-request") != "" {
+			successMsg = fmt.Sprintf("Successfully rejected Microsoft account request for '%s'", r.PostFormValue("reject-email"))
 		}
 	}
 
@@ -102,6 +114,21 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		users = append(users, *user)
 	}
 
+	msRequestsData, err := cc.AppQueries().GetAllPendingMSAccountRequests(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get MS account requests: %w", err)
+	}
+
+	msRequests := make([]MSAccountRequest, 0, len(msRequestsData))
+	for _, req := range msRequestsData {
+		msRequests = append(msRequests, MSAccountRequest{
+			MSAccountId:   req.MsAccountID,
+			Email:         req.Email,
+			FullName:      req.FullName,
+			RequestedDate: req.RequestedDate,
+		})
+	}
+
 	tmpl := components.NewTemplate()
 	tmpl = template.Must(tmpl.Parse(adminPage))
 	w.Header().Add("Content-Type", "text/html")
@@ -109,6 +136,7 @@ func Handler(w http.ResponseWriter, r *http.Request, cc *common.Context) error {
 		PageTitle:       "User Administration",
 		Users:           users,
 		AllCapabilities: capabilities,
+		MSRequests:      msRequests,
 		Debug:           cc.Config.Debug,
 		Error:           errorMsg,
 		Success:         successMsg,
